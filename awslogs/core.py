@@ -120,16 +120,25 @@ class AWSLogs(object):
         first, values = True, []
 
         while first or any(values) or self.watch:
+
+            # Sort each of the next events by date
             earliests = sorted((v for v in values if v), key=lambda x: x['timestamp'])
 
             if earliests:
+                # If there is any event available, use the oldest one.
                 earliest = earliests[0]
             else:
                 if not first:
+                    # If this is not the first run and there is no any event
+                    # wait one second  before continuing. This is only used
+                    # while running awslogs with --watch.
                     time.sleep(1)
+
                 first = False
 
-                # Asyncronously get the first page of all streams
+                # Asyncronously get the first page of all streams. For subsequent
+                # request we don't really need to query for logs asyncronously
+                # because we'll only request them one by one.
                 pool = gevent.pool.Pool(self.pool_size)
                 greens = []
                 for source in sources:
