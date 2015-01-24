@@ -8,7 +8,7 @@ awslogs
     :target: https://crate.io/packages/awslogs/
 
 
-awslogs is a simple command line tool to query `Amazon CloudWatch logs <http://aws.amazon.com/cloudwatch/>`_::
+awslogs is a simple command line tool to query `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
 
     $ awslogs get /var/log/syslog *
 
@@ -19,6 +19,9 @@ Features
 --------
 
 * Aggregate logs from accross streams and groups.
+  * Aggregate all stream in a group.
+  * Aggregate streams matching specific queries.
+  * Filter both groups and streams using regular expressions.
 * Colored output
 * List existing groups
 * List existing streams
@@ -31,7 +34,7 @@ tbc
 Contribute
 -----------
 
-* Fork the repository on GitHub to start making your changes to the master branch (or branch off of it).
+* Fork the repository on GitHub.
 * Write a test which shows that the bug was fixed or that the feature works as expected.
 
   - Use ``python setup.py test``
@@ -42,4 +45,5 @@ Contribute
 Helpful Links
 -------------
 
+* http://aws.amazon.com/cloudwatch/
 * http://boto.readthedocs.org/en/latest/ref/logs.html
