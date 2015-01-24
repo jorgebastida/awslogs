@@ -32,7 +32,7 @@ Features
 
 * Watch logs as they are created
 
-  - ``$ awslogs get /var/log/syslog * --watch``
+  - ``$ awslogs get /var/log/syslog ALL --watch``
 
 * Human-friendly time filtering:
 
@@ -63,6 +63,7 @@ Options
 * ``awslogs streams GROUP``: List existing streams withing ``GROUP``
 * ``awslogs get [GROUP_EXPRESSION [STREAM_EXPRESSION]]``: Get logs matching ``GROUP_EXPRESSION`` and ``STREAM_EXPRESSION``
 
+  - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
 
 Time options
 -------------
