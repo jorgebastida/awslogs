@@ -27,15 +27,15 @@ Features
 * Colored output.
 * List existing groups
 
-  - ``$ awslogs groups``.
+  - ``$ awslogs groups``
 
 * List existing streams
 
-  - ``$ awslogs /var/log/syslog streams``.
+  - ``$ awslogs /var/log/syslog streams``
 
 * Watch logs as they are created
 
-  - ``$ awslogs get /var/log/syslog * --watch``.
+  - ``$ awslogs get /var/log/syslog * --watch``
 
 * Human-friendly time filtering:
 
