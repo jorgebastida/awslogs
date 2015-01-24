@@ -8,7 +8,7 @@ awslogs
     :target: https://crate.io/packages/awslogs/
 
 
-awslogs is a simple command line tool to query `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
+awslogs is a simple command line tool to query, group and stream `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
 
     $ awslogs get /var/log/syslog ip-10-1.*
 
