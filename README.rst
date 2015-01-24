@@ -19,9 +19,10 @@ Features
 --------
 
 * Aggregate logs from accross streams and groups.
-  * Aggregate all stream in a group.
-  * Aggregate streams matching specific queries.
-  * Filter both groups and streams using regular expressions.
+  - Aggregate all stream in a group.
+  - Aggregate streams matching specific queries.
+  - Filter both groups and streams using regular expressions.
+
 * Colored output
 * List existing groups
 * List existing streams
