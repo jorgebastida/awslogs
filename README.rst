@@ -25,9 +25,18 @@ Features
   - Filter both groups and streams using regular expressions.
 
 * Colored output.
-* List existing groups ``$ awslogs groups``.
-* List existing streams ``$ awslogs /var/log/syslog streams``.
-* Watch logs as they are created ``$ awslogs get /var/log/syslog * --watch``.
+* List existing groups
+
+  - ``$ awslogs groups``.
+
+* List existing streams
+
+  - ``$ awslogs /var/log/syslog streams``.
+
+* Watch logs as they are created
+
+  - ``$ awslogs get /var/log/syslog * --watch``.
+
 * Human-friendly time filtering:
 
   - ``--start='23/1/2015 14:23'``
