@@ -61,7 +61,7 @@ Options
 
 * ``awslogs groups``: List existing groups
 * ``awslogs streams GROUP``: List existing streams withing ``GROUP``
-* ``awslogs get [GROUP_EXPRESSION [STREAM_EXPRESSION`]]`: Get logs matching ``GROUP_EXPRESSION`` and ``STREAM_EXPRESSION``
+* ``awslogs get [GROUP_EXPRESSION [STREAM_EXPRESSION]]``: Get logs matching ``GROUP_EXPRESSION`` and ``STREAM_EXPRESSION``
 
 
 Time options
