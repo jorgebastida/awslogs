@@ -4,3 +4,7 @@ class BaseAWSLogsException(Exception):
 
 class ConnectionError(BaseAWSLogsException):
     pass
+
+
+class UnknownDateError(BaseAWSLogsException):
+    pass

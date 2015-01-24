@@ -20,13 +20,21 @@ Features
 
 * Aggregate logs from accross streams and groups.
 
-  - Aggregate all stream in a group.
-  - Aggregate streams matching specific queries.
+  - Aggregate all streams in a group.
+  - Aggregate streams matching a regular expression.
   - Filter both groups and streams using regular expressions.
 
-* Colored output
-* List existing groups
-* List existing streams
+* Colored output.
+* List existing groups.
+* List existing streams.
+* Watch logs as they are created.
+* Human-friendly time filtering
+
+  - ``--start='23/1/2015 14:23'``
+  - ``--start='2h ago'``
+  - ``--start='2d ago'``
+  - ``--start='2w ago'``
+  - ``--start='2d ago' --end='1h ago'``
 
 Example
 -------

@@ -5,7 +5,8 @@ from setuptools import setup, find_packages
 install_requires = [
     'boto>=2.35.0',
     'termcolor>=1.1',
-    'gevent>=1.0'
+    'gevent>=1.0',
+    'python-dateutil>=2.4.0'
 ]
 
 tests_require = []

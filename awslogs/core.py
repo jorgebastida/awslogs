@@ -1,11 +1,13 @@
 import re
 import time
 from functools import partial
+from datetime import datetime, timedelta
 
 import boto
 import gevent
 from termcolor import colored
 from boto import logs as botologs
+from dateutil.parser import parse
 
 import exceptions
 
@@ -47,6 +49,8 @@ class AWSLogs(object):
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
+        self.start = self.parse_datetime(kwargs.get('start'))
+        self.end = self.parse_datetime(kwargs.get('end'))
         self.pool_size = kwargs.get('pool_size', 20)
         self.connection = AWSConnection(self.aws_region,
                                         aws_access_key_id=self.aws_access_key_id,
@@ -78,7 +82,11 @@ class AWSLogs(object):
 
         next_token = None
         while True:
-            response = self.connection.get_log_events(next_token=next_token, log_group_name=log_group_name, log_stream_name=log_stream_name)
+            response = self.connection.get_log_events(next_token=next_token,
+                                                      log_group_name=log_group_name,
+                                                      log_stream_name=log_stream_name,
+                                                      start_time=self.start,
+                                                      end_time=self.end)
 
             active = False
             for event in response['events']:
@@ -184,3 +192,21 @@ class AWSLogs(object):
         if self.color_enabled:
             return colored(text, color)
         return text
+
+    def parse_datetime(self, datetime_text):
+        if not datetime_text:
+            return None
+
+        ago_match = re.match(r'(\d+)\s?(m|minutes|minute|d|day|days|h|hour|hours|w|weeks|weeks)(:? ago)?', datetime_text)
+        if ago_match:
+            amount, unit = ago_match.groups()
+            amount = int(amount)
+            unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
+            date = datetime.now() + timedelta(seconds=unit * amount * -1)
+        else:
+            try:
+                date = parse(datetime_text)
+            except ValueError:
+                raise exceptions.UnknownDateError(datetime_text)
+
+        return int(date.strftime("%s")) * 1000

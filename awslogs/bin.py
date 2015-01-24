@@ -7,6 +7,9 @@ import sys
 import argparse
 import boto
 
+from termcolor import colored
+
+import exceptions
 from core import AWSLogs
 
 __version__ = "0.0.1"
@@ -70,6 +73,16 @@ def main(argv=None):
                             dest='output_stream_enabled',
                             help="Add stream to the output")
 
+    get_parser.add_argument("-s", "--start",
+                            type=unicode,
+                            dest='start',
+                            help="Start time")
+
+    get_parser.add_argument("-e", "--end",
+                            type=unicode,
+                            dest='end',
+                            help="End time")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
@@ -87,6 +100,10 @@ def main(argv=None):
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
+    except exceptions.UnknownDateError, exc:
+        sys.stderr.write(colored("awslogs doesn't understand '{0}' as a date.\n".format(exc), "red"))
+    except exceptions.ConnectionError, exc:
+        sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
     except Exception:
         raise
         import platform
