@@ -213,7 +213,7 @@ class AWSLogs(object):
         if not datetime_text:
             return None
 
-        ago_match = re.match(r'(\d+)\s?(m|minutes|minute|d|day|days|h|hour|hours|w|weeks|weeks)(?: ago)?', datetime_text)
+        ago_match = re.match(r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?', datetime_text)
         if ago_match:
             amount, unit = ago_match.groups()
             amount = int(amount)
