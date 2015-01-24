@@ -10,7 +10,7 @@ awslogs
 
 awslogs is a simple command line tool to query `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
 
-    $ awslogs get /var/log/syslog *
+    $ awslogs get /var/log/syslog ip-10-1.*
 
 * The latest documentation is available at: http://awslogs.readthedocs.org
 * Installation instructions: http://awslogs.readthedocs.org/en/latest/installation.html
