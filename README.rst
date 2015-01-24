@@ -97,9 +97,9 @@ While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`
 
   - ``--start='23/1/2015 12:00'`` Events generated after midday  on the 23th of January 2015.
   - ``--start='1/1/2015'`` Events generated after midnight on the 1st of January 2015.
-  - ``--start='Sat Oct 11 17:13:46 UTC 2003'`` You can use readable dates too
+  - ``--start='Sat Oct 11 17:13:46 UTC 2003'`` You can use detailed dates too.
 
-  Note, for time parsing awslogs uses ``dateutil <https://dateutil.readthedocs.org/en/latest/>_'.
+  Note, for time parsing awslogs uses `dateutil <https://dateutil.readthedocs.org/en/latest/>_'.
 
 * All previous examples are applicable for  ``--end`` `-e` too.
 
