@@ -25,10 +25,10 @@ Features
   - Filter both groups and streams using regular expressions.
 
 * Colored output.
-* List existing groups.
-* List existing streams.
-* Watch logs as they are created.
-* Human-friendly time filtering
+* List existing groups ``awslogs groups``.
+* List existing streams ``awslogs /var/log/syslog streams``.
+* Watch logs as they are created ``--watch``.
+* Human-friendly time filtering:
 
   - ``--start='23/1/2015 14:23'``
   - ``--start='2h ago'``
