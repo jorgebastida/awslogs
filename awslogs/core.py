@@ -32,7 +32,7 @@ class AWSConnection(object):
                     return getattr(self.connection, name)(*args, **kwargs)
                 except boto.exception.JSONResponseError, exc:
                     if exc.error_code == u'ThrottlingException':
-                        gevent.sleep(0.5)
+                        time.sleep(0.5)
 
         return aws_connection_wrap
 
@@ -67,16 +67,18 @@ class AWSLogs(object):
 
     def _get_groups_from_pattern(self, pattern):
         """Returns groups matching ``pattern``."""
+        pattern = '.*' if pattern == 'ALL' else pattern
         reg = re.compile('^{0}'.format(pattern))
         for group in self.get_groups():
-            if pattern == '*' or re.match(reg, group):
+            if re.match(reg, group):
                 yield group
 
     def _get_streams_from_pattern(self, group, pattern):
         """Returns streams in ``group`` matching ``pattern``."""
+        pattern = '.*' if pattern == 'ALL' else pattern
         reg = re.compile('^{0}'.format(pattern))
         for stream in self.get_streams(group):
-            if pattern == '*' or re.match(reg, stream):
+            if re.match(reg, stream):
                 yield stream
 
     def _get_stream_logs(self, log_group_name, log_stream_name):
@@ -182,7 +184,7 @@ class AWSLogs(object):
         next_token = None
 
         while True:
-            response = self.connection.describe_log_streams(log_group_name=self.log_group_name, next_token=next_token)
+            response = self.connection.describe_log_streams(log_group_name=log_group_name, next_token=next_token)
 
             for stream in response.get('logStreams', []):
                 yield stream['logStreamName']

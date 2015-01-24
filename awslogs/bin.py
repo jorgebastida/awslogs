@@ -60,12 +60,13 @@ def main(argv=None):
 
     get_parser.add_argument("log_group_name",
                             type=unicode,
-                            default=".*",
+                            default="ALL",
+                            nargs='?',
                             help="log group name")
 
     get_parser.add_argument("log_stream_name",
                             type=unicode,
-                            default=".*",
+                            default="ALL",
                             nargs='?',
                             help="log stream name")
 
@@ -113,12 +114,16 @@ def main(argv=None):
         getattr(logs, options.func)()
     except exceptions.UnknownDateError, exc:
         sys.stderr.write(colored("awslogs doesn't understand '{0}' as a date.\n".format(exc), "red"))
+        return exc.code
     except exceptions.ConnectionError, exc:
         sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
+        return exc.code
     except Exception:
-        raise
         import platform
         import traceback
+        options = vars(options)
+        options['aws_access_key_id'] = 'SENSITIVE'
+        options['aws_secret_access_key'] = 'SENSITIVE'
         sys.stderr.write("\n")
         sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
@@ -129,7 +134,7 @@ def main(argv=None):
         sys.stderr.write("Python: {0}\n".format(sys.version))
         sys.stderr.write("boto version: {0}\n".format(boto.__version__))
         sys.stderr.write("Platform: {0}\n".format(platform.platform()))
-        sys.stderr.write("Config: {0}\n".format(vars(options)))
+        sys.stderr.write("Config: {0}\n".format(options))
         sys.stderr.write("Args: {0}\n\n".format(sys.argv))
         sys.stderr.write(traceback.format_exc())
         sys.stderr.write("=" * 80)

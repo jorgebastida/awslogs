@@ -3,8 +3,10 @@ class BaseAWSLogsException(Exception):
 
 
 class ConnectionError(BaseAWSLogsException):
-    pass
+
+    code = 2
 
 
 class UnknownDateError(BaseAWSLogsException):
-    pass
+
+    code = 3
