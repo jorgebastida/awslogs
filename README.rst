@@ -101,7 +101,7 @@ While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`
 
   Note, for time parsing awslogs uses `dateutil <https://dateutil.readthedocs.org/en/latest/>_'.
 
-* All previous examples are applicable for  ``--end`` `-e` too.
+* All previous examples are applicable for  ``--end`` ``-e`` too.
 
 
 Contribute
