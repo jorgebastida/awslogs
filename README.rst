@@ -45,7 +45,7 @@ Features
 Example
 -------
 
-tbc
+.. image:: https://github.com/jorgebastida/awslogs/raw/master/media/screenshot.png
 
 
 Installation
