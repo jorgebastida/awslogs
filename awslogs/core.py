@@ -52,6 +52,8 @@ class AWSLogs(object):
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
         self.pool_size = kwargs.get('pool_size', 20)
+        self.max_group_length = 0
+        self.max_stream_length = 0
         self.connection = AWSConnection(self.aws_region,
                                         aws_access_key_id=self.aws_access_key_id,
                                         aws_secret_access_key=self.aws_secret_access_key)
@@ -65,16 +67,16 @@ class AWSLogs(object):
 
     def _get_groups_from_pattern(self, pattern):
         """Returns groups matching ``pattern``."""
-        pattern = re.compile('^{0}.*'.format(pattern))
+        reg = re.compile('^{0}'.format(pattern))
         for group in self.get_groups():
-            if re.match(pattern, group):
+            if pattern == '*' or re.match(reg, group):
                 yield group
 
     def _get_streams_from_pattern(self, group, pattern):
         """Returns streams in ``group`` matching ``pattern``."""
-        pattern = re.compile('^{0}.*'.format(pattern))
+        reg = re.compile('^{0}'.format(pattern))
         for stream in self.get_streams(group):
-            if re.match(pattern, stream):
+            if pattern == '*' or re.match(reg, stream):
                 yield stream
 
     def _get_stream_logs(self, log_group_name, log_stream_name):
@@ -107,11 +109,14 @@ class AWSLogs(object):
         """Returns events for streams matching ``log_group_name`` in groups
         matching ``log_group_name``."""
         sources = []
+
         for group, stream in self._get_streams_from_patterns(self.log_group_name, self.log_stream_name):
+            self.max_group_length = max(self.max_group_length, len(group))
+            self.max_stream_length = max(self.max_stream_length, len(stream))
             sources.append(self._get_stream_logs(group, stream))
 
-        first = True
-        values = []
+        first, values = True, []
+
         while first or any(values) or self.watch:
             earliests = sorted((v for v in values if v), key=lambda x: x['timestamp'])
 
@@ -143,9 +148,9 @@ class AWSLogs(object):
         for line in self.get_logs():
             output = [line['message']]
             if self.output_stream_enabled:
-                output.insert(0, self.color(line['stream'], 'cyan'))
+                output.insert(0, self.color(line['stream'].ljust(self.max_stream_length, ' '), 'cyan'))
             if self.output_group_enabled:
-                output.insert(0, self.color(line['group'], 'green'))
+                output.insert(0, self.color(line['group'].ljust(self.max_group_length, ' '), 'green'))
             print ' '.join(output)
 
     def list_groups(self):
@@ -197,7 +202,7 @@ class AWSLogs(object):
         if not datetime_text:
             return None
 
-        ago_match = re.match(r'(\d+)\s?(m|minutes|minute|d|day|days|h|hour|hours|w|weeks|weeks)(:? ago)?', datetime_text)
+        ago_match = re.match(r'(\d+)\s?(m|minutes|minute|d|day|days|h|hour|hours|w|weeks|weeks)(?: ago)?', datetime_text)
         if ago_match:
             amount, unit = ago_match.groups()
             amount = int(amount)

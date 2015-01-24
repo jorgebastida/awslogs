@@ -4,15 +4,23 @@ monkey.patch_all()
 
 import os
 import sys
+import signal
 import argparse
-import boto
 
+import boto
 from termcolor import colored
 
 import exceptions
 from core import AWSLogs
 
 __version__ = "0.0.1"
+
+
+def keyboard_signal_handler(signal, frame):
+    print 'You pressed Ctrl+C!'
+    sys.exit(0)
+
+signal.signal(signal.SIGINT, keyboard_signal_handler)
 
 
 def main(argv=None):
@@ -52,10 +60,13 @@ def main(argv=None):
 
     get_parser.add_argument("log_group_name",
                             type=unicode,
+                            default=".*",
                             help="log group name")
 
     get_parser.add_argument("log_stream_name",
                             type=unicode,
+                            default=".*",
+                            nargs='?',
                             help="log stream name")
 
     get_parser.add_argument("--watch",
