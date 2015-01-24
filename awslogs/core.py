@@ -11,6 +11,8 @@ from dateutil.parser import parse
 
 import exceptions
 
+__version__ = '0.0.1'
+
 
 class AWSConnection(object):
     """Wrapper on top of boto's ``connect_to_region`` which retry api

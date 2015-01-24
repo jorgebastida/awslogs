@@ -12,9 +12,6 @@ awslogs is a simple command line tool to query, group and stream `Amazon CloudWa
 
     $ awslogs get /var/log/syslog ip-10-1.*
 
-* The latest documentation is available at: http://awslogs.readthedocs.org
-* Installation instructions: http://awslogs.readthedocs.org/en/latest/installation.html
-
 Features
 --------
 
@@ -49,6 +46,63 @@ Example
 -------
 
 tbc
+
+
+Installation
+------------
+
+You can easily install ``awslogs`` using ``pip``::
+
+  $ pip install awslogs
+
+
+Options
+-------
+
+* ``awslogs groups``: List existing groups
+* ``awslogs streams GROUP``: List existing streams withing ``GROUP``
+* ``awslogs get [GROUP_EXPRESSION [STREAM_EXPRESSION`]]`: Get logs matching ``GROUP_EXPRESSION`` and ``STREAM_EXPRESSION``
+
+
+Time options
+-------------
+
+While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`` ``--e`` date.
+
+* By minute:
+
+  - ``--start='2m'`` Events generated two minutes ago.
+  - ``--start='1 minute'`` Events generated one minute ago.
+  - ``--start='5 minutes'`` Events generated five minutes ago.
+
+* By hours:
+
+  - ``--start='2h'`` Events generated two hours ago.
+  - ``--start='1 hour'`` Events generated one hour ago.
+  - ``--start='5 hours'`` Events generated five hours ago.
+
+* By days:
+
+  - ``--start='2d'`` Events generated two days ago.
+  - ``--start='1 day'`` Events generated one day ago.
+  - ``--start='5 days'`` Events generated five days ago.
+
+* By weeks:
+
+  - ``--start='2w'`` Events generated two week ago.
+  - ``--start='1 week'`` Events generated one weeks ago.
+  - ``--start='5 weeks'`` Events generated five week ago.
+
+* Using specific dates:
+
+  - ``--start='23/1/2015 12:00'`` Events generated after midday  on the 23th of January 2015.
+  - ``--start='1/1/2015'`` Events generated after midnight on the 1st of January 2015.
+  - ``--start='Sat Oct 11 17:13:46 UTC 2003'`` You can use readable dates too
+
+  Note, for time parsing awslogs uses ``dateutil <https://dateutil.readthedocs.org/en/latest/>_'.
+
+* All previous examples are applicable for  ``--end`` `-e` too.
+
 
 Contribute
 -----------
