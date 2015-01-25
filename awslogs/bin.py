@@ -89,6 +89,7 @@ def main(argv=None):
     get_parser.add_argument("-s", "--start",
                             type=unicode,
                             dest='start',
+                            default='24h',
                             help="Start time")
 
     get_parser.add_argument("-e", "--end",
