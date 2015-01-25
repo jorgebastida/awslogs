@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 from functools import partial
 from datetime import datetime, timedelta
@@ -6,7 +7,7 @@ from datetime import datetime, timedelta
 import boto
 import gevent
 from gevent.queue import PriorityQueue
-from gevent.pool import Pool
+from gevent.pool import Pool, Group
 
 from termcolor import colored
 from boto import logs as botologs
@@ -39,6 +40,7 @@ class AWSConnection(object):
                     if exc.error_code == u'ThrottlingException':
                         gevent.sleep(1)
                         continue
+                    raise
                 except Exception, exc:
                     raise
 
@@ -49,6 +51,8 @@ class AWSLogs(object):
 
     ACTIVE = 1
     EXHAUSTED = 2
+
+    WATCH_SLEEP = 2
 
     def __init__(self, **kwargs):
         self.aws_region = kwargs.get('aws_region')
@@ -104,13 +108,12 @@ class AWSLogs(object):
                                                       log_stream_name=log_stream_name,
                                                       start_time=self.start,
                                                       end_time=self.end)
-            total = len(response['events'])
 
+            total = len(response['events'])
             if not total:
                 self.stream_status[(log_group_name, log_stream_name)] = self.EXHAUSTED
                 if self.watch:
-                    print "watch logs"
-                    gevent.sleep(1)
+                    gevent.sleep(self.WATCH_SLEEP)
                     continue
                 else:
                     break
@@ -128,13 +131,13 @@ class AWSLogs(object):
             else:
                 break
 
+            gevent.sleep()
+
     def _queue_consumer(self):
         while True:
-
             if all((s == self.EXHAUSTED for s in self.stream_status.itervalues())) and self.events_queue.empty():
                 if self.watch:
-                    print "watch consumer"
-                    gevent.sleep(1)
+                    gevent.sleep(self.WATCH_SLEEP)
                     continue
                 break
 
@@ -156,7 +159,10 @@ class AWSLogs(object):
                 output.insert(0, self.color(line['stream'].ljust(self.max_stream_length, ' '), 'cyan'))
             if self.output_group_enabled:
                 output.insert(0, self.color(line['group'].ljust(self.max_group_length, ' '), 'green'))
-            print ' '.join(output)
+
+            sys.stdout.write(' '.join(output))
+            sys.stdout.write('\n')
+            sys.stdout.flush()
 
     def list_logs(self):
         """Returns events for streams matching ``log_group_name`` in groups
@@ -167,25 +173,21 @@ class AWSLogs(object):
         self.stream_publishers = {}
         self.stream_status = {}
         self.stream_max_timestamp = {}
-        pool = Pool(5)
 
+        pool_size = 0
         for group, stream in self._get_streams_from_patterns(self.log_group_name, self.log_stream_name):
             self.max_group_length = max(self.max_group_length, len(group))
             self.max_stream_length = max(self.max_stream_length, len(stream))
             self.stream_publishers[(group, stream)] = partial(self._get_stream_logs, group, stream)
             self.stream_status[(group, stream)] = self.ACTIVE
             self.stream_max_timestamp[(group, stream)] = -1
+            pool_size += 1
 
-        consumer = gevent.spawn(self._queue_consumer)
-
+        group = Group()
+        group.spawn(self._queue_consumer)
         for stream in self.stream_publishers.itervalues():
-            pool.spawn(stream)
-
-        pool.join()
-        try:
-            consumer.join()
-        except Exception:
-            import ipdb; ipdb.set_trace()
+            group.spawn(stream)
+        group.join()
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
