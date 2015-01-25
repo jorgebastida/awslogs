@@ -121,3 +121,4 @@ Helpful Links
 
 * http://aws.amazon.com/cloudwatch/
 * http://boto.readthedocs.org/en/latest/ref/logs.html
+* http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_limits.html

@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python -u
 from gevent import monkey
-monkey.patch_all()
+monkey.patch_all(thread=False)
 
 import os
 import sys
@@ -121,6 +121,7 @@ def main(argv=None):
         sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
         return exc.code
     except Exception:
+        raise
         import platform
         import traceback
         options = vars(options)
