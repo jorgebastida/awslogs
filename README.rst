@@ -28,7 +28,7 @@ Features
 
 * List existing streams
 
-  - ``$ awslogs /var/log/syslog streams``
+  - ``$ awslogs streams /var/log/syslog``
 
 * Watch logs as they are created
 
