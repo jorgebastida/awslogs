@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 
 import boto
 import gevent
-from gevent.queue import PriorityQueue
+from gevent.queue import PriorityQueue, Empty
 from gevent.pool import Pool, Group
 
 from termcolor import colored
@@ -66,7 +66,7 @@ class AWSLogs(object):
         self.output_group_enabled = kwargs.get('output_group_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
-        self.pool_size = kwargs.get('pool_size', 20)
+        self.pool_size = kwargs.get('pool_size', 3)
         self.max_group_length = 0
         self.max_stream_length = 0
         self.connection = AWSConnection(self.aws_region,
@@ -96,27 +96,31 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
-    def _get_stream_logs(self, log_group_name, log_stream_name):
+    def _publisher_queue_consumer(self):
         """Returns events in ``log_stream_name`` of ``log_group_name``."""
 
-        next_token = None
-
         while True:
+
+            try:
+                _, (log_group_name, log_stream_name, next_token) = self.publishers_queue.get(block=False)
+            except Empty:
+                if self.watch:
+                    gevent.sleep(self.WATCH_SLEEP)
+                else:
+                    break
 
             response = self.connection.get_log_events(next_token=next_token,
                                                       log_group_name=log_group_name,
                                                       log_stream_name=log_stream_name,
                                                       start_time=self.start,
-                                                      end_time=self.end)
+                                                      end_time=self.end,
+                                                      start_from_head=True)
 
             total = len(response['events'])
+
             if not total:
                 self.stream_status[(log_group_name, log_stream_name)] = self.EXHAUSTED
-                if self.watch:
-                    gevent.sleep(self.WATCH_SLEEP)
-                    continue
-                else:
-                    break
+                continue
 
             self.stream_status[(log_group_name, log_stream_name)] = self.ACTIVE
 
@@ -127,13 +131,11 @@ class AWSLogs(object):
                 self.stream_max_timestamp[(log_group_name, log_stream_name)] = event['timestamp']
 
             if 'nextForwardToken' in response:
-                next_token = response['nextForwardToken']
-            else:
-                break
+                self.publishers_queue.put((response['events'][-1]['timestamp'], (log_group_name, log_stream_name, response['nextForwardToken'])))
 
             gevent.sleep()
 
-    def _queue_consumer(self):
+    def _event_queue_consumer(self):
         while True:
             if all((s == self.EXHAUSTED for s in self.stream_status.itervalues())) and self.events_queue.empty():
                 if self.watch:
@@ -144,7 +146,7 @@ class AWSLogs(object):
             try:
                 timestamp, line = self.events_queue.peek_nowait()
             except gevent.queue.Empty:
-                gevent.sleep()
+                gevent.sleep(0.5)
                 continue
 
             pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
@@ -170,24 +172,22 @@ class AWSLogs(object):
 
         from functools import partial
         self.events_queue = PriorityQueue()
-        self.stream_publishers = {}
+        self.publishers_queue = PriorityQueue()
         self.stream_status = {}
         self.stream_max_timestamp = {}
 
-        pool_size = 0
         for group, stream in self._get_streams_from_patterns(self.log_group_name, self.log_stream_name):
             self.max_group_length = max(self.max_group_length, len(group))
             self.max_stream_length = max(self.max_stream_length, len(stream))
-            self.stream_publishers[(group, stream)] = partial(self._get_stream_logs, group, stream)
+            self.publishers_queue.put((0, (group, stream, None)))
             self.stream_status[(group, stream)] = self.ACTIVE
             self.stream_max_timestamp[(group, stream)] = -1
-            pool_size += 1
 
-        group = Group()
-        group.spawn(self._queue_consumer)
-        for stream in self.stream_publishers.itervalues():
-            group.spawn(stream)
-        group.join()
+        pool = Pool(size=self.pool_size)
+        pool.spawn(self._event_queue_consumer)
+        for i in xrange(self.pool_size - 1):
+            pool.spawn(self._publisher_queue_consumer)
+        pool.join()
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
