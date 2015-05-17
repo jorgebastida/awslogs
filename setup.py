@@ -36,7 +36,6 @@ setup(
     test_suite='tests',
     classifiers=[
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 3',
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
@@ -49,6 +48,5 @@ setup(
             'awslogs = awslogs.bin:main',
         ]
     },
-    zip_safe=False,
-    use_2to3=True
+    zip_safe=False
 )
