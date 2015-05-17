@@ -108,6 +108,10 @@ class AWSLogs(object):
                 yield stream
 
     def _publisher_queue_consumer(self):
+        """Consume ``publishers_queue`` api calls, run them and publish log
+        events to ``raw_events_queue``. If ``nextForwardToken`` is present
+        register a new api call into ``publishers_queue`` using as weight
+        the timestamp of the latest event."""
         while True:
             try:
                 _, (log_group_name, log_stream_name, next_token) = self.publishers_queue.get(block=False)
@@ -145,13 +149,18 @@ class AWSLogs(object):
                 )
 
     def _get_min_timestamp(self):
+        """Return the minimum timestamp available across all active streams."""
         pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
         return min(pending) if pending else None
 
     def _get_all_streams_exhausted(self):
+        """Return if all streams are exhausted."""
         return all((s == self.EXHAUSTED for s in self.stream_status.itervalues()))
 
     def _raw_events_queue_consumer(self):
+        """Consume events from ``raw_events_queue`` if all active streams
+        have already publish events up to the ``_get_min_timestamp`` and
+        register them in order into ``events_queue``."""
         while True:
             if self._get_all_streams_exhausted() and self.raw_events_queue.empty():
                 if self.watch:
@@ -193,6 +202,7 @@ class AWSLogs(object):
             self.events_queue.put("{0}\n".format(' '.join(output)))
 
     def _events_consumer(self):
+        """Print events from ``events_queue`` as soon as they are available."""
         while True:
             event = self.events_queue.get(True)
             if event == NO_MORE_EVENTS:
@@ -215,6 +225,7 @@ class AWSLogs(object):
         pool.join()
 
     def register_publishers(self):
+        """Register publishers into ``publishers_queue``."""
         for group, stream in self._get_streams_from_patterns(self.log_group_name, self.log_stream_name):
             if (group, stream) in self.publishers:
                 continue
@@ -280,6 +291,7 @@ class AWSLogs(object):
         return text
 
     def parse_datetime(self, datetime_text):
+        """Parse ``datetime_text`` into a ``datetime``."""
         if not datetime_text:
             return None
 
