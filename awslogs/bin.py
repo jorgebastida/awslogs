@@ -121,7 +121,6 @@ def main(argv=None):
         sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
         return exc.code
     except Exception:
-        raise
         import platform
         import traceback
         options = vars(options)

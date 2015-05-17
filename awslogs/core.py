@@ -198,7 +198,6 @@ class AWSLogs(object):
                         'green'
                     )
                 )
-
             self.events_queue.put("{0}\n".format(' '.join(output)))
 
     def _events_consumer(self):
