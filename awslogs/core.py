@@ -39,7 +39,6 @@ class AWSConnection(object):
                     return getattr(self.connection, name)(*args, **kwargs)
                 except boto.exception.JSONResponseError, exc:
                     if exc.error_code == u'ThrottlingException':
-                        print "ThrottlingException"
                         gevent.sleep(1)
                         continue
                     raise
