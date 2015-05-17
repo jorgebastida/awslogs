@@ -4,8 +4,8 @@ awslogs
 .. image:: https://badge.fury.io/py/awslogs.png
   :target: http://badge.fury.io/py/awslogs
 
-.. image:: https://travis-ci.org/jorgebastida/glue.png?branch=master
-    :target: https://travis-ci.org/jorgebastida/glue
+.. image:: https://travis-ci.org/jorgebastida/awslogs.png?branch=master
+    :target: https://travis-ci.org/jorgebastida/awslogs
 
 .. image:: https://coveralls.io/repos/jorgebastida/awslogs/badge.svg
   :target: https://coveralls.io/r/jorgebastida/awslogs
