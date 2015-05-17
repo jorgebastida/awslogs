@@ -1,14 +1,8 @@
 import unittest
 from datetime import datetime
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
-
 import gevent
 from gevent.pool import Pool
-from gevent import Greenlet
 
 from mock import Mock, patch, call
 
