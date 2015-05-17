@@ -217,7 +217,7 @@ class AWSLogs(object):
         pool.spawn(self._events_consumer)
 
         if self.watch:
-            pool.spawn(self._register_publishers_periodically)
+            pool.spawn(self.register_publishers_periodically)
 
         for i in xrange(self.pool_size):
             pool.spawn(self._publisher_queue_consumer)
