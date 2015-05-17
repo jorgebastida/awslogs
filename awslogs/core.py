@@ -18,6 +18,7 @@ __version__ = '0.0.1'
 
 NO_MORE_EVENTS = object()
 
+
 class AWSConnection(object):
     """Wrapper on top of boto's ``connect_to_region`` which retry api
     calls if some well-known errors occur."""
@@ -77,15 +78,18 @@ class AWSLogs(object):
         self.publishers = []
         self.stream_status = {}
         self.stream_max_timestamp = {}
-        self.connection = self.connection_cls(self.aws_region,
-                                        aws_access_key_id=self.aws_access_key_id,
-                                        aws_secret_access_key=self.aws_secret_access_key)
+        self.connection = self.connection_cls(
+            self.aws_region,
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key
+        )
 
     def _get_streams_from_patterns(self, log_group_pattern, log_stream_pattern):
         """Returns pairs of group, stream matching ``log_group_pattern`` and
         ``log_stream_pattern``."""
         for group in self._get_groups_from_pattern(log_group_pattern):
-            for stream in self._get_streams_from_pattern(group, log_stream_pattern):
+            for stream in self._get_streams_from_pattern(group,
+                                                         log_stream_pattern):
                 yield group, stream
 
     def _get_groups_from_pattern(self, pattern):
@@ -114,12 +118,14 @@ class AWSLogs(object):
                 else:
                     break
 
-            response = self.connection.get_log_events(next_token=next_token,
-                                                      log_group_name=log_group_name,
-                                                      log_stream_name=log_stream_name,
-                                                      start_time=self.start,
-                                                      end_time=self.end,
-                                                      start_from_head=True)
+            response = self.connection.get_log_events(
+                next_token=next_token,
+                log_group_name=log_group_name,
+                log_stream_name=log_stream_name,
+                start_time=self.start,
+                end_time=self.end,
+                start_from_head=True
+            )
 
             if not len(response['events']):
                 self.stream_status[(log_group_name, log_stream_name)] = self.EXHAUSTED
@@ -134,7 +140,10 @@ class AWSLogs(object):
                 self.stream_max_timestamp[(log_group_name, log_stream_name)] = event['timestamp']
 
             if 'nextForwardToken' in response:
-                self.publishers_queue.put((response['events'][-1]['timestamp'], (log_group_name, log_stream_name, response['nextForwardToken'])))
+                self.publishers_queue.put(
+                    (response['events'][-1]['timestamp'],
+                     (log_group_name, log_stream_name, response['nextForwardToken']))
+                )
 
     def _get_min_timestamp(self):
         pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
@@ -166,9 +175,21 @@ class AWSLogs(object):
 
             output = [line['message']]
             if self.output_stream_enabled:
-                output.insert(0, self.color(line['stream'].ljust(self.max_stream_length, ' '), 'cyan'))
+                output.insert(
+                    0,
+                    self.color(
+                        line['stream'].ljust(self.max_stream_length, ' '),
+                        'cyan'
+                    )
+                )
             if self.output_group_enabled:
-                output.insert(0, self.color(line['group'].ljust(self.max_group_length, ' '), 'green'))
+                output.insert(
+                    0,
+                    self.color(
+                        line['group'].ljust(self.max_group_length, ' '),
+                        'green'
+                    )
+                )
 
             self.events_queue.put("{0}\n".format(' '.join(output)))
 
@@ -240,7 +261,10 @@ class AWSLogs(object):
         next_token = None
 
         while True:
-            response = self.connection.describe_log_streams(log_group_name=log_group_name, next_token=next_token)
+            response = self.connection.describe_log_streams(
+                log_group_name=log_group_name,
+                next_token=next_token
+            )
 
             for stream in response.get('logStreams', []):
                 yield stream['logStreamName']

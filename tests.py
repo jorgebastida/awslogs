@@ -27,38 +27,64 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(self.aws.parse_datetime(''), None)
         self.assertEqual(self.aws.parse_datetime(None), None)
 
-        self.assertEqual(self.aws.parse_datetime('1m'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1m ago'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1minute'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1minute ago'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1minutes'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1minutes ago'), epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1m'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1m ago'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1minute'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1minute ago'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1minutes'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1minutes ago'),
+                         epoch(datetime(2015, 1, 1, 2, 59, 0, 0)))
 
-        self.assertEqual(self.aws.parse_datetime('1h'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1h ago'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1hour'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1hour ago'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1hours'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1hours ago'), epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1h'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1h ago'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1hour'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1hour ago'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1hours'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1hours ago'),
+                         epoch(datetime(2015, 1, 1, 2, 0, 0, 0)))
 
-        self.assertEqual(self.aws.parse_datetime('1d'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1d ago'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1day'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1day ago'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1days'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1days ago'), epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1d'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1d ago'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1day'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1day ago'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1days'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1days ago'),
+                         epoch(datetime(2014, 12, 31, 3, 0, 0, 0)))
 
-        self.assertEqual(self.aws.parse_datetime('1w'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1w ago'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1week'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1week ago'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1weeks'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1weeks ago'), epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1w'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1w ago'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1week'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1week ago'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1weeks'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1weeks ago'),
+                         epoch(datetime(2014, 12, 25, 3, 0, 0, 0)))
 
-
-        self.assertEqual(self.aws.parse_datetime('1/1/2013'), epoch(datetime(2013, 1, 1, 0, 0, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1/1/2012 12:34'), epoch(datetime(2012, 1, 1, 12, 34, 0, 0)))
-        self.assertEqual(self.aws.parse_datetime('1/1/2011 12:34:56'), epoch(datetime(2011, 1, 1, 12, 34, 56, 0)))
+        self.assertEqual(self.aws.parse_datetime('1/1/2013'),
+                         epoch(datetime(2013, 1, 1, 0, 0, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1/1/2012 12:34'),
+                         epoch(datetime(2012, 1, 1, 12, 34, 0, 0)))
+        self.assertEqual(self.aws.parse_datetime('1/1/2011 12:34:56'),
+                         epoch(datetime(2011, 1, 1, 12, 34, 56, 0)))
 
         self.assertRaises(UnknownDateError, self.aws.parse_datetime, '???')
 
@@ -88,12 +114,12 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_streams(self):
         self.aws.connection.describe_log_streams.side_effect = [
             {'logStreams': [{'logStreamName': 'A'},
-                           {'logStreamName': 'B'},
-                           {'logStreamName': 'C'}],
+                            {'logStreamName': 'B'},
+                            {'logStreamName': 'C'}],
              'nextToken': 1},
             {'logStreams': [{'logStreamName': 'D'},
-                           {'logStreamName': 'E'},
-                           {'logStreamName': 'F'}],
+                            {'logStreamName': 'E'},
+                            {'logStreamName': 'F'}],
              'nextToken': 2},
             {'logStreams': [{'logStreamName': 'G'}]},
         ]
@@ -111,12 +137,12 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_streams_from_pattern(self):
         side_effect = [
             {'logStreams': [{'logStreamName': 'AAA'},
-                           {'logStreamName': 'ABA'},
-                           {'logStreamName': 'ACA'}],
+                            {'logStreamName': 'ABA'},
+                            {'logStreamName': 'ACA'}],
              'nextToken': 1},
             {'logStreams': [{'logStreamName': 'BAA'},
-                           {'logStreamName': 'BBA'},
-                           {'logStreamName': 'BBB'}],
+                            {'logStreamName': 'BBA'},
+                            {'logStreamName': 'BBB'}],
              'nextToken': 2},
             {'logStreams': [{'logStreamName': 'CAC'}]},
         ]
@@ -173,11 +199,11 @@ class TestAWSLogs(unittest.TestCase):
 
         streams = [
             {'logStreams': [{'logStreamName': 'ABB'},
-                           {'logStreamName': 'ABC'},
-                           {'logStreamName': 'ACD'}]},
+                            {'logStreamName': 'ABC'},
+                            {'logStreamName': 'ACD'}]},
             {'logStreams': [{'logStreamName': 'BBB'},
-                           {'logStreamName': 'BBD'},
-                           {'logStreamName': 'BBE'}]},
+                            {'logStreamName': 'BBD'},
+                            {'logStreamName': 'BBE'}]},
             {'logStreams': [{'logStreamName': 'CCC'}]},
         ]
 
@@ -215,11 +241,19 @@ class TestAWSLogs(unittest.TestCase):
     @patch('awslogs.core.gevent.sleep')
     @patch('awslogs.core.AWSLogs._get_min_timestamp')
     @patch('awslogs.core.AWSLogs._get_all_streams_exhausted')
-    def test_raw_events_queue_consumer_waits_streams(self,
-        _get_all_streams_exhausted, _get_min_timestamp, sleep):
+    def test_raw_events_queue_consumer_waits_streams(self, _get_all_streams_exhausted, _get_min_timestamp, sleep):
         _get_min_timestamp.side_effect = [5, 5, 6, 7, 8, 9, 10]
-        _get_all_streams_exhausted.side_effect = [False, False, False, False, False, True, True]
-        self.aws.stream_status = {('A', 'B'): self.aws.ACTIVE, ('A', 'C'): self.aws.EXHAUSTED}
+        _get_all_streams_exhausted.side_effect = [
+            False,
+            False,
+            False,
+            False,
+            False,
+            True,
+            True
+        ]
+        self.aws.stream_status = {('A', 'B'): self.aws.ACTIVE,
+                                  ('A', 'C'): self.aws.EXHAUSTED}
         self.aws.raw_events_queue.put((8, {'message': 'Hello 8'}))
         self.aws.raw_events_queue.put((7, {'message': 'Hello 7'}))
         self.aws.raw_events_queue.put((9, {'message': 'Hello 9'}))
@@ -256,23 +290,29 @@ class TestAWSLogs(unittest.TestCase):
         pool.spawn(self.aws._publisher_queue_consumer)
         pool.join()
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (1, {'timestamp': 1,
                  'message': 'Hello 1',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (2, {'timestamp': 2,
                  'message': 'Hello 2',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (3, {'timestamp': 3,
                  'message': 'Hello 3',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
         self.assertTrue(self.aws.raw_events_queue.empty())
         self.assertTrue(self.aws.publishers_queue.empty())
@@ -293,41 +333,53 @@ class TestAWSLogs(unittest.TestCase):
         pool.spawn(self.aws._publisher_queue_consumer)
         pool.join()
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (1, {'timestamp': 1,
                  'message': 'Hello 1',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (2, {'timestamp': 2,
                  'message': 'Hello 2',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (3, {'timestamp': 3,
                  'message': 'Hello 3',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (4, {'timestamp': 4,
                  'message': 'Hello 4',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (5, {'timestamp': 5,
                  'message': 'Hello 5',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
-        self.assertEqual(self.aws.raw_events_queue.get(),
+        self.assertEqual(
+            self.aws.raw_events_queue.get(),
             (6, {'timestamp': 6,
                  'message': 'Hello 6',
                  'stream': 'stream',
-                 'group': 'group'}))
+                 'group': 'group'})
+        )
 
         self.assertTrue(self.aws.raw_events_queue.empty())
         self.assertTrue(self.aws.publishers_queue.empty())
@@ -344,10 +396,12 @@ class TestAWSLogs(unittest.TestCase):
             ('C', 'C'): datetime(2015, 1, 1, 15, 30)
         }
 
-        self.assertEqual(self.aws._get_min_timestamp(), datetime(2015, 1, 1, 13, 30))
+        self.assertEqual(self.aws._get_min_timestamp(),
+                         datetime(2015, 1, 1, 13, 30))
 
         self.aws.stream_status[('A', 'A')] = AWSLogs.EXHAUSTED
-        self.assertEqual(self.aws._get_min_timestamp(), datetime(2015, 1, 1, 14, 30))
+        self.assertEqual(self.aws._get_min_timestamp(),
+                         datetime(2015, 1, 1, 14, 30))
 
         self.aws.stream_status[('B', 'B')] = AWSLogs.EXHAUSTED
         self.assertEqual(self.aws._get_min_timestamp(), None)
