@@ -11,8 +11,6 @@ awslogs
   :target: https://coveralls.io/r/jorgebastida/awslogs
 
 
-
-
 awslogs is a simple command line tool to query, group and stream `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
 
     $ awslogs get /var/log/syslog ip-10-1.*
@@ -49,6 +47,8 @@ Features
 
 Example
 -------
+
+Running: ``awslogs get /var/logs/syslog ALL -s1d` will return you events from any ``stream`` in the ``/var/logs/syslog`` group generated in the last day.
 
 .. image:: https://github.com/jorgebastida/awslogs/raw/master/media/screenshot.png
 
