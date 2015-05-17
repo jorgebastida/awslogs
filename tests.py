@@ -14,16 +14,8 @@ from mock import Mock, patch, call
 
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
+from awslogs.core import NO_MORE_EVENTS
 
-
-class ShoutyGreenlet(Greenlet):
-
-    def __init__(self, *args, **kwargs):
-        super(ShoutyGreenlet, self).__init__(*args, **kwargs)
-        self.link_exception(self._raise_exception)
-
-    def _raise_exception():
-        raise Exception()
 
 class TestAWSLogs(unittest.TestCase):
 
@@ -208,24 +200,175 @@ class TestAWSLogs(unittest.TestCase):
         actual = [s for s in self.aws._get_streams_from_patterns('[AB]A.*', '.*B.*')]
         self.assertEqual(actual, expected)
 
-    @patch('awslogs.core.sys.stdout')
-    def test_event_queue_consumer(self, stdout):
-        import ipdb; ipdb.set_trace()
-
-        # Abort if EXHAUSTED
+    def test_raw_events_queue_consumer_exit_if_exhausted(self):
         self.aws.stream_status = {('A', 'B'): self.aws.EXHAUSTED}
-        pool = Pool(size=1, greenlet_class=ShoutyGreenlet)
-        pool.spawn(self.aws._event_queue_consumer)
+        pool = Pool(size=1)
+        pool.spawn(self.aws._raw_events_queue_consumer)
         pool.join()
-        self.assertEqual(stdout.write.call_count, 0)
+        self.assertEqual(self.aws.events_queue.get(), NO_MORE_EVENTS)
+        self.assertTrue(self.aws.events_queue.empty())
 
-        # Consume when EXHAUSTED
+    def test_raw_events_queue_consumer_exit_when_exhausted(self):
         self.aws.stream_status = {('A', 'B'): self.aws.EXHAUSTED}
-        self.aws.events_queue.put(0, {'message': 'Hello'})
-        pool = Pool(size=1, greenlet_class=ShoutyGreenlet)
-        pool.spawn(self.aws._event_queue_consumer)
+        self.aws.raw_events_queue.put((0, {'message': 'Hello'}))
+        pool = Pool(size=1)
+        pool.spawn(self.aws._raw_events_queue_consumer)
         pool.join()
-        self.assertEqual(stdout.write.call_count, 0)
+        self.assertEqual(self.aws.events_queue.get(), 'Hello\n')
+        self.assertEqual(self.aws.events_queue.get(), NO_MORE_EVENTS)
+        self.assertTrue(self.aws.events_queue.empty())
+
+    @patch('awslogs.core.gevent.sleep')
+    @patch('awslogs.core.AWSLogs._get_min_timestamp')
+    @patch('awslogs.core.AWSLogs._get_all_streams_exhausted')
+    def test_raw_events_queue_consumer_waits_streams(self,
+        _get_all_streams_exhausted, _get_min_timestamp, sleep):
+        _get_min_timestamp.side_effect = [5, 5, 6, 7, 8, 9, 10]
+        _get_all_streams_exhausted.side_effect = [False, False, False, False, False, True, True]
+        self.aws.stream_status = {('A', 'B'): self.aws.ACTIVE, ('A', 'C'): self.aws.EXHAUSTED}
+        self.aws.raw_events_queue.put((8, {'message': 'Hello 8'}))
+        self.aws.raw_events_queue.put((7, {'message': 'Hello 7'}))
+        self.aws.raw_events_queue.put((9, {'message': 'Hello 9'}))
+        self.aws.raw_events_queue.put((6, {'message': 'Hello 6'}))
+
+        pool = Pool(size=1)
+        pool.spawn(self.aws._raw_events_queue_consumer)
+        pool.join()
+        self.assertEqual(self.aws.events_queue.get(), 'Hello 6\n')
+        self.assertEqual(self.aws.events_queue.get(), 'Hello 7\n')
+        self.assertEqual(self.aws.events_queue.get(), 'Hello 8\n')
+        self.assertEqual(self.aws.events_queue.get(), 'Hello 9\n')
+        self.assertEqual(self.aws.events_queue.get(), NO_MORE_EVENTS)
+        self.assertTrue(self.aws.events_queue.empty())
+
+        self.assertEqual(sleep.call_args_list, [call(0.3), call(0.3)])
+
+    def test_publisher_queue_consumer_with_empty_queue(self):
+        self.aws.connection = Mock()
+        pool = Pool(size=1)
+        pool.spawn(self.aws._publisher_queue_consumer)
+        pool.join()
+        self.assertEqual(self.aws.connection.call_count, 0)
+
+    def test_publisher_queue_consumer(self):
+        self.aws.publishers_queue.put((0, ('group', 'stream', None)))
+        self.aws.connection = Mock()
+        self.aws.connection.get_log_events.side_effect = [
+            {'events': [{'timestamp': 1, 'message': 'Hello 1'},
+                        {'timestamp': 2, 'message': 'Hello 2'},
+                        {'timestamp': 3, 'message': 'Hello 3'}]}
+        ]
+        pool = Pool(size=1)
+        pool.spawn(self.aws._publisher_queue_consumer)
+        pool.join()
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (1, {'timestamp': 1,
+                 'message': 'Hello 1',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (2, {'timestamp': 2,
+                 'message': 'Hello 2',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (3, {'timestamp': 3,
+                 'message': 'Hello 3',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertTrue(self.aws.raw_events_queue.empty())
+        self.assertTrue(self.aws.publishers_queue.empty())
+
+    def test_publisher_queue_consumer_paginated(self):
+        self.aws.publishers_queue.put((0, ('group', 'stream', None)))
+        self.aws.connection = Mock()
+        self.aws.connection.get_log_events.side_effect = [
+            {'events': [{'timestamp': 1, 'message': 'Hello 1'},
+                        {'timestamp': 2, 'message': 'Hello 2'},
+                        {'timestamp': 3, 'message': 'Hello 3'}],
+             'nextForwardToken': 'token'},
+            {'events': [{'timestamp': 4, 'message': 'Hello 4'},
+                        {'timestamp': 5, 'message': 'Hello 5'},
+                        {'timestamp': 6, 'message': 'Hello 6'}]}
+        ]
+        pool = Pool(size=1)
+        pool.spawn(self.aws._publisher_queue_consumer)
+        pool.join()
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (1, {'timestamp': 1,
+                 'message': 'Hello 1',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (2, {'timestamp': 2,
+                 'message': 'Hello 2',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (3, {'timestamp': 3,
+                 'message': 'Hello 3',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (4, {'timestamp': 4,
+                 'message': 'Hello 4',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (5, {'timestamp': 5,
+                 'message': 'Hello 5',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertEqual(self.aws.raw_events_queue.get(),
+            (6, {'timestamp': 6,
+                 'message': 'Hello 6',
+                 'stream': 'stream',
+                 'group': 'group'}))
+
+        self.assertTrue(self.aws.raw_events_queue.empty())
+        self.assertTrue(self.aws.publishers_queue.empty())
+
+    def test_get_min_timestamp(self):
+        self.assertEqual(self.aws._get_min_timestamp(), None)
+
+        self.aws.stream_status = {('A', 'A'): AWSLogs.ACTIVE,
+                                  ('B', 'B'): AWSLogs.ACTIVE,
+                                  ('C', 'C'): AWSLogs.EXHAUSTED}
+        self.aws.stream_max_timestamp = {
+            ('A', 'A'): datetime(2015, 1, 1, 13, 30),
+            ('B', 'B'): datetime(2015, 1, 1, 14, 30),
+            ('C', 'C'): datetime(2015, 1, 1, 15, 30)
+        }
+
+        self.assertEqual(self.aws._get_min_timestamp(), datetime(2015, 1, 1, 13, 30))
+
+        self.aws.stream_status[('A', 'A')] = AWSLogs.EXHAUSTED
+        self.assertEqual(self.aws._get_min_timestamp(), datetime(2015, 1, 1, 14, 30))
+
+        self.aws.stream_status[('B', 'B')] = AWSLogs.EXHAUSTED
+        self.assertEqual(self.aws._get_min_timestamp(), None)
+
+    def test_get_all_streams_exhausted(self):
+        self.aws.stream_status = {}
+        self.assertTrue(self.aws._get_all_streams_exhausted())
+
+        self.aws.stream_status = {('A', 'A'): AWSLogs.ACTIVE,
+                                  ('B', 'B'): AWSLogs.EXHAUSTED}
+        self.assertFalse(self.aws._get_all_streams_exhausted())
+
+        self.aws.stream_status = {('A', 'A'): AWSLogs.EXHAUSTED,
+                                  ('B', 'B'): AWSLogs.EXHAUSTED}
+        self.assertTrue(self.aws._get_all_streams_exhausted())
 
 
 if __name__ == '__main__':

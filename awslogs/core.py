@@ -38,6 +38,7 @@ class AWSConnection(object):
                     return getattr(self.connection, name)(*args, **kwargs)
                 except boto.exception.JSONResponseError, exc:
                     if exc.error_code == u'ThrottlingException':
+                        print "ThrottlingException"
                         gevent.sleep(1)
                         continue
                     raise
@@ -135,9 +136,16 @@ class AWSLogs(object):
             if 'nextForwardToken' in response:
                 self.publishers_queue.put((response['events'][-1]['timestamp'], (log_group_name, log_stream_name, response['nextForwardToken'])))
 
+    def _get_min_timestamp(self):
+        pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
+        return min(pending) if pending else None
+
+    def _get_all_streams_exhausted(self):
+        return all((s == self.EXHAUSTED for s in self.stream_status.itervalues()))
+
     def _raw_events_queue_consumer(self):
         while True:
-            if all((s == self.EXHAUSTED for s in self.stream_status.itervalues())) and self.raw_events_queue.empty():
+            if self._get_all_streams_exhausted() and self.raw_events_queue.empty():
                 if self.watch:
                     gevent.sleep(self.WATCH_SLEEP)
                     continue
@@ -145,14 +153,13 @@ class AWSLogs(object):
                 break
 
             try:
-                timestamp, line = self.raw_events_queue.peek_nowait()
-            except gevent.queue.Empty:
-                gevent.sleep(0.5)
+                timestamp, line = self.raw_events_queue.peek(timeout=1)
+            except Empty:
                 continue
 
-            pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
-            if pending and timestamp > min(pending):
-                gevent.sleep(0.5)
+            min_timestamp = self._get_min_timestamp()
+            if min_timestamp and min_timestamp < timestamp:
+                gevent.sleep(0.3)
                 continue
 
             timestamp, line = self.raw_events_queue.get()
