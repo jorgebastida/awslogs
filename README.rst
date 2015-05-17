@@ -2,10 +2,15 @@ awslogs
 =======
 
 .. image:: https://badge.fury.io/py/awslogs.png
-    :target: http://badge.fury.io/py/awslogs
+  :target: http://badge.fury.io/py/awslogs
 
 .. image:: https://pypip.in/d/awslogs/badge.png
-    :target: https://crate.io/packages/awslogs/
+  :target: https://crate.io/packages/awslogs/
+
+.. image:: https://coveralls.io/repos/jorgebastida/awslogs/badge.svg
+  :target: https://coveralls.io/r/jorgebastida/awslogs
+
+
 
 
 awslogs is a simple command line tool to query, group and stream `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs::
