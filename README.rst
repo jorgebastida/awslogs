@@ -4,11 +4,14 @@ awslogs
 .. image:: https://badge.fury.io/py/awslogs.png
   :target: http://badge.fury.io/py/awslogs
 
-.. image:: https://pypip.in/d/awslogs/badge.png
-  :target: https://crate.io/packages/awslogs/
+.. image:: https://travis-ci.org/jorgebastida/glue.png?branch=master
+    :target: https://travis-ci.org/jorgebastida/glue
 
 .. image:: https://coveralls.io/repos/jorgebastida/awslogs/badge.svg
   :target: https://coveralls.io/r/jorgebastida/awslogs
+
+.. image:: https://pypip.in/d/awslogs/badge.png
+  :target: https://crate.io/packages/awslogs/
 
 
 ``awslogs`` is a simple command line tool for querying groups, streams and events from `Amazon CloudWatch <http://aws.amazon.com/cloudwatch/>`_ logs.
