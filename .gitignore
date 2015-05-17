@@ -4,3 +4,5 @@ dist
 build
 .DS_Store
 *.egg
+.coverage
+htmlcov/
