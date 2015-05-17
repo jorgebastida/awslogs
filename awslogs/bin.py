@@ -48,11 +48,6 @@ def main(argv=None):
                         default=os.environ.get('AWS_REGION', "eu-west-1"),
                         help="aws region")
 
-    parser.add_argument("--no-color",
-                        action='store_false',
-                        dest='color_enabled',
-                        help="Color output")
-
     subparsers = parser.add_subparsers()
 
     # get
@@ -96,6 +91,11 @@ def main(argv=None):
                             type=unicode,
                             dest='end',
                             help="End time")
+
+    get_parser.add_argument("--no-color",
+                            action='store_false',
+                            dest='color_enabled',
+                            help="Color output")
 
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')

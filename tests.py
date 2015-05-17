@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+from StringIO import StringIO
 
 import gevent
 from gevent.pool import Pool
@@ -9,6 +10,7 @@ from mock import Mock, patch, call
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
 from awslogs.core import NO_MORE_EVENTS
+from awslogs.bin import main
 
 
 class TestAWSLogs(unittest.TestCase):
@@ -417,6 +419,99 @@ class TestAWSLogs(unittest.TestCase):
         self.aws.stream_status = {('A', 'A'): AWSLogs.EXHAUSTED,
                                   ('B', 'B'): AWSLogs.EXHAUSTED}
         self.assertTrue(self.aws._get_all_streams_exhausted())
+
+    @patch('awslogs.core.AWSConnection')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_get(self, mock_stdout, AWSConnection):
+        instance = Mock()
+        AWSConnection.return_value = instance
+        logs = [
+            {'events': [{'timestamp': 1, 'message': 'Hello 1'},
+                        {'timestamp': 2, 'message': 'Hello 2'},
+                        {'timestamp': 3, 'message': 'Hello 3'}],
+             'nextForwardToken': 'token'},
+            {'events': [{'timestamp': 4, 'message': 'Hello 4'},
+                        {'timestamp': 5, 'message': 'Hello 5'},
+                        {'timestamp': 6, 'message': 'Hello 6'}],
+             'nextForwardToken': 'token'},
+            {'events': []}
+        ]
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'},
+                           {'logGroupName': 'BBB'},
+                           {'logGroupName': 'CCC'}]},
+        ]
+
+        streams = [
+            {'logStreams': [{'logStreamName': 'DDD'},
+                            {'logStreamName': 'EEE'}]}
+        ]
+
+        instance.get_log_events.side_effect = logs
+        instance.describe_log_groups.side_effect = groups
+        instance.describe_log_streams.side_effect = streams
+
+        main("awslogs get AAA DDD --no-color".split())
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("AAA DDD Hello 1\n"
+             "AAA DDD Hello 2\n"
+             "AAA DDD Hello 3\n"
+             "AAA DDD Hello 4\n"
+             "AAA DDD Hello 5\n"
+             "AAA DDD Hello 6\n")
+        )
+
+    @patch('awslogs.core.AWSConnection')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_groups(self, mock_stdout, AWSConnection):
+        instance = Mock()
+        AWSConnection.return_value = instance
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'},
+                           {'logGroupName': 'BBB'},
+                           {'logGroupName': 'CCC'}]},
+        ]
+
+        instance.describe_log_groups.side_effect = groups
+
+        main("awslogs groups".split())
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("AAA\n"
+             "BBB\n"
+             "CCC\n")
+        )
+
+    @patch('awslogs.core.AWSConnection')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_streams(self, mock_stdout, AWSConnection):
+        instance = Mock()
+        AWSConnection.return_value = instance
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'},
+                           {'logGroupName': 'BBB'},
+                           {'logGroupName': 'CCC'}]},
+        ]
+
+        streams = [
+            {'logStreams': [{'logStreamName': 'DDD'},
+                            {'logStreamName': 'EEE'}]}
+        ]
+
+        instance.describe_log_groups.side_effect = groups
+        instance.describe_log_streams.side_effect = streams
+
+        main("awslogs streams AAA".split())
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("DDD\n"
+             "EEE\n")
+        )
+
 
 
 if __name__ == '__main__':
