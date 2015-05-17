@@ -8,12 +8,22 @@ except ImportError:
 
 import gevent
 from gevent.pool import Pool
+from gevent import Greenlet
 
 from mock import Mock, patch, call
 
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
 
+
+class ShoutyGreenlet(Greenlet):
+
+    def __init__(self, *args, **kwargs):
+        super(ShoutyGreenlet, self).__init__(*args, **kwargs)
+        self.link_exception(self._raise_exception)
+
+    def _raise_exception():
+        raise Exception()
 
 class TestAWSLogs(unittest.TestCase):
 
@@ -198,23 +208,24 @@ class TestAWSLogs(unittest.TestCase):
         actual = [s for s in self.aws._get_streams_from_patterns('[AB]A.*', '.*B.*')]
         self.assertEqual(actual, expected)
 
-    # @patch('awslogs.core.sys.stdout')
-    # def test_event_queue_consumer(self, stdout):
-    #
-    #     # Abort if EXHAUSTED
-    #     self.aws.stream_status = [self.aws.EXHAUSTED]
-    #     pool = Pool(size=1)
-    #     pool.spawn(self.aws._event_queue_consumer)
-    #     pool.join()
-    #     self.assertEqual(stdout.write.call_count, 0)
-    #
-    #     # Consume when EXHAUSTED
-    #     self.aws.stream_status = [self.aws.EXHAUSTED]
-    #     self.aws.events_queue.put(0, {'message': 'Hello'})
-    #     pool = Pool(size=1)
-    #     pool.spawn(self.aws._event_queue_consumer)
-    #     pool.join()
-    #     self.assertEqual(stdout.write.call_count, 0)
+    @patch('awslogs.core.sys.stdout')
+    def test_event_queue_consumer(self, stdout):
+        import ipdb; ipdb.set_trace()
+
+        # Abort if EXHAUSTED
+        self.aws.stream_status = {('A', 'B'): self.aws.EXHAUSTED}
+        pool = Pool(size=1, greenlet_class=ShoutyGreenlet)
+        pool.spawn(self.aws._event_queue_consumer)
+        pool.join()
+        self.assertEqual(stdout.write.call_count, 0)
+
+        # Consume when EXHAUSTED
+        self.aws.stream_status = {('A', 'B'): self.aws.EXHAUSTED}
+        self.aws.events_queue.put(0, {'message': 'Hello'})
+        pool = Pool(size=1, greenlet_class=ShoutyGreenlet)
+        pool.spawn(self.aws._event_queue_consumer)
+        pool.join()
+        self.assertEqual(stdout.write.call_count, 0)
 
 
 if __name__ == '__main__':

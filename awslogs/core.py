@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import boto
 import gevent
-from gevent.queue import PriorityQueue, Empty
+from gevent.queue import PriorityQueue, Empty, Queue
 from gevent.pool import Pool, Group
 
 from termcolor import colored
@@ -16,6 +16,7 @@ import exceptions
 
 __version__ = '0.0.1'
 
+NO_MORE_EVENTS = object()
 
 class AWSConnection(object):
     """Wrapper on top of boto's ``connect_to_region`` which retry api
@@ -65,10 +66,12 @@ class AWSLogs(object):
         self.output_group_enabled = kwargs.get('output_group_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
-        self.pool_size = max(kwargs.get('pool_size', 0), 3)
+        self.pool_size = max(kwargs.get('pool_size', 0), 10)
         self.max_group_length = 0
         self.max_stream_length = 0
-        self.events_queue = PriorityQueue()
+        self.publishers = []
+        self.events_queue = Queue()
+        self.raw_events_queue = PriorityQueue()
         self.publishers_queue = PriorityQueue()
         self.publishers = []
         self.stream_status = {}
@@ -102,7 +105,6 @@ class AWSLogs(object):
 
     def _publisher_queue_consumer(self):
         while True:
-
             try:
                 _, (log_group_name, log_stream_name, next_token) = self.publishers_queue.get(block=False)
             except Empty:
@@ -127,34 +129,33 @@ class AWSLogs(object):
             for i, event in enumerate(response['events'], start=1):
                 event['group'] = log_group_name
                 event['stream'] = log_stream_name
-                self.events_queue.put((event['timestamp'], event))
+                self.raw_events_queue.put((event['timestamp'], event))
                 self.stream_max_timestamp[(log_group_name, log_stream_name)] = event['timestamp']
 
             if 'nextForwardToken' in response:
                 self.publishers_queue.put((response['events'][-1]['timestamp'], (log_group_name, log_stream_name, response['nextForwardToken'])))
 
-            gevent.sleep()
-
-    def _event_queue_consumer(self):
+    def _raw_events_queue_consumer(self):
         while True:
-            if all((s == self.EXHAUSTED for s in self.stream_status.itervalues())) and self.events_queue.empty():
+            if all((s == self.EXHAUSTED for s in self.stream_status.itervalues())) and self.raw_events_queue.empty():
                 if self.watch:
                     gevent.sleep(self.WATCH_SLEEP)
                     continue
+                self.events_queue.put(NO_MORE_EVENTS)
                 break
 
             try:
-                timestamp, line = self.events_queue.peek_nowait()
+                timestamp, line = self.raw_events_queue.peek_nowait()
             except gevent.queue.Empty:
                 gevent.sleep(0.5)
                 continue
 
             pending = [self.stream_max_timestamp[k] for k, v in self.stream_status.iteritems() if v != self.EXHAUSTED]
             if pending and timestamp > min(pending):
-                gevent.sleep()
+                gevent.sleep(0.5)
                 continue
 
-            timestamp, line = self.events_queue.get()
+            timestamp, line = self.raw_events_queue.get()
 
             output = [line['message']]
             if self.output_stream_enabled:
@@ -162,16 +163,23 @@ class AWSLogs(object):
             if self.output_group_enabled:
                 output.insert(0, self.color(line['group'].ljust(self.max_group_length, ' '), 'green'))
 
-            print sys.stdout
-            sys.stdout.write(' '.join(output))
-            sys.stdout.write('\n')
+            self.events_queue.put("{0}\n".format(' '.join(output)))
+
+    def _events_consumer(self):
+        while True:
+            event = self.events_queue.get(True)
+            if event == NO_MORE_EVENTS:
+                break
+            sys.stdout.write(event)
             sys.stdout.flush()
 
     def list_logs(self):
-        pool = Pool(size=self.pool_size)
-        pool.spawn(self._event_queue_consumer)
-
         self.register_publishers()
+
+        pool = Pool(size=self.pool_size)
+        pool.spawn(self._raw_events_queue_consumer)
+        pool.spawn(self._events_consumer)
+
         if self.watch:
             pool.spawn(self._register_publishers_periodically)
 
