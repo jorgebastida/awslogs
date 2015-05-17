@@ -1,0 +1,12 @@
+language: python
+python:
+  - "3.4"
+  - "3.3"
+  - "2.7"
+  - "2.6"
+install:
+  - pip install coveralls
+script:
+  - coverage run --source=glue setup.py test
+after_success:
+  coveralls
