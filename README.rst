@@ -79,7 +79,7 @@ Options
 Time options
 -------------
 
-While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`` ``--e`` date.
+While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`` ``-e`` date.
 
 * By minute:
 
