@@ -4,7 +4,7 @@ from StringIO import StringIO
 
 import gevent
 from gevent.pool import Pool
-
+from termcolor import colored
 from mock import Mock, patch, call
 
 from awslogs import AWSLogs
@@ -512,6 +512,22 @@ class TestAWSLogs(unittest.TestCase):
              "EEE\n")
         )
 
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_unknown_date_error(self, mock_stderr):
+        code = main("awslogs get AAA BBB -sX".split())
+        self.assertEqual(code, 3)
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("awslogs doesn't understand 'X' as a date.\n", "red"))
+
+
+    @patch('awslogs.bin.AWSLogs')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_unknown_error(self, mock_stderr, mock_awslogs):
+        mock_awslogs.side_effect = Exception("Error!")
+        main("awslogs get AAA BBB".split())
+        output = mock_stderr.getvalue()
+        self.assertTrue("You've found a bug!" in output)
+        self.assertTrue("Exception: Error!" in output)
 
 
 if __name__ == '__main__':
