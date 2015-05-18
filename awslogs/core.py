@@ -248,7 +248,7 @@ class AWSLogs(object):
     def list_streams(self, *args, **kwargs):
         """Lists available CloudWatch logs streams in ``log_group_name``."""
         for stream in self.get_streams(*args, **kwargs):
-            sys.stdout.write('{0}\n'.format(stream))
+            print stream
 
     def get_groups(self):
         """Returns available CloudWatch logs groups"""
