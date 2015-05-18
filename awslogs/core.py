@@ -136,7 +136,7 @@ class AWSLogs(object):
 
             self.stream_status[(log_group_name, log_stream_name)] = self.ACTIVE
 
-            for i, event in enumerate(response['events'], start=1):
+            for event in response['events']:
                 event['group'] = log_group_name
                 event['stream'] = log_stream_name
                 self.raw_events_queue.put((event['timestamp'], event))
