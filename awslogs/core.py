@@ -41,6 +41,9 @@ class AWSConnection(object):
                     if exc.error_code == u'ThrottlingException':
                         gevent.sleep(1)
                         continue
+                    elif exc.error_code == u'AccessDeniedException':
+                        hint = exc.body.get('Message', 'AccessDeniedException')
+                        raise exceptions.AccessDeniedException('{0}\n'.format(hint))
                     raise
                 except Exception, exc:
                     raise

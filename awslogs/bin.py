@@ -119,6 +119,9 @@ def main(argv=None):
     except exceptions.ConnectionError, exc:
         sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
         return exc.code
+    except exceptions.AccessDeniedException, exc:
+        sys.stderr.write(colored(exc.message, "red"))
+        return exc.code
     except Exception:
         import platform
         import traceback

@@ -8,3 +8,6 @@ class ConnectionError(BaseAWSLogsException):
 
 class UnknownDateError(BaseAWSLogsException):
     code = 3
+
+class AccessDeniedException(BaseAWSLogsException):
+    code = 4
