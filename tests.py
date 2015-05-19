@@ -555,5 +555,4 @@ class TestAWSLogs(unittest.TestCase):
 
         code = main("awslogs groups".split())
         self.assertEqual(code, 4)
-        output = mock_stderr.getvalue()
         self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
