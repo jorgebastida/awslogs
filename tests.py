@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime
 from StringIO import StringIO
 
+import boto
 import gevent
 from gevent.pool import Pool
 from termcolor import colored
@@ -539,3 +540,18 @@ class TestAWSLogs(unittest.TestCase):
         output = mock_stderr.getvalue()
         self.assertEqual(mock_stderr.getvalue(),
                          colored("awslogs can't connecto to AWS.\n", "red"))
+
+    @patch('boto.logs.layer1.CloudWatchLogsConnection.describe_log_groups')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_access_denied_error(self, mock_stderr, describe_log_groups):
+        exc = boto.exception.JSONResponseError(
+            status=400,
+            reason='Bad Request',
+            body={u'Message': u'User XXX...', '__type': 'AccessDeniedException'}
+        )
+        describe_log_groups.side_effect = exc
+
+        code = main("awslogs groups".split())
+        self.assertEqual(code, 4)
+        output = mock_stderr.getvalue()
+        self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
