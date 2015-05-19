@@ -539,7 +539,3 @@ class TestAWSLogs(unittest.TestCase):
         output = mock_stderr.getvalue()
         self.assertEqual(mock_stderr.getvalue(),
                          colored("awslogs can't connecto to AWS.\n", "red"))
-
-
-if __name__ == '__main__':
-    unittest.main()
