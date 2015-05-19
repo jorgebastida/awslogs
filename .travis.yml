@@ -1,10 +1,17 @@
 language: python
+
 python:
   - "2.7"
   - "2.6"
+
 install:
   - pip install coveralls
+
 script:
   - coverage run --source=awslogs setup.py test
+  - python setup.py install
+  - which awslogs
+  - awslogs --help
+
 after_success:
   coveralls
