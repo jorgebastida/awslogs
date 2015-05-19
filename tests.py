@@ -541,15 +541,17 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(mock_stderr.getvalue(),
                          colored("awslogs can't connecto to AWS.\n", "red"))
 
-    @patch('boto.logs.layer1.CloudWatchLogsConnection.describe_log_groups')
+    @patch('awslogs.core.botologs.connect_to_region')
     @patch('sys.stderr', new_callable=StringIO)
-    def test_access_denied_error(self, mock_stderr, describe_log_groups):
+    def test_access_denied_error(self, mock_stderr, connect_to_region):
+        instance = Mock()
+        connect_to_region.return_value = instance
         exc = boto.exception.JSONResponseError(
             status=400,
             reason='Bad Request',
             body={u'Message': u'User XXX...', '__type': 'AccessDeniedException'}
         )
-        describe_log_groups.side_effect = exc
+        instance.describe_log_groups.side_effect = exc
 
         code = main("awslogs groups".split())
         self.assertEqual(code, 4)
