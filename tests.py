@@ -8,7 +8,7 @@ from termcolor import colored
 from mock import Mock, patch, call
 
 from awslogs import AWSLogs
-from awslogs.exceptions import UnknownDateError
+from awslogs.exceptions import UnknownDateError, ConnectionError
 from awslogs.core import NO_MORE_EVENTS
 from awslogs.bin import main
 
@@ -524,10 +524,21 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stderr', new_callable=StringIO)
     def test_unknown_error(self, mock_stderr, mock_awslogs):
         mock_awslogs.side_effect = Exception("Error!")
-        main("awslogs get AAA BBB".split())
+        code = main("awslogs get AAA BBB".split())
         output = mock_stderr.getvalue()
+        self.assertEqual(code, 1)
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
+
+    @patch('awslogs.bin.AWSLogs')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_connection_error(self, mock_stderr, mock_awslogs):
+        mock_awslogs.side_effect = ConnectionError("Error!")
+        code = main("awslogs get AAA BBB".split())
+        self.assertEqual(code, 2)
+        output = mock_stderr.getvalue()
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("awslogs can't connecto to AWS.\n", "red"))
 
 
 if __name__ == '__main__':
