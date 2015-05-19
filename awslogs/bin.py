@@ -1,4 +1,3 @@
-#!/usr/bin/env python -u
 from gevent import monkey
 monkey.patch_all(thread=False)
 
