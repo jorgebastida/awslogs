@@ -1,0 +1,7 @@
+0.0.2
+=====
+* Deal with AccessDeniedException properly #3.
+
+0.0.1
+=====
+* Initial release
