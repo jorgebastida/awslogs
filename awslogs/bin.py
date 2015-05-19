@@ -122,6 +122,18 @@ def main(argv=None):
     except exceptions.AccessDeniedException, exc:
         sys.stderr.write(colored(exc.args[0], "red"))
         return exc.code
+    except exceptions.NoAuthHandlerFoundError, exc:
+        message = [
+            exc.args[0],
+            "Check that you have provided valid credentials in one of the following ways:",
+            "* AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
+            "* /etc/boto.cfg",
+            "* ~/.boto",
+            "* ~/.aws/credentials",
+            "* Instance profile credentials\n"
+        ]
+        sys.stderr.write(colored('\n'.join(message), "red"))
+        return exc.code
     except Exception:
         import platform
         import traceback

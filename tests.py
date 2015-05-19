@@ -556,3 +556,15 @@ class TestAWSLogs(unittest.TestCase):
         code = main("awslogs groups".split())
         self.assertEqual(code, 4)
         self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
+
+    @patch('awslogs.core.botologs.connect_to_region')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_no_handler_was_ready_to_authenticate(self, mock_stderr, connect_to_region):
+        instance = Mock()
+        connect_to_region.side_effect = boto.exception.NoAuthHandlerFound(
+            "No handler was ready to authenticate"
+        )
+
+        code = main("awslogs groups".split())
+        self.assertEqual(code, 5)
+        self.assertTrue("No handler was ready to authenticate" in mock_stderr.getvalue())

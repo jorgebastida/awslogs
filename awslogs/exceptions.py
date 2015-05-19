@@ -11,3 +11,6 @@ class UnknownDateError(BaseAWSLogsException):
 
 class AccessDeniedException(BaseAWSLogsException):
     code = 4
+
+class NoAuthHandlerFoundError(BaseAWSLogsException):
+    code = 5

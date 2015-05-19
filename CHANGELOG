@@ -1,6 +1,7 @@
 0.0.2
 =====
 * Deal with AccessDeniedException properly #3.
+* Return some helpful information if boto raises NoAuthHandlerFound #2.
 
 0.0.1
 =====

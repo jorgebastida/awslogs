@@ -24,7 +24,11 @@ class AWSConnection(object):
     calls if some well-known errors occur."""
 
     def __init__(self, *args, **kwargs):
-        self.connection = botologs.connect_to_region(*args, **kwargs)
+        try:
+            self.connection = botologs.connect_to_region(*args, **kwargs)
+        except boto.exception.NoAuthHandlerFound, exc:
+            raise exceptions.NoAuthHandlerFoundError(*exc.args)
+
         if not self.connection:
             raise exceptions.ConnectionError()
 
