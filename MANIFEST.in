@@ -1,0 +1,4 @@
+include AUTHORS
+include CHANGELOG
+include COPYING
+include tests.py
