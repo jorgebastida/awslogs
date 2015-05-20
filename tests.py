@@ -568,3 +568,17 @@ class TestAWSLogs(unittest.TestCase):
         code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 5)
         self.assertTrue("No handler was ready to authenticate" in mock_stderr.getvalue())
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_invalid_aws_region(self, mock_stderr):
+        code = main("awslogs groups --aws-region=xxx".split())
+        self.assertEqual(code, 6)
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("xxx is not a valid AWS region name\n", "red"))
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_empty_aws_region(self, mock_stderr):
+        code = main("awslogs groups".split())
+        self.assertEqual(code, 6)
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("You need to provide a valid AWS region name using --aws-region\n", "red"))
