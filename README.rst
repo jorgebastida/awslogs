@@ -144,3 +144,18 @@ Although, the most straightforward thing to do might be use ``--aws-access-key-i
 
 * If you only have one ``AWS`` account, my personal recommendation would be to configure `aws-cli <http://aws.amazon.com/cli/>`_. ``awslogs`` will use those credentials if available.
 * If you have multiple ``AWS`` accounts or you don't want to setup ``aws-cli``, I would recommend you to use `envdir <https://pypi.python.org/pypi/envdir>`_ in order to make ``AWS_ACCESS_KEY_ID`` and ``AWS_SECRET_ACCESS_KEY`` available to ``awslogs``.
+
+Running awslogs in Docker
+-------------------------
+
+There's a Dockerfile that allows you to build your own docker awslogs image. To build the image you have to clone the repo and then do:
+
+``docker build -t awslogs . ``
+
+Once the image is built you can call awslogs by executing:
+
+``docker run -it --rm \
+-e AWS_ACCESS_KEY_ID=XXX \
+-e AWS_SECRET_ACCESS_KEY=XXX \
+-e AWS_REGION=XXX \
+awslogs bash -c "awslogs groups"``
