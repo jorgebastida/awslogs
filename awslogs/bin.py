@@ -27,31 +27,34 @@ def main(argv=None):
 
     argv = (argv or sys.argv)[1:]
 
-    parser = argparse.ArgumentParser(usage=("%(prog)s group [ get | groups | streams ]"))
+    parser = argparse.ArgumentParser(usage=("%(prog)s [ get | groups | streams ]"))
 
-    parser.add_argument("--aws-access-key-id",
-                        dest="aws_access_key_id",
-                        type=unicode,
-                        default=os.environ.get('AWS_ACCESS_KEY_ID', None),
-                        help="aws access key id")
+    def add_common_arguments(parser):
+        parser.add_argument("--aws-access-key-id",
+                            dest="aws_access_key_id",
+                            type=unicode,
+                            default=os.environ.get('AWS_ACCESS_KEY_ID', None),
+                            help="aws access key id")
 
-    parser.add_argument("--aws-secret-access-key",
-                        dest="aws_secret_access_key",
-                        type=unicode,
-                        default=os.environ.get('AWS_SECRET_ACCESS_KEY', None),
-                        help="aws secret access key")
+        parser.add_argument("--aws-secret-access-key",
+                            dest="aws_secret_access_key",
+                            type=unicode,
+                            default=os.environ.get('AWS_SECRET_ACCESS_KEY', None),
+                            help="aws secret access key")
 
-    parser.add_argument("--aws-region",
-                        dest="aws_region",
-                        type=unicode,
-                        default=os.environ.get('AWS_REGION', "eu-west-1"),
-                        help="aws region")
+        parser.add_argument("--aws-region",
+                            dest="aws_region",
+                            type=unicode,
+                            default=os.environ.get('AWS_REGION', None),
+                            help="aws region")
 
     subparsers = parser.add_subparsers()
 
     # get
     get_parser = subparsers.add_parser('get', description='Get logs')
     get_parser.set_defaults(func="list_logs")
+    add_common_arguments(get_parser)
+
 
     get_parser.add_argument("log_group_name",
                             type=unicode,
@@ -99,10 +102,13 @@ def main(argv=None):
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
+    add_common_arguments(groups_parser)
 
     # streams
     streams_parser = subparsers.add_parser('streams', description='List streams')
     streams_parser.set_defaults(func="list_streams")
+    add_common_arguments(streams_parser)
+
     streams_parser.add_argument("log_group_name",
                                 type=unicode,
                                 help="log group name")
