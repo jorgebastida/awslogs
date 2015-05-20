@@ -553,7 +553,7 @@ class TestAWSLogs(unittest.TestCase):
         )
         instance.describe_log_groups.side_effect = exc
 
-        code = main("awslogs groups".split())
+        code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 4)
         self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
 
@@ -565,6 +565,6 @@ class TestAWSLogs(unittest.TestCase):
             "No handler was ready to authenticate"
         )
 
-        code = main("awslogs groups".split())
+        code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 5)
         self.assertTrue("No handler was ready to authenticate" in mock_stderr.getvalue())
