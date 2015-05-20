@@ -76,6 +76,9 @@ Options
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
 
+Note: You need to provide to all these options a valid AWS region using ``--aws-region`` or ``AWS_REGION``.
+
+
 Time options
 -------------
 
