@@ -2,6 +2,10 @@
 =====
 * Deal with AccessDeniedException properly #3.
 * Return some helpful information if boto raises NoAuthHandlerFound #2.
+* Make --aws-access-key-id, --aws-secret-access-key and --aws-region available to all parsers (groups, streams, get).
+* Make it required to provide a valid region using --aws-region or AWS_REGION.
+* Improve error messages by providing some hints.
+* Add MANIFEST file #7.
 
 0.0.1
 =====
