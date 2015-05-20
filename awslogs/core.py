@@ -23,9 +23,13 @@ class AWSConnection(object):
     """Wrapper on top of boto's ``connect_to_region`` which retry api
     calls if some well-known errors occur."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, aws_region, *args, **kwargs):
+
+        if aws_region not in (r.name for r in botologs.regions()):
+            raise exceptions.InvalidRegionError(aws_region)
+
         try:
-            self.connection = botologs.connect_to_region(*args, **kwargs)
+            self.connection = botologs.connect_to_region(aws_region, *args, **kwargs)
         except boto.exception.NoAuthHandlerFound, exc:
             raise exceptions.NoAuthHandlerFoundError(*exc.args)
 
@@ -47,7 +51,7 @@ class AWSConnection(object):
                         continue
                     elif exc.error_code == u'AccessDeniedException':
                         hint = exc.body.get('Message', 'AccessDeniedException')
-                        raise exceptions.AccessDeniedException('{0}\n'.format(hint))
+                        raise exceptions.AccessDeniedException(hint)
                     raise
                 except Exception, exc:
                     raise
@@ -84,6 +88,7 @@ class AWSLogs(object):
         self.publishers = []
         self.stream_status = {}
         self.stream_max_timestamp = {}
+
         self.connection = self.connection_cls(
             self.aws_region,
             aws_access_key_id=self.aws_access_key_id,

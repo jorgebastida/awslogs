@@ -119,26 +119,8 @@ def main(argv=None):
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
-    except exceptions.UnknownDateError, exc:
-        sys.stderr.write(colored("awslogs doesn't understand '{0}' as a date.\n".format(exc), "red"))
-        return exc.code
-    except exceptions.ConnectionError, exc:
-        sys.stderr.write(colored("awslogs can't connecto to AWS.\n", "red"))
-        return exc.code
-    except exceptions.AccessDeniedException, exc:
-        sys.stderr.write(colored(exc.args[0], "red"))
-        return exc.code
-    except exceptions.NoAuthHandlerFoundError, exc:
-        message = [
-            exc.args[0],
-            "Check that you have provided valid credentials in one of the following ways:",
-            "* AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
-            "* /etc/boto.cfg",
-            "* ~/.boto",
-            "* ~/.aws/credentials",
-            "* Instance profile credentials\n"
-        ]
-        sys.stderr.write(colored('\n'.join(message), "red"))
+    except exceptions.BaseAWSLogsException, exc:
+        sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
         return exc.code
     except Exception:
         import platform
