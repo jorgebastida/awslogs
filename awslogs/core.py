@@ -51,7 +51,7 @@ class AWSConnection(object):
                         continue
                     elif exc.error_code == u'AccessDeniedException':
                         hint = exc.body.get('Message', 'AccessDeniedException')
-                        raise exceptions.AccessDeniedException(hint)
+                        raise exceptions.AccessDeniedError(hint)
                     raise
                 except Exception, exc:
                     raise

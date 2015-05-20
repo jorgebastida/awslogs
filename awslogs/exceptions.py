@@ -22,7 +22,7 @@ class UnknownDateError(BaseAWSLogsException):
         return "awslogs doesn't understand '{0}' as a date.".format(self.args[0])
 
 
-class AccessDeniedException(BaseAWSLogsException):
+class AccessDeniedError(BaseAWSLogsException):
 
     code = 4
 
