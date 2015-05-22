@@ -6,3 +6,4 @@ build
 *.egg
 .coverage
 htmlcov/
+.ropeproject

@@ -34,6 +34,7 @@ setup(
     platforms='any',
     install_requires=install_requires,
     test_suite='tests',
+    tests_require=tests_require,
     classifiers=[
         'Programming Language :: Python :: 2',
         'Development Status :: 4 - Beta',
