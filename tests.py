@@ -143,6 +143,25 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(self.aws.connection.describe_log_streams.call_args_list,
                          expected)
 
+    def test_get_streams_filtered_by_date(self):
+        self.aws.connection.describe_log_streams.side_effect = [
+            {'logStreams': [self._stream('A', 0, 1),
+                            self._stream('B', 0, 6),
+                            self._stream('C'),
+                            self._stream('D', sys.maxint - 1, sys.maxint)],
+            }
+        ]
+
+        self.aws.start, self.aws.end = 5, 7
+        expected = ['B', 'C']
+
+        self.assertEqual([g for g in self.aws.get_streams('group')], expected)
+
+        expected = [call(log_group_name="group", next_token=None)]
+
+        self.assertEqual(self.aws.connection.describe_log_streams.call_args_list,
+                         expected)
+
     def test_get_streams_from_pattern(self):
         side_effect = [
             {'logStreams': [self._stream('AAA'),
