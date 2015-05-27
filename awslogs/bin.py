@@ -13,7 +13,7 @@ import exceptions
 from core import AWSLogs
 
 
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 
 
 def keyboard_signal_handler(signal, frame):
@@ -47,6 +47,18 @@ def main(argv=None):
                             type=unicode,
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
+
+    def add_date_range_arguments(parser):
+        parser.add_argument("-s", "--start",
+                                type=unicode,
+                                dest='start',
+                                default='24h',
+                                help="Start time")
+
+        parser.add_argument("-e", "--end",
+                                type=unicode,
+                                dest='end',
+                                help="End time")
 
     subparsers = parser.add_subparsers()
 
@@ -83,16 +95,7 @@ def main(argv=None):
                             dest='output_stream_enabled',
                             help="Add stream to the output")
 
-    get_parser.add_argument("-s", "--start",
-                            type=unicode,
-                            dest='start',
-                            default='24h',
-                            help="Start time")
-
-    get_parser.add_argument("-e", "--end",
-                            type=unicode,
-                            dest='end',
-                            help="End time")
+    add_date_range_arguments(get_parser)
 
     get_parser.add_argument("--no-color",
                             action='store_false',
@@ -108,6 +111,7 @@ def main(argv=None):
     streams_parser = subparsers.add_parser('streams', description='List streams')
     streams_parser.set_defaults(func="list_streams")
     add_common_arguments(streams_parser)
+    add_date_range_arguments(streams_parser)
 
     streams_parser.add_argument("log_group_name",
                                 type=unicode,
