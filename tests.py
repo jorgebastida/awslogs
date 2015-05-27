@@ -1,3 +1,4 @@
+import sys
 import unittest
 from datetime import datetime
 from StringIO import StringIO
@@ -19,6 +20,11 @@ class TestAWSLogs(unittest.TestCase):
     def setUp(self):
         super(TestAWSLogs, self).setUp()
         self.aws = AWSLogs(connection_cls=Mock)
+
+    def _stream(self, name, start=0, end=sys.maxint):
+        return {'logStreamName': name,
+                'firstEventTimestamp': start,
+                'lastEventTimestamp': end}
 
     @patch('awslogs.core.datetime')
     def test_parse_datetime(self, datetime_mock):
@@ -116,15 +122,15 @@ class TestAWSLogs(unittest.TestCase):
 
     def test_get_streams(self):
         self.aws.connection.describe_log_streams.side_effect = [
-            {'logStreams': [{'logStreamName': 'A'},
-                            {'logStreamName': 'B'},
-                            {'logStreamName': 'C'}],
+            {'logStreams': [self._stream('A'),
+                            self._stream('B'),
+                            self._stream('C')],
              'nextToken': 1},
-            {'logStreams': [{'logStreamName': 'D'},
-                            {'logStreamName': 'E'},
-                            {'logStreamName': 'F'}],
+            {'logStreams': [self._stream('D'),
+                            self._stream('E'),
+                            self._stream('F')],
              'nextToken': 2},
-            {'logStreams': [{'logStreamName': 'G'}]},
+            {'logStreams': [self._stream('G')]},
         ]
 
         expected = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
@@ -139,15 +145,15 @@ class TestAWSLogs(unittest.TestCase):
 
     def test_get_streams_from_pattern(self):
         side_effect = [
-            {'logStreams': [{'logStreamName': 'AAA'},
-                            {'logStreamName': 'ABA'},
-                            {'logStreamName': 'ACA'}],
+            {'logStreams': [self._stream('AAA'),
+                            self._stream('ABA'),
+                            self._stream('ACA')],
              'nextToken': 1},
-            {'logStreams': [{'logStreamName': 'BAA'},
-                            {'logStreamName': 'BBA'},
-                            {'logStreamName': 'BBB'}],
+            {'logStreams': [self._stream('BAA'),
+                            self._stream('BBA'),
+                            self._stream('BBB')],
              'nextToken': 2},
-            {'logStreams': [{'logStreamName': 'CAC'}]},
+            {'logStreams': [self._stream('CAC')]},
         ]
 
         self.aws.connection.describe_log_streams.side_effect = side_effect
@@ -201,13 +207,13 @@ class TestAWSLogs(unittest.TestCase):
         ]
 
         streams = [
-            {'logStreams': [{'logStreamName': 'ABB'},
-                            {'logStreamName': 'ABC'},
-                            {'logStreamName': 'ACD'}]},
-            {'logStreams': [{'logStreamName': 'BBB'},
-                            {'logStreamName': 'BBD'},
-                            {'logStreamName': 'BBE'}]},
-            {'logStreams': [{'logStreamName': 'CCC'}]},
+            {'logStreams': [self._stream('ABB'),
+                            self._stream('ABC'),
+                            self._stream('ACD')]},
+            {'logStreams': [self._stream('BBB'),
+                            self._stream('BBD'),
+                            self._stream('BBE')]},
+            {'logStreams': [self._stream('CCC')]},
         ]
 
         self.aws.connection.describe_log_groups.side_effect = groups
@@ -445,8 +451,8 @@ class TestAWSLogs(unittest.TestCase):
         ]
 
         streams = [
-            {'logStreams': [{'logStreamName': 'DDD'},
-                            {'logStreamName': 'EEE'}]}
+            {'logStreams': [self._stream('DDD'),
+                            self._stream('EEE')]}
         ]
 
         instance.get_log_events.side_effect = logs
@@ -499,8 +505,8 @@ class TestAWSLogs(unittest.TestCase):
         ]
 
         streams = [
-            {'logStreams': [{'logStreamName': 'DDD'},
-                            {'logStreamName': 'EEE'}]}
+            {'logStreams': [self._stream('DDD'),
+                            self._stream('EEE')]}
         ]
 
         instance.describe_log_groups.side_effect = groups
