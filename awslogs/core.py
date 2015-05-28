@@ -130,6 +130,7 @@ class AWSLogs(object):
             except Empty:
                 if self.watch:
                     gevent.sleep(self.WATCH_SLEEP)
+                    continue
                 else:
                     break
 

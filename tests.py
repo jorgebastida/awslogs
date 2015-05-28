@@ -582,3 +582,32 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(code, 6)
         self.assertEqual(mock_stderr.getvalue(),
                          colored("You need to provide a valid AWS region name using --aws-region\n", "red"))
+
+    def test_regression_next_token_unbound(self):
+        """Test that the loop continues without raising unbound exception.
+
+        `next_token` was unbound because the loop didn't continue after an
+        Empty exception with `self.watch` set to True."""
+
+        class MockPublishersQueue(object):
+            def get(self, block):
+                raise gevent.queue.Empty
+
+        class MockAWSLogs(AWSLogs):
+            WATCH_SLEEP = 0
+            continue_reached = False
+
+            def __init__(self):
+                self.publishers_queue = MockPublishersQueue()
+
+            @property
+            def watch(self):
+                if self.continue_reached:
+                    return False
+                self.continue_reached = True
+                return True
+
+        logs = MockAWSLogs()
+        logs._publisher_queue_consumer()
+
+        self.assertTrue(logs.continue_reached)
