@@ -1,6 +1,7 @@
 0.0.3
 =====
 * Filter streams by ``start`` and ``end`` in order to reduce the initial volume of queries #9.
+* Fix next_token unbound after exception #8
 
 0.0.2
 =====
