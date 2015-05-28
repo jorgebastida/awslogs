@@ -1,3 +1,7 @@
+0.0.3
+=====
+* Filter streams by ``start`` and ``end`` in order to reduce the initial volume of queries #9.
+
 0.0.2
 =====
 * Deal with AccessDeniedException properly #3.

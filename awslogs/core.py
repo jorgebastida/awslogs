@@ -281,6 +281,8 @@ class AWSLogs(object):
         """Returns available CloudWatch logs streams in ``log_group_name``."""
         log_group_name = log_group_name or self.log_group_name
         next_token = None
+        window_start = self.start or 0
+        window_end = self.end or sys.maxint
 
         while True:
             response = self.connection.describe_log_streams(
@@ -289,7 +291,9 @@ class AWSLogs(object):
             )
 
             for stream in response.get('logStreams', []):
-                yield stream['logStreamName']
+                if max(stream['firstEventTimestamp'], window_start) <= \
+                   min(stream['lastEventTimestamp'], window_end):
+                    yield stream['logStreamName']
 
             if 'nextToken' in response:
                 next_token = response['nextToken']

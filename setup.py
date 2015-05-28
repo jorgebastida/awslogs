@@ -22,7 +22,7 @@ if sys.version_info < (3, 3):
 
 setup(
     name='awslogs',
-    version='0.0.2',
+    version='0.0.3',
     url='http://github.com/jorgebastida/awslogs',
     license='BSD',
     author='Jorge Bastida',
