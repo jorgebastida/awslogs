@@ -39,6 +39,12 @@ def main(argv=None):
                             default=None,
                             help="aws secret access key")
 
+        parser.add_argument("--aws-session-token",
+                            dest="aws_session_token",
+                            type=unicode,
+                            default=None,
+                            help="aws session token")
+
         parser.add_argument("--aws-region",
                             dest="aws_region",
                             type=unicode,
@@ -128,6 +134,7 @@ def main(argv=None):
         import traceback
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
+        options['aws_secret_access_key'] = 'SENSITIVE'
         options['aws_secret_access_key'] = 'SENSITIVE'
         sys.stderr.write("\n")
         sys.stderr.write("=" * 80)
