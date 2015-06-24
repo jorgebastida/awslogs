@@ -1,12 +1,9 @@
-from gevent import monkey
-monkey.patch_all(thread=False)
-
 import os
 import sys
 import signal
 import argparse
 
-import boto
+import boto3
 from termcolor import colored
 
 import exceptions
@@ -33,13 +30,13 @@ def main(argv=None):
         parser.add_argument("--aws-access-key-id",
                             dest="aws_access_key_id",
                             type=unicode,
-                            default=os.environ.get('AWS_ACCESS_KEY_ID', None),
+                            default=None,
                             help="aws access key id")
 
         parser.add_argument("--aws-secret-access-key",
                             dest="aws_secret_access_key",
                             type=unicode,
-                            default=os.environ.get('AWS_SECRET_ACCESS_KEY', None),
+                            default=None,
                             help="aws secret access key")
 
         parser.add_argument("--aws-region",
@@ -140,7 +137,7 @@ def main(argv=None):
         sys.stderr.write("\n")
         sys.stderr.write("Version: {0}\n".format(__version__))
         sys.stderr.write("Python: {0}\n".format(sys.version))
-        sys.stderr.write("boto version: {0}\n".format(boto.__version__))
+        sys.stderr.write("boto3 version: {0}\n".format(boto3.__version__))
         sys.stderr.write("Platform: {0}\n".format(platform.platform()))
         sys.stderr.write("Config: {0}\n".format(options))
         sys.stderr.write("Args: {0}\n\n".format(sys.argv))
