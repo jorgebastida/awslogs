@@ -5,7 +5,8 @@ from setuptools import setup, find_packages
 install_requires = [
     'boto3>=1.0.0',
     'termcolor>=1.1',
-    'python-dateutil>=2.4.0'
+    'python-dateutil>=2.4.0',
+    'future'
 ]
 
 tests_require = []
@@ -17,7 +18,6 @@ if sys.version_info < (2, 7):
 # as of Python >= 3.3 unittest.mock module is maintained within Python.
 if sys.version_info < (3, 3):
     tests_require.append('mock>=1.0')
-
 
 setup(
     name='awslogs',

@@ -1,5 +1,13 @@
 0.0.3
 =====
+* awslogs now use ``boto3`` instead of ``boto2``.
+* awslogs don't longer require ``gevent``.
+* massive refactoring of the internals now that ``aws`` provides ``filter_log_events`` out the box.
+* awslogs don't longer support retrieving logs from several groups at the same time.
+* awslogs now support python python: 2.7, 3.3 and 3.4
+
+0.0.3
+=====
 * Filter streams by ``start`` and ``end`` in order to reduce the initial volume of queries #9.
 * Fix next_token unbound after exception #8
 

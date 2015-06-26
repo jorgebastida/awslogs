@@ -6,54 +6,11 @@ from datetime import datetime, timedelta
 import boto3
 
 from termcolor import colored
-from boto import logs as botologs
 from dateutil.parser import parse
 
-import exceptions
+from . import exceptions
 
 __version__ = '0.1.0'
-
-#NO_MORE_EVENTS = object()
-
-#
-# class AWSConnection(object):
-#     """Wrapper on top of boto's ``connect_to_region`` which retry api
-#     calls if some well-known errors occur."""
-#
-#     def __init__(self, aws_region, *args, **kwargs):
-#
-#         if aws_region not in (r.name for r in botologs.regions()):
-#             raise exceptions.InvalidRegionError(aws_region)
-#
-#         try:
-#             self.connection = botologs.connect_to_region(aws_region, *args, **kwargs)
-#         except boto.exception.NoAuthHandlerFound, exc:
-#             raise exceptions.NoAuthHandlerFoundError(*exc.args)
-#
-#         if not self.connection:
-#             raise exceptions.ConnectionError()
-#
-#     def __bool__(self):
-#         return bool(self.connection)
-#
-#     def __getattr__(self, name):
-#
-#         def aws_connection_wrap(*args, **kwargs):
-#             while True:
-#                 try:
-#                     return getattr(self.connection, name)(*args, **kwargs)
-#                 except boto.exception.JSONResponseError, exc:
-#                     if exc.error_code == u'ThrottlingException':
-#                         gevent.sleep(1)
-#                         continue
-#                     elif exc.error_code == u'AccessDeniedException':
-#                         hint = exc.body.get('Message', 'AccessDeniedException')
-#                         raise exceptions.AccessDeniedError(hint)
-#                     raise
-#                 except Exception, exc:
-#                     raise
-#
-#         return aws_connection_wrap
 
 
 class AWSLogs(object):
@@ -134,17 +91,17 @@ class AWSLogs(object):
 
     def list_logs(self):
         for event in self.get_logs():
-            print event
+            print(event)
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
         for group in self.get_groups():
-            print group
+            print(group)
 
-    def list_streams(self, *args, **kwargs):
+    def list_streams(self):
         """Lists available CloudWatch logs streams in ``log_group_name``."""
-        for stream in self.get_streams(*args, **kwargs):
-            print stream
+        for stream in self.get_streams():
+            print(stream)
 
     def get_groups(self):
         """Returns available CloudWatch logs groups"""
@@ -164,7 +121,7 @@ class AWSLogs(object):
         """Returns available CloudWatch logs streams in ``log_group_name``."""
         kwargs = {'logGroupName': log_group_name or self.log_group_name}
         window_start = self.start or 0
-        window_end = self.end or sys.maxint
+        window_end = self.end or sys.maxsize
 
         while True:
             response = self.client.describe_log_streams(**kwargs)

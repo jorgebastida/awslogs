@@ -6,15 +6,15 @@ import argparse
 import boto3
 from termcolor import colored
 
-import exceptions
-from core import AWSLogs
+from . import exceptions
+from .core import AWSLogs
 
 
 __version__ = "0.0.3"
 
 
 def keyboard_signal_handler(signal, frame):
-    print 'You pressed Ctrl+C!'
+    print('You pressed Ctrl+C!')
     sys.exit(0)
 
 signal.signal(signal.SIGINT, keyboard_signal_handler)
@@ -29,37 +29,37 @@ def main(argv=None):
     def add_common_arguments(parser):
         parser.add_argument("--aws-access-key-id",
                             dest="aws_access_key_id",
-                            type=unicode,
+                            type=str,
                             default=None,
                             help="aws access key id")
 
         parser.add_argument("--aws-secret-access-key",
                             dest="aws_secret_access_key",
-                            type=unicode,
+                            type=str,
                             default=None,
                             help="aws secret access key")
 
         parser.add_argument("--aws-session-token",
                             dest="aws_session_token",
-                            type=unicode,
+                            type=str,
                             default=None,
                             help="aws session token")
 
         parser.add_argument("--aws-region",
                             dest="aws_region",
-                            type=unicode,
+                            type=str,
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
 
     def add_date_range_arguments(parser):
         parser.add_argument("-s", "--start",
-                                type=unicode,
+                                type=str,
                                 dest='start',
                                 default='24h',
                                 help="Start time")
 
         parser.add_argument("-e", "--end",
-                                type=unicode,
+                                type=str,
                                 dest='end',
                                 help="End time")
 
@@ -72,13 +72,13 @@ def main(argv=None):
 
 
     get_parser.add_argument("log_group_name",
-                            type=unicode,
+                            type=str,
                             default="ALL",
                             nargs='?',
                             help="log group name")
 
     get_parser.add_argument("log_stream_name",
-                            type=unicode,
+                            type=str,
                             default="ALL",
                             nargs='?',
                             help="log stream name")
@@ -117,7 +117,7 @@ def main(argv=None):
     add_date_range_arguments(streams_parser)
 
     streams_parser.add_argument("log_group_name",
-                                type=unicode,
+                                type=str,
                                 help="log group name")
 
     # Parse input
@@ -126,7 +126,7 @@ def main(argv=None):
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
-    except exceptions.BaseAWSLogsException, exc:
+    except exceptions.BaseAWSLogsException as exc:
         sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
         return exc.code
     except Exception:
@@ -135,7 +135,7 @@ def main(argv=None):
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
         options['aws_secret_access_key'] = 'SENSITIVE'
-        options['aws_secret_access_key'] = 'SENSITIVE'
+        options['aws_session_token'] = 'SENSITIVE'
         sys.stderr.write("\n")
         sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
