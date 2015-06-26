@@ -29,8 +29,9 @@ class TestAWSLogs(unittest.TestCase):
                 'firstEventTimestamp': start,
                 'lastEventTimestamp': end}
 
+    @patch('boto3.client')
     @patch('awslogs.core.datetime')
-    def test_parse_datetime(self, datetime_mock):
+    def test_parse_datetime(self, datetime_mock, botoclient):
 
         awslogs = AWSLogs()
         datetime_mock.now.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
