@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'boto3>=1.0.0',
-    'termcolor>=1.1',
+    'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
 ]
 
@@ -12,11 +12,11 @@ tests_require = []
 
 # as of Python >= 2.7 argparse module is maintained within Python.
 if sys.version_info < (2, 7):
-    install_requires.append('argparse>=1.1')
+    install_requires.append('argparse>=1.1.0')
 
 # as of Python >= 3.3 unittest.mock module is maintained within Python.
 if sys.version_info < (3, 3):
-    tests_require.append('mock>=1.0')
+    tests_require.append('mock>=1.0.0')
 
 setup(
     name='awslogs',
