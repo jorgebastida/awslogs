@@ -5,8 +5,7 @@ from setuptools import setup, find_packages
 install_requires = [
     'boto3>=1.0.0',
     'termcolor>=1.1',
-    'python-dateutil>=2.4.0',
-    'future'
+    'python-dateutil>=2.4.0'
 ]
 
 tests_require = []
