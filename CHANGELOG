@@ -1,10 +1,10 @@
-0.0.3
+0.1.0
 =====
 * awslogs now use ``boto3`` instead of ``boto2``.
 * awslogs don't longer require ``gevent``.
 * massive refactoring of the internals now that ``aws`` provides ``filter_log_events`` out the box.
 * awslogs don't longer support retrieving logs from several groups at the same time.
-* awslogs now support python python: 2.7, 3.3 and 3.4
+* awslogs now support python: 2.7, 3.3 and 3.4
 
 0.0.3
 =====
