@@ -43,12 +43,3 @@ class NoAuthHandlerFoundError(BaseAWSLogsException):
             "* Instance profile credentials"
         ]
         return '\n'.join(message)
-
-class InvalidRegionError(BaseAWSLogsException):
-
-    code = 6
-
-    def hint(self):
-        if self.args[0]:
-            return "{0} is not a valid AWS region name".format(self.args[0])
-        return "You need to provide a valid AWS region name using --aws-region"
