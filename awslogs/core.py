@@ -1,6 +1,8 @@
 import re
 import sys
 import time
+import threading
+import functools
 from datetime import datetime, timedelta
 
 import boto3
@@ -41,7 +43,7 @@ class AWSClient(object):
                     if code == u'ThrottlingException':
                         time.sleep(0.5)
                         continue
-                    elif code == u'AccessDeniedException':
+                    elif code == u'AccessDeniedException' or code == u'ExpiredTokenException':
                         hint = exc.response['Error'].get('Message', 'AccessDeniedException')
                         raise exceptions.AccessDeniedError(hint)
                     raise
@@ -71,12 +73,6 @@ class AWSLogs(object):
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
-        # self.client = AWSClient('logs',
-        #     aws_access_key_id=self.aws_access_key_id,
-        #     aws_secret_access_key=self.aws_secret_access_key,
-        #     aws_session_token=self.aws_session_token,
-        #     region_name=self.aws_region
-        # )
         self.client = AWSClient('logs',
             aws_access_key_id=None,
             aws_secret_access_key=None,
@@ -92,22 +88,36 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
-    def get_logs(self):
+    def list_logs(self):
         streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
         max_stream_length = max([len(s) for s in streams])
         group_length = len(self.log_group_name)
 
-        kwargs = {'logGroupName': self.log_group_name,
-                  'logStreamNames': streams,
-                  'interleaved': True}
-        if self.start:
-            kwargs['startTime'] = self.start
+        print_lock = threading.Lock()
+        end_condition = threading.Condition()
+        self.list_logs_end = False
 
-        if self.end:
-            kwargs['endTime'] = self.end
+        def get_logs(token=None):
+            kwargs = {'logGroupName': self.log_group_name,
+                      'logStreamNames': streams,
+                      'interleaved': True}
+            if self.start:
+                kwargs['startTime'] = self.start
 
-        while True:
+            if self.end:
+                kwargs['endTime'] = self.end
+
+            if token:
+                kwargs['nextToken'] = token
+
             response = self.client.filter_log_events(**kwargs)
+
+            if 'nextToken' in response:
+                page = threading.Thread(target=functools.partial(get_logs, token=response['nextToken']))
+                page.start()
+
+            print_lock.acquire()
+
             for event in response.get('events', []):
                 output = [event['message']]
                 if self.output_stream_enabled:
@@ -126,16 +136,24 @@ class AWSLogs(object):
                             'green'
                         )
                     )
-                yield ' '.join(output)
+                print(' '.join(output))
 
-            if 'nextToken' in response:
-                kwargs['nextToken']= response['nextToken']
-            else:
-                break
+            print_lock.release()
 
-    def list_logs(self):
-        for event in self.get_logs():
-            print(event)
+            if 'nextToken' not in response:
+                end_condition.acquire()
+                self.list_logs_end = True
+                end_condition.notify_all()
+                end_condition.release()
+
+        end_condition.acquire()
+
+        main = threading.Thread(target=get_logs)
+        main.start()
+
+        while not self.list_logs_end:
+            end_condition.wait()
+        end_condition.release()
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""

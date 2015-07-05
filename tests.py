@@ -238,7 +238,6 @@ class TestAWSLogs(unittest.TestCase):
         client.describe_log_streams.side_effect = streams
 
         main("awslogs get AAA DDD --no-color".split())
-
         self.assertEqual(
             mock_stdout.getvalue(),
             ("AAA DDD Hello 1\n"
