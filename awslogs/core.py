@@ -4,6 +4,9 @@ import time
 from datetime import datetime, timedelta
 
 import boto3
+from botocore.client import ClientError
+from botocore.auth import NoCredentialsError
+from botocore.retryhandler import EndpointConnectionError
 
 from termcolor import colored
 from dateutil.parser import parse
@@ -11,6 +14,42 @@ from dateutil.parser import parse
 from . import exceptions
 
 __version__ = '0.1.0'
+
+
+class AWSClient(object):
+    """Wrapper on top of boto's ``client`` which retry api
+    calls if some well-known errors occur."""
+
+    def __init__(self, *args, **kwargs):
+        self.client = boto3.client(*args, **kwargs)
+
+    def __bool__(self):
+        return bool(self.connection)
+
+    def __getattr__(self, name):
+
+        def aws_connection_wrap(*args, **kwargs):
+            while True:
+                try:
+                    return getattr(self.client, name)(*args, **kwargs)
+                except NoCredentialsError, exc:
+                    raise exceptions.AccessDeniedError(*exc.args)
+                except EndpointConnectionError, exc:
+                    raise exceptions.ConnectionError(*exc.args)
+                except ClientError, exc:
+                    print exc
+                    code = exc.response['Error']['Code']
+                    if code == u'ThrottlingException':
+                        time.sleep(0.5)
+                        continue
+                    elif code == u'AccessDeniedException':
+                        hint = exc.response['Error'].get('Message', 'AccessDeniedException')
+                        raise exceptions.AccessDeniedError(hint)
+                    raise
+                except Exception, exc:
+                    raise
+
+        return aws_connection_wrap
 
 
 class AWSLogs(object):
@@ -33,11 +72,17 @@ class AWSLogs(object):
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
-        self.client = boto3.client('logs',
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            aws_session_token=self.aws_session_token,
-            region_name=self.aws_region
+        # self.client = AWSClient('logs',
+        #     aws_access_key_id=self.aws_access_key_id,
+        #     aws_secret_access_key=self.aws_secret_access_key,
+        #     aws_session_token=self.aws_session_token,
+        #     region_name=self.aws_region
+        # )
+        self.client = AWSClient('logs',
+            aws_access_key_id=None,
+            aws_secret_access_key=None,
+            aws_session_token=None,
+            region_name='eu-west-1'
         )
 
     def _get_streams_from_pattern(self, group, pattern):

@@ -6,6 +6,10 @@ try:
 except ImportError:
     from io import StringIO
 
+from botocore.client import ClientError
+from botocore.auth import NoCredentialsError
+from botocore.retryhandler import EndpointConnectionError
+
 from termcolor import colored
 
 try:
@@ -19,10 +23,6 @@ from awslogs.bin import main
 
 
 class TestAWSLogs(unittest.TestCase):
-
-    # def setUp(self):
-    #     super(TestAWSLogs, self).setUp()
-    #     self.aws = AWSLogs()
 
     def _stream(self, name, start=0, end=sys.maxsize):
         return {'logStreamName': name,
@@ -317,58 +317,41 @@ class TestAWSLogs(unittest.TestCase):
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
 
-    @patch('awslogs.bin.AWSLogs')
+    @patch('boto3.client')
     @patch('sys.stderr', new_callable=StringIO)
-    def test_connection_error(self, mock_stderr, mock_awslogs):
-        mock_awslogs.side_effect = ConnectionError("Error!")
-        code = main("awslogs get AAA BBB".split())
+    def test_connection_error(self, mock_stderr, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+
+        exc = EndpointConnectionError(endpoint_url="url")
+        client.describe_log_groups.side_effect = exc
+
+        code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 2)
-        output = mock_stderr.getvalue()
-        self.assertEqual(mock_stderr.getvalue(),
-                         colored("awslogs can't connecto to AWS.\n", "red"))
+        self.assertEqual(mock_stderr.getvalue(), colored("Could not connect to the endpoint URL: \"url\"\n", "red"))
 
-    # @patch('awslogs.core.boto3.client')
-    # @patch('sys.stderr', new_callable=StringIO)
-    # def test_access_denied_error(self, mock_stderr, botoclient):
-    #     client = Mock()
-    #     botoclient.return_value = client
-    #
-    #     exc = boto.exception.JSONResponseError(
-    #         status=400,
-    #         reason='Bad Request',
-    #         body={u'Message': u'User XXX...', '__type': 'AccessDeniedException'}
-    #     )
-    #     client.describe_log_groups.side_effect = exc
-    #
-    #     code = main("awslogs groups --aws-region=eu-west-1".split())
-    #     self.assertEqual(code, 4)
-    #     self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
+    @patch('boto3.client')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_access_denied_error(self, mock_stderr, botoclient):
+        client = Mock()
+        botoclient.return_value = client
 
-    # @patch('awslogs.core.botologs.connect_to_region')
-    # @patch('sys.stderr', new_callable=StringIO)
-    # def test_no_handler_was_ready_to_authenticate(self, mock_stderr, connect_to_region):
-    #     instance = Mock()
-    #     connect_to_region.side_effect = boto.exception.NoAuthHandlerFound(
-    #         "No handler was ready to authenticate"
-    #     )
-    #
-    #     code = main("awslogs groups --aws-region=eu-west-1".split())
-    #     self.assertEqual(code, 5)
-    #     self.assertTrue("No handler was ready to authenticate" in mock_stderr.getvalue())
-    #
-    # @patch('sys.stderr', new_callable=StringIO)
-    # def test_invalid_aws_region(self, mock_stderr):
-    #     code = main("awslogs groups --aws-region=xxx".split())
-    #     self.assertEqual(code, 6)
-    #     self.assertEqual(mock_stderr.getvalue(),
-    #                      colored("xxx is not a valid AWS region name\n", "red"))
-    #
-    # @patch('boto3.client')
-    # @patch('sys.stderr', new_callable=StringIO)
-    # def test_empty_aws_region(self, mock_stderr, botoclient):
-    #     client = Mock()
-    #     botoclient.return_value = client
-    #     code = main("awslogs groups".split())
-    #     self.assertEqual(code, 6)
-    #     self.assertEqual(mock_stderr.getvalue(),
-    #                      colored("You need to provide a valid AWS region name using --aws-region\n", "red"))
+        exc = ClientError(error_response={'Error': {'Code': 'AccessDeniedException', 'Message': 'User XXX...'}}, operation_name="operation")
+        client.describe_log_groups.side_effect = exc
+
+        code = main("awslogs groups --aws-region=eu-west-1".split())
+        self.assertEqual(code, 4)
+        self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
+
+    @patch('boto3.client')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_no_credentials_error(self, mock_stderr, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+
+        exc = NoCredentialsError()
+        client.describe_log_groups.side_effect = exc
+
+        code = main("awslogs groups --aws-region=eu-west-1".split())
+        self.assertEqual(code, 4)
+        self.assertEqual(mock_stderr.getvalue(), colored("Unable to locate credentials\n", "red"))

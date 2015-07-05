@@ -11,7 +11,7 @@ class ConnectionError(BaseAWSLogsException):
     code = 2
 
     def hint(self):
-        return "awslogs can't connecto to AWS."
+        return self.args[0]
 
 
 class UnknownDateError(BaseAWSLogsException):
