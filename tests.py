@@ -353,5 +353,9 @@ class TestAWSLogs(unittest.TestCase):
         client.describe_log_groups.side_effect = exc
 
         code = main("awslogs groups --aws-region=eu-west-1".split())
-        self.assertEqual(code, 4)
-        self.assertEqual(mock_stderr.getvalue(), colored("Unable to locate credentials\n", "red"))
+        self.assertEqual(code, 5)
+        self.assertEqual(mock_stderr.getvalue(), colored("""Unable to locate credentials
+Check that you have provided valid credentials in one of the following ways:
+* AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.
+* ~/.aws/credentials
+* Instance profile credentials\n""", "red"))

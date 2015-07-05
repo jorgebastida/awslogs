@@ -33,7 +33,7 @@ class AWSClient(object):
                 try:
                     return getattr(self.client, name)(*args, **kwargs)
                 except NoCredentialsError, exc:
-                    raise exceptions.AccessDeniedError(*exc.args)
+                    raise exceptions.NoAuthHandlerFoundError(*exc.args)
                 except EndpointConnectionError, exc:
                     raise exceptions.ConnectionError(*exc.args)
                 except ClientError, exc:

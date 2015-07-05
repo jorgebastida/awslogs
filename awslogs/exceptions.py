@@ -39,8 +39,6 @@ class NoAuthHandlerFoundError(BaseAWSLogsException):
             self.args[0],
             "Check that you have provided valid credentials in one of the following ways:",
             "* AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.",
-            "* /etc/boto.cfg",
-            "* ~/.boto",
             "* ~/.aws/credentials",
             "* Instance profile credentials"
         ]
