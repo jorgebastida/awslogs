@@ -32,12 +32,11 @@ class AWSClient(object):
             while True:
                 try:
                     return getattr(self.client, name)(*args, **kwargs)
-                except NoCredentialsError, exc:
+                except NoCredentialsError as exc:
                     raise exceptions.NoAuthHandlerFoundError(*exc.args)
-                except EndpointConnectionError, exc:
+                except EndpointConnectionError as exc:
                     raise exceptions.ConnectionError(*exc.args)
-                except ClientError, exc:
-                    print exc
+                except ClientError as exc:
                     code = exc.response['Error']['Code']
                     if code == u'ThrottlingException':
                         time.sleep(0.5)
@@ -46,7 +45,7 @@ class AWSClient(object):
                         hint = exc.response['Error'].get('Message', 'AccessDeniedException')
                         raise exceptions.AccessDeniedError(hint)
                     raise
-                except Exception, exc:
+                except Exception:
                     raise
 
         return aws_connection_wrap
