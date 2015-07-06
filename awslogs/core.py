@@ -89,18 +89,29 @@ class AWSLogs(object):
                 yield stream
 
     def list_logs(self):
-        streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
-        max_stream_length = max([len(s) for s in streams])
+
+        def get_streams():
+            streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
+            max_stream_length = max([len(s) for s in streams]) if streams else 0
+            return streams, max_stream_length
+
         group_length = len(self.log_group_name)
-
-        print_lock = threading.Lock()
+        streams, max_stream_length = [], 0
+        self.current_page = 0
         end_condition = threading.Condition()
-        self.list_logs_end = False
+        self.list_logs_finished = False
 
-        def get_logs(token=None):
+        def get_logs(page, token=None):
+            global streams, max_stream_length
+
+            # If there is no token available, refres the list of streams
+            if not token:
+                streams, max_stream_length = get_streams()
+
             kwargs = {'logGroupName': self.log_group_name,
                       'logStreamNames': streams,
                       'interleaved': True}
+
             if self.start:
                 kwargs['startTime'] = self.start
 
@@ -113,10 +124,11 @@ class AWSLogs(object):
             response = self.client.filter_log_events(**kwargs)
 
             if 'nextToken' in response:
-                page = threading.Thread(target=functools.partial(get_logs, token=response['nextToken']))
-                page.start()
+                page_thread = threading.Thread(target=functools.partial(get_logs, page=page + 1, token=response['nextToken']))
+                page_thread.start()
 
-            print_lock.acquire()
+            while self.current_page != page:
+                time.sleep(0.1)
 
             for event in response.get('events', []):
                 output = [event['message']]
@@ -138,20 +150,25 @@ class AWSLogs(object):
                     )
                 print(' '.join(output))
 
-            print_lock.release()
+            self.current_page += 1
 
-            if 'nextToken' not in response:
+            if 'nextToken' not in response and not self.watch:
                 end_condition.acquire()
-                self.list_logs_end = True
+                self.list_logs_finished = True
                 end_condition.notify_all()
                 end_condition.release()
 
+            if self.watch:
+                time.sleep(self.WATCH_SLEEP)
+                main = threading.Thread(target=functools.partial(get_logs, page=page))
+                main.start()
+
         end_condition.acquire()
 
-        main = threading.Thread(target=get_logs)
+        main = threading.Thread(target=functools.partial(get_logs, page=0))
         main.start()
 
-        while not self.list_logs_end:
+        while not self.list_logs_finished:
             end_condition.wait()
         end_condition.release()
 
