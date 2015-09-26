@@ -34,10 +34,11 @@ class TestAWSLogs(unittest.TestCase):
     def test_parse_datetime(self, datetime_mock, botoclient):
 
         awslogs = AWSLogs()
-        datetime_mock.now.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
+        datetime_mock.utcnow.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
+        datetime_mock.return_value = datetime(1970, 1, 1)
 
         def epoch(dt):
-            return int(dt.strftime("%s")) * 1000
+            return int((dt - datetime(1970, 1, 1)).total_seconds() * 1000)
 
         self.assertEqual(awslogs.parse_datetime(''), None)
         self.assertEqual(awslogs.parse_datetime(None), None)
@@ -107,7 +108,7 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_groups(self, botoclient):
         client = Mock()
         botoclient.return_value = client
-        client.describe_log_groups.side_effect = [
+        client.get_paginator.return_value.paginate.return_value = [
             {'logGroups': [{'logGroupName': 'A'},
                            {'logGroupName': 'B'},
                            {'logGroupName': 'C'}],
@@ -122,16 +123,11 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs()
         self.assertEqual([g for g in awslogs.get_groups()], ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-        expected = [call(),
-                    call(nextToken=1),
-                    call(nextToken=2)]
-        self.assertEqual(client.describe_log_groups.call_args_list, expected)
-
     @patch('boto3.client')
     def test_get_streams(self, botoclient):
         client = Mock()
         botoclient.return_value = client
-        client.describe_log_streams.side_effect = [
+        client.get_paginator.return_value.paginate.return_value = [
             {'logStreams': [self._stream('A'),
                             self._stream('B'),
                             self._stream('C')],
@@ -146,18 +142,12 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs(log_group_name='group')
         self.assertEqual([g for g in awslogs.get_streams()], ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-        expected = [call(logGroupName="group"),
-                    call(logGroupName="group", nextToken=1),
-                    call(logGroupName="group", nextToken=2)]
-
-        self.assertEqual(client.describe_log_streams.call_args_list, expected)
-
     @patch('boto3.client')
     @patch('awslogs.core.AWSLogs.parse_datetime')
     def test_get_streams_filtered_by_date(self, parse_datetime, botoclient):
         client = Mock()
         botoclient.return_value = client
-        client.describe_log_streams.side_effect = [
+        client.get_paginator.return_value.paginate.return_value = [
             {'logStreams': [self._stream('A', 0, 1),
                             self._stream('B', 0, 6),
                             self._stream('C'),
@@ -167,7 +157,6 @@ class TestAWSLogs(unittest.TestCase):
         parse_datetime.side_effect = [5, 7]
         awslogs = AWSLogs(log_group_name='group', start='5', end='7')
         self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C'])
-        self.assertEqual(client.describe_log_streams.call_args_list, [call(logGroupName="group")])
 
     @patch('boto3.client')
     def test_get_streams_from_pattern(self, botoclient):
@@ -188,17 +177,17 @@ class TestAWSLogs(unittest.TestCase):
 
         awslogs = AWSLogs()
 
-        client.describe_log_streams.side_effect = side_effect
+        client.get_paginator.return_value.paginate.return_value = side_effect
         expected = ['AAA', 'ABA', 'ACA', 'BAA', 'BBA', 'BBB', 'CAC']
         actual = [s for s in awslogs._get_streams_from_pattern('X', 'ALL')]
         self.assertEqual(actual, expected)
 
-        client.describe_log_streams.side_effect = side_effect
+        client.get_paginator.return_value.paginate.return_value = side_effect
         expected = ['AAA', 'ABA', 'ACA']
         actual = [s for s in awslogs._get_streams_from_pattern('X', 'A')]
         self.assertEqual(actual, expected)
 
-        client.describe_log_streams.side_effect = side_effect
+        client.get_paginator.return_value.paginate.return_value = side_effect
         expected = ['AAA', 'ACA']
         actual = [s for s in awslogs._get_streams_from_pattern('X', 'A[AC]A')]
         self.assertEqual(actual, expected)
@@ -233,9 +222,16 @@ class TestAWSLogs(unittest.TestCase):
                             self._stream('EEE')]}
         ]
 
-        client.filter_log_events.side_effect = logs
-        client.describe_log_groups.side_effect = groups
-        client.describe_log_streams.side_effect = streams
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'filter_log_events': logs,
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
 
         main("awslogs get AAA DDD --no-color".split())
 
@@ -262,7 +258,7 @@ class TestAWSLogs(unittest.TestCase):
                            {'logGroupName': 'CCC'}]},
         ]
 
-        client.describe_log_groups.side_effect = groups
+        client.get_paginator.return_value.paginate.return_value = groups
 
         main("awslogs groups".split())
         self.assertEqual(
@@ -290,8 +286,15 @@ class TestAWSLogs(unittest.TestCase):
                             self._stream('EEE')]}
         ]
 
-        client.describe_log_groups.side_effect = groups
-        client.describe_log_streams.side_effect = streams
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
 
         main("awslogs streams AAA".split())
         self.assertEqual(
@@ -324,7 +327,7 @@ class TestAWSLogs(unittest.TestCase):
         botoclient.return_value = client
 
         exc = EndpointConnectionError(endpoint_url="url")
-        client.describe_log_groups.side_effect = exc
+        client.get_paginator.side_effect = exc
 
         code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 2)
@@ -337,7 +340,7 @@ class TestAWSLogs(unittest.TestCase):
         botoclient.return_value = client
 
         exc = ClientError(error_response={'Error': {'Code': 'AccessDeniedException', 'Message': 'User XXX...'}}, operation_name="operation")
-        client.describe_log_groups.side_effect = exc
+        client.get_paginator.side_effect = exc
 
         code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 4)
@@ -350,7 +353,7 @@ class TestAWSLogs(unittest.TestCase):
         botoclient.return_value = client
 
         exc = NoCredentialsError()
-        client.describe_log_groups.side_effect = exc
+        client.get_paginator.side_effect = exc
 
         code = main("awslogs groups --aws-region=eu-west-1".split())
         self.assertEqual(code, 5)
