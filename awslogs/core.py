@@ -80,8 +80,6 @@ class AWSLogs(object):
             aws_session_token=self.aws_session_token,
             region_name=self.aws_region
         )
-        import ipdb; ipdb.set_trace()
-        
 
     def _get_streams_from_pattern(self, group, pattern):
         """Returns streams in ``group`` matching ``pattern``."""
@@ -182,6 +180,7 @@ class AWSLogs(object):
 
     def parse_datetime(self, datetime_text):
         """Parse ``datetime_text`` into a ``datetime``."""
+
         if not datetime_text:
             return None
 
