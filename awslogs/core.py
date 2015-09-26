@@ -190,11 +190,10 @@ class AWSLogs(object):
             amount, unit = ago_match.groups()
             amount = int(amount)
             unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
-            date = datetime.now() + timedelta(seconds=unit * amount * -1)
+            date = datetime.utcnow() + timedelta(seconds=unit * amount * -1)
         else:
             try:
                 date = parse(datetime_text)
             except ValueError:
                 raise exceptions.UnknownDateError(datetime_text)
-
-        return int(date.strftime("%s")) * 1000
+        return int((date - datetime(1970, 1, 1)).total_seconds() * 1000)
