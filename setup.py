@@ -3,7 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
-    'boto3>=1.0.0',
+    'boto3>1.0.0',
     'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
 ]
@@ -16,6 +16,7 @@ if sys.version_info < (2, 7):
 
 # as of Python >= 3.3 unittest.mock module is maintained within Python.
 if sys.version_info < (3, 3):
+    tests_require.append('pbr>=0.11,<1.7.0')
     tests_require.append('mock>=1.0.0')
 
 setup(
