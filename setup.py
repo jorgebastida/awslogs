@@ -3,6 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
+    'botocore<=1.2.3',
     'boto3>1.0.0',
     'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
