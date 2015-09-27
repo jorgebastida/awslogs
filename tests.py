@@ -6,6 +6,7 @@ try:
 except ImportError:
     from io import StringIO
 
+from botocore.compat import total_seconds
 from botocore.client import ClientError
 from botocore.auth import NoCredentialsError
 from botocore.retryhandler import EndpointConnectionError
@@ -38,7 +39,7 @@ class TestAWSLogs(unittest.TestCase):
         datetime_mock.return_value = datetime(1970, 1, 1)
 
         def epoch(dt):
-            return int((dt - datetime(1970, 1, 1)).total_seconds() * 1000)
+            return int(total_seconds(dt - datetime(1970, 1, 1)) * 1000)
 
         self.assertEqual(awslogs.parse_datetime(''), None)
         self.assertEqual(awslogs.parse_datetime(None), None)

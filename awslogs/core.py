@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 import boto3
+from botocore.compat import total_seconds
 from botocore.client import ClientError
 from botocore.auth import NoCredentialsError
 from botocore.retryhandler import EndpointConnectionError
@@ -196,6 +197,4 @@ class AWSLogs(object):
             except ValueError:
                 raise exceptions.UnknownDateError(datetime_text)
 
-        delta = date - datetime(1970, 1, 1)
-        microseconds = (delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 1e6) / 1e6
-        return int(microseconds * 1000)
+        return int(total_seconds(date - datetime(1970, 1, 1)) * 1000)
