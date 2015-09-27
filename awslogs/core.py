@@ -195,4 +195,7 @@ class AWSLogs(object):
                 date = parse(datetime_text)
             except ValueError:
                 raise exceptions.UnknownDateError(datetime_text)
-        return int((date - datetime(1970, 1, 1)).total_seconds() * 1000)
+
+        delta = date - datetime(1970, 1, 1)
+        microseconds = (delta.microseconds + (delta.seconds + delta.days * 24 * 3600) * 1e6) / 1e6
+        return int(microseconds * 1000)
