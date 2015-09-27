@@ -3,6 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
+    'jmespath==0.7.1',
     'botocore<=1.2.3',
     'boto3>1.0.0',
     'termcolor>=1.1.0',
