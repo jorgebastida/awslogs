@@ -24,11 +24,10 @@ One of the most powerful features is to query events from several streams and co
 Features
 --------
 
-* Aggregate logs from accross streams and groups.
+* Aggregate logs from accross streams.
 
   - Aggregate all streams in a group.
   - Aggregate streams matching a regular expression.
-  - Filter both groups and streams using regular expressions.
 
 * Colored output.
 * List existing groups
@@ -72,7 +71,7 @@ Options
 
 * ``awslogs groups``: List existing groups
 * ``awslogs streams GROUP``: List existing streams withing ``GROUP``
-* ``awslogs get [GROUP_EXPRESSION [STREAM_EXPRESSION]]``: Get logs matching ``GROUP_EXPRESSION`` and ``STREAM_EXPRESSION``
+* ``awslogs get [GROUP [STREAM_EXPRESSION]]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
 
