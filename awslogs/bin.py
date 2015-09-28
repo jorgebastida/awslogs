@@ -4,6 +4,7 @@ import signal
 import argparse
 
 import boto3
+from botocore.client import ClientError
 from termcolor import colored
 
 from . import exceptions
@@ -126,6 +127,13 @@ def main(argv=None):
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
+    except ClientError as exc:
+        code = exc.response['Error']['Code']
+        if code in (u'AccessDeniedException', u'ExpiredTokenException'):
+            hint = exc.response['Error'].get('Message', 'AccessDeniedException')
+            sys.stderr.write(colored("{0}\n".format(hint), "yellow"))
+            return 4
+        raise
     except exceptions.BaseAWSLogsException as exc:
         sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
         return exc.code

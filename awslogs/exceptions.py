@@ -22,14 +22,6 @@ class UnknownDateError(BaseAWSLogsException):
         return "awslogs doesn't understand '{0}' as a date.".format(self.args[0])
 
 
-class AccessDeniedError(BaseAWSLogsException):
-
-    code = 4
-
-    def hint(self):
-        return self.args[0]
-
-
 class NoAuthHandlerFoundError(BaseAWSLogsException):
 
     code = 5
