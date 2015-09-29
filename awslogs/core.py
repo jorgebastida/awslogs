@@ -1,6 +1,8 @@
 import re
 import sys
 import time
+from Queue import Queue
+from threading import Thread
 from datetime import datetime, timedelta
 
 import boto3
@@ -55,10 +57,9 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
-    def get_logs(self):
-
+    def list_logs(self):
         streams = []
-        if self.log_stream_name != self.ALL_WILDCARD:
+        if self.log_stream_name != self.ALL_WILDCARD or True:
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
@@ -70,17 +71,7 @@ class AWSLogs(object):
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)
 
-        kwargs = {'logGroupName': self.log_group_name,
-                  'interleaved': True}
-
-        if streams:
-            kwargs['logStreamNames'] = streams
-
-        if self.start:
-            kwargs['startTime'] = self.start
-
-        if self.end:
-            kwargs['endTime'] = self.end
+        queue = Queue()
 
         # Note: filter_log_events paginator is broken
         # Error during pagination: The same next token was received twice
@@ -88,9 +79,11 @@ class AWSLogs(object):
         #for page in paginator.paginate(**kwargs):
         #    for event in page.get('events', []):
 
-        while True:
-            response = self.client.filter_log_events(**kwargs)
-            for event in response.get('events', []):
+        def consumer():
+            while True:
+                event = queue.get()
+                if event is None:
+                    break
                 output = [event['message']]
                 if self.output_stream_enabled:
                     output.insert(
@@ -108,16 +101,42 @@ class AWSLogs(object):
                             'green'
                         )
                     )
-                yield ' '.join(output)
+                print ' '.join(output)
 
-            if 'nextToken' in response:
-                kwargs['nextToken']= response['nextToken']
-            else:
-                break
+        def generator():
+            kwargs = {'logGroupName': self.log_group_name,
+                      'interleaved': True}
 
-    def list_logs(self):
-        for event in self.get_logs():
-            print(event)
+            if streams:
+                kwargs['logStreamNames'] = streams
+
+            if self.start:
+                kwargs['startTime'] = self.start
+
+            if self.end:
+                kwargs['endTime'] = self.end
+
+            while True:
+                response = self.client.filter_log_events(**kwargs)
+                for event in response.get('events', []):
+                    queue.put(event)
+
+                if 'nextToken' in response:
+                    kwargs['nextToken']= response['nextToken']
+                else:
+                    queue.put(None)
+                    break
+
+        g = Thread(target=generator)
+        g.daemon = True
+        g.start()
+
+        c = Thread(target=consumer)
+        c.daemon = True
+        c.start()
+
+        g.join()
+        c.join()
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
