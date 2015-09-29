@@ -82,9 +82,15 @@ class AWSLogs(object):
         if self.end:
             kwargs['endTime'] = self.end
 
-        paginator = self.client.get_paginator('filter_log_events')
-        for page in paginator.paginate(**kwargs):
-            for event in page.get('events', []):
+        # Note: filter_log_events paginator is broken
+        # Error during pagination: The same next token was received twice
+        #paginator = self.client.get_paginator('filter_log_events')
+        #for page in paginator.paginate(**kwargs):
+        #    for event in page.get('events', []):
+
+        while True:
+            response = self.client.filter_log_events(**kwargs)
+            for event in response.get('events', []):
                 output = [event['message']]
                 if self.output_stream_enabled:
                     output.insert(
@@ -103,6 +109,11 @@ class AWSLogs(object):
                         )
                     )
                 yield ' '.join(output)
+
+            if 'nextToken' in response:
+                kwargs['nextToken']= response['nextToken']
+            else:
+                break
 
     def list_logs(self):
         for event in self.get_logs():
