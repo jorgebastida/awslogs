@@ -200,13 +200,13 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs()
 
         logs = [
-            {'events': [{'timestamp': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
-                        {'timestamp': 2, 'message': 'Hello 2', 'logStreamName': 'EEE'},
-                        {'timestamp': 3, 'message': 'Hello 3', 'logStreamName': 'DDD'}],
+            {'events': [{'eventId': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
+                        {'eventId': 2, 'message': 'Hello 2', 'logStreamName': 'EEE'},
+                        {'eventId': 3, 'message': 'Hello 3', 'logStreamName': 'DDD'}],
              'nextToken': 'token'},
-            {'events': [{'timestamp': 4, 'message': 'Hello 4', 'logStreamName': 'EEE'},
-                        {'timestamp': 5, 'message': 'Hello 5', 'logStreamName': 'DDD'},
-                        {'timestamp': 6, 'message': 'Hello 6', 'logStreamName': 'EEE'}],
+            {'events': [{'eventId': 4, 'message': 'Hello 4', 'logStreamName': 'EEE'},
+                        {'eventId': 5, 'message': 'Hello 5', 'logStreamName': 'DDD'},
+                        {'eventId': 6, 'message': 'Hello 6', 'logStreamName': 'EEE'}],
              'nextToken': 'token'},
             {'events': []}
         ]
@@ -242,6 +242,55 @@ class TestAWSLogs(unittest.TestCase):
              "AAA EEE Hello 4\n"
              "AAA DDD Hello 5\n"
              "AAA EEE Hello 6\n")
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_get_deduplication(self, mock_stdout, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+        awslogs = AWSLogs()
+
+        logs = [
+            {'events': [{'eventId': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
+                        {'eventId': 2, 'message': 'Hello 2', 'logStreamName': 'EEE'},
+                        {'eventId': 3, 'message': 'Hello 3', 'logStreamName': 'DDD'}],
+             'nextToken': 'token'},
+            {'events': [{'eventId': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
+                        {'eventId': 2, 'message': 'Hello 2', 'logStreamName': 'EEE'},
+                        {'eventId': 3, 'message': 'Hello 3', 'logStreamName': 'DDD'}],
+             'nextToken': 'token'},
+            {'events': []}
+        ]
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'},
+                           {'logGroupName': 'BBB'},
+                           {'logGroupName': 'CCC'}]},
+        ]
+
+        streams = [
+            {'logStreams': [self._stream('DDD'),
+                            self._stream('EEE')]}
+        ]
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+        client.filter_log_events.side_effect = logs
+        main("awslogs get AAA DDD --no-color".split())
+
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("AAA DDD Hello 1\n"
+             "AAA EEE Hello 2\n"
+             "AAA DDD Hello 3\n")
         )
 
     @patch('boto3.client')
