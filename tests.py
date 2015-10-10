@@ -9,7 +9,6 @@ except ImportError:
 from botocore.compat import total_seconds
 from botocore.client import ClientError
 from botocore.auth import NoCredentialsError
-from botocore.retryhandler import EndpointConnectionError
 
 from termcolor import colored
 
@@ -19,7 +18,7 @@ except ImportError:
     from unittest.mock import patch, Mock, call
 
 from awslogs import AWSLogs
-from awslogs.exceptions import UnknownDateError, ConnectionError
+from awslogs.exceptions import UnknownDateError
 from awslogs.bin import main
 
 
@@ -226,14 +225,13 @@ class TestAWSLogs(unittest.TestCase):
         def paginator(value):
             mock = Mock()
             mock.paginate.return_value = {
-                'filter_log_events': logs,
                 'describe_log_groups': groups,
                 'describe_log_streams': streams
             }.get(value)
             return mock
 
         client.get_paginator.side_effect = paginator
-
+        client.filter_log_events.side_effect = logs
         main("awslogs get AAA DDD --no-color".split())
 
         self.assertEqual(
@@ -320,46 +318,3 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
-
-    @patch('boto3.client')
-    @patch('sys.stderr', new_callable=StringIO)
-    def test_connection_error(self, mock_stderr, botoclient):
-        client = Mock()
-        botoclient.return_value = client
-
-        exc = EndpointConnectionError(endpoint_url="url")
-        client.get_paginator.side_effect = exc
-
-        code = main("awslogs groups --aws-region=eu-west-1".split())
-        self.assertEqual(code, 2)
-        self.assertEqual(mock_stderr.getvalue(), colored("Could not connect to the endpoint URL: \"url\"\n", "red"))
-
-    @patch('boto3.client')
-    @patch('sys.stderr', new_callable=StringIO)
-    def test_access_denied_error(self, mock_stderr, botoclient):
-        client = Mock()
-        botoclient.return_value = client
-
-        exc = ClientError(error_response={'Error': {'Code': 'AccessDeniedException', 'Message': 'User XXX...'}}, operation_name="operation")
-        client.get_paginator.side_effect = exc
-
-        code = main("awslogs groups --aws-region=eu-west-1".split())
-        self.assertEqual(code, 4)
-        self.assertEqual(mock_stderr.getvalue(), colored("User XXX...\n", "red"))
-
-    @patch('boto3.client')
-    @patch('sys.stderr', new_callable=StringIO)
-    def test_no_credentials_error(self, mock_stderr, botoclient):
-        client = Mock()
-        botoclient.return_value = client
-
-        exc = NoCredentialsError()
-        client.get_paginator.side_effect = exc
-
-        code = main("awslogs groups --aws-region=eu-west-1".split())
-        self.assertEqual(code, 5)
-        self.assertEqual(mock_stderr.getvalue(), colored("""Unable to locate credentials
-Check that you have provided valid credentials in one of the following ways:
-* AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY environment variables.
-* ~/.aws/credentials
-* Instance profile credentials\n""", "red"))
