@@ -1,10 +1,13 @@
 import re
 import sys
 import time
-from Queue import Queue
 from threading import Thread, Event
 from datetime import datetime, timedelta
 from collections import deque
+try:
+    from Queue import Queue
+except ImportError:
+    from queue import Queue
 
 import boto3
 from botocore.compat import total_seconds
