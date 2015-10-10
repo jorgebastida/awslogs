@@ -103,7 +103,7 @@ class AWSLogs(object):
                             'green'
                         )
                     )
-                print ' '.join(output)
+                print(' '.join(output))
 
         def generator():
             """Push events into queue trying to deduplicate them using a lru queue.
@@ -160,7 +160,7 @@ class AWSLogs(object):
                 time.sleep(.1)
         except (KeyboardInterrupt, SystemExit):
             exit.set()
-            print 'You pressed Ctrl+C!\n'
+            print('You pressed Ctrl+C!\n')
             g.join()
             c.join()
 
