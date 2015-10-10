@@ -59,7 +59,7 @@ class AWSLogs(object):
 
     def list_logs(self):
         streams = []
-        if self.log_stream_name != self.ALL_WILDCARD or True:
+        if self.log_stream_name != self.ALL_WILDCARD:
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
@@ -192,4 +192,4 @@ class AWSLogs(object):
             except ValueError:
                 raise exceptions.UnknownDateError(datetime_text)
 
-        return int(total_seconds(date - datetime(1970, 1, 1)) * 1000)
+        return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
