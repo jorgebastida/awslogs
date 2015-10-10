@@ -1,2 +1,2 @@
-from core import __version__
-from core import AWSLogs
+from .core import __version__
+from .core import AWSLogs

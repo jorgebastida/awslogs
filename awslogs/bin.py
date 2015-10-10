@@ -1,26 +1,16 @@
-from gevent import monkey
-monkey.patch_all(thread=False)
-
 import os
 import sys
-import signal
 import argparse
 
-import boto
+import boto3
+from botocore.client import ClientError
 from termcolor import colored
 
-import exceptions
-from core import AWSLogs
+from . import exceptions
+from .core import AWSLogs
 
 
-__version__ = "0.0.3"
-
-
-def keyboard_signal_handler(signal, frame):
-    print 'You pressed Ctrl+C!'
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, keyboard_signal_handler)
+__version__ = "0.1.0"
 
 
 def main(argv=None):
@@ -32,31 +22,37 @@ def main(argv=None):
     def add_common_arguments(parser):
         parser.add_argument("--aws-access-key-id",
                             dest="aws_access_key_id",
-                            type=unicode,
-                            default=os.environ.get('AWS_ACCESS_KEY_ID', None),
+                            type=str,
+                            default=None,
                             help="aws access key id")
 
         parser.add_argument("--aws-secret-access-key",
                             dest="aws_secret_access_key",
-                            type=unicode,
-                            default=os.environ.get('AWS_SECRET_ACCESS_KEY', None),
+                            type=str,
+                            default=None,
                             help="aws secret access key")
+
+        parser.add_argument("--aws-session-token",
+                            dest="aws_session_token",
+                            type=str,
+                            default=None,
+                            help="aws session token")
 
         parser.add_argument("--aws-region",
                             dest="aws_region",
-                            type=unicode,
+                            type=str,
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
 
     def add_date_range_arguments(parser):
         parser.add_argument("-s", "--start",
-                                type=unicode,
+                                type=str,
                                 dest='start',
                                 default='24h',
                                 help="Start time")
 
         parser.add_argument("-e", "--end",
-                                type=unicode,
+                                type=str,
                                 dest='end',
                                 help="End time")
 
@@ -69,13 +65,13 @@ def main(argv=None):
 
 
     get_parser.add_argument("log_group_name",
-                            type=unicode,
+                            type=str,
                             default="ALL",
                             nargs='?',
                             help="log group name")
 
     get_parser.add_argument("log_stream_name",
-                            type=unicode,
+                            type=str,
                             default="ALL",
                             nargs='?',
                             help="log stream name")
@@ -114,7 +110,7 @@ def main(argv=None):
     add_date_range_arguments(streams_parser)
 
     streams_parser.add_argument("log_group_name",
-                                type=unicode,
+                                type=str,
                                 help="log group name")
 
     # Parse input
@@ -123,7 +119,14 @@ def main(argv=None):
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
-    except exceptions.BaseAWSLogsException, exc:
+    except ClientError as exc:
+        code = exc.response['Error']['Code']
+        if code in (u'AccessDeniedException', u'ExpiredTokenException'):
+            hint = exc.response['Error'].get('Message', 'AccessDeniedException')
+            sys.stderr.write(colored("{0}\n".format(hint), "yellow"))
+            return 4
+        raise
+    except exceptions.BaseAWSLogsException as exc:
         sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
         return exc.code
     except Exception:
@@ -132,6 +135,7 @@ def main(argv=None):
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
         options['aws_secret_access_key'] = 'SENSITIVE'
+        options['aws_session_token'] = 'SENSITIVE'
         sys.stderr.write("\n")
         sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
@@ -140,7 +144,7 @@ def main(argv=None):
         sys.stderr.write("\n")
         sys.stderr.write("Version: {0}\n".format(__version__))
         sys.stderr.write("Python: {0}\n".format(sys.version))
-        sys.stderr.write("boto version: {0}\n".format(boto.__version__))
+        sys.stderr.write("boto3 version: {0}\n".format(boto3.__version__))
         sys.stderr.write("Platform: {0}\n".format(platform.platform()))
         sys.stderr.write("Config: {0}\n".format(options))
         sys.stderr.write("Args: {0}\n\n".format(sys.argv))
