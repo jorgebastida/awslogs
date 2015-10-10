@@ -2,7 +2,7 @@ import re
 import sys
 import time
 from Queue import Queue
-from threading import Thread
+from threading import Thread, Event
 from datetime import datetime, timedelta
 
 import boto3
@@ -71,19 +71,19 @@ class AWSLogs(object):
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)
 
-        queue = Queue()
+        queue, exit = Queue(), Event()
 
         # Note: filter_log_events paginator is broken
-        # Error during pagination: The same next token was received twice
-        #paginator = self.client.get_paginator('filter_log_events')
-        #for page in paginator.paginate(**kwargs):
-        #    for event in page.get('events', []):
+        # ! Error during pagination: The same next token was received twice
 
         def consumer():
-            while True:
+            while not exit.is_set():
                 event = queue.get()
+
                 if event is None:
+                    exit.set()
                     break
+
                 output = [event['message']]
                 if self.output_stream_enabled:
                     output.insert(
@@ -116,7 +116,7 @@ class AWSLogs(object):
             if self.end:
                 kwargs['endTime'] = self.end
 
-            while True:
+            while not exit.is_set():
                 response = self.client.filter_log_events(**kwargs)
                 for event in response.get('events', []):
                     queue.put(event)
@@ -128,15 +128,19 @@ class AWSLogs(object):
                     break
 
         g = Thread(target=generator)
-        g.daemon = True
         g.start()
 
         c = Thread(target=consumer)
-        c.daemon = True
         c.start()
 
-        g.join()
-        c.join()
+        try:
+            while not exit.is_set():
+                time.sleep(.1)
+        except (KeyboardInterrupt, SystemExit):
+            exit.set()
+            print 'You pressed Ctrl+C!\n'
+            g.join()
+            c.join()
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""

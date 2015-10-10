@@ -1,6 +1,5 @@
 import os
 import sys
-import signal
 import argparse
 
 import boto3
@@ -12,13 +11,6 @@ from .core import AWSLogs
 
 
 __version__ = "0.1.0"
-
-
-def keyboard_signal_handler(signal, frame):
-    print('You pressed Ctrl+C!')
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, keyboard_signal_handler)
 
 
 def main(argv=None):
