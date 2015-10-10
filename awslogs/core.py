@@ -4,6 +4,7 @@ import time
 from Queue import Queue
 from threading import Thread, Event
 from datetime import datetime, timedelta
+from collections import deque
 
 import boto3
 from botocore.compat import total_seconds
@@ -26,6 +27,7 @@ class AWSLogs(object):
     WATCH_SLEEP = 2
 
     FILTER_LOG_EVENTS_STREAMS_LIMIT = 100
+    MAX_EVENTS_PER_CALL = 10000
     ALL_WILDCARD = 'ALL'
 
     def __init__(self, **kwargs):
@@ -104,6 +106,20 @@ class AWSLogs(object):
                 print ' '.join(output)
 
         def generator():
+            """Push events into queue trying to deduplicate them using a lru queue.
+            AWS API stands for the interleaved parameter that:
+                interleaved (boolean) -- If provided, the API will make a best
+                effort to provide responses that contain events from multiple
+                log streams within the log group interleaved in a single
+                response. That makes some responses return some subsequent
+                response duplicate events. In a similar way when awslogs is
+                called with --watch option, we need to findout which events we
+                have alredy put in the queue in order to not do it several
+                times while waiting for new ones and reusing the same
+                next_token. The site of this queue is MAX_EVENTS_PER_CALL in
+                order to not exhaust the memory.
+            """
+            interleaving_sanity = deque(maxlen=self.MAX_EVENTS_PER_CALL)
             kwargs = {'logGroupName': self.log_group_name,
                       'interleaved': True}
 
@@ -118,14 +134,20 @@ class AWSLogs(object):
 
             while not exit.is_set():
                 response = self.client.filter_log_events(**kwargs)
+
                 for event in response.get('events', []):
-                    queue.put(event)
+                    if event['eventId'] not in interleaving_sanity:
+                        interleaving_sanity.append(event['eventId'])
+                        queue.put(event)
 
                 if 'nextToken' in response:
                     kwargs['nextToken']= response['nextToken']
                 else:
-                    queue.put(None)
-                    break
+                    if self.watch:
+                        time.sleep(1)
+                    else:
+                        queue.put(None)
+                        break
 
         g = Thread(target=generator)
         g.start()
