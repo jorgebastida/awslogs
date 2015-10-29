@@ -10,7 +10,7 @@ from . import exceptions
 from .core import AWSLogs
 
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 
 def main(argv=None):

@@ -3,9 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 install_requires = [
-    'jmespath==0.7.1',
-    'botocore<=1.2.3',
-    'boto3>1.0.0',
+    'boto3>=1.2.1',
     'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
 ]
@@ -23,7 +21,7 @@ if sys.version_info < (3, 3):
 
 setup(
     name='awslogs',
-    version='0.1.0',
+    version='0.1.1',
     url='http://github.com/jorgebastida/awslogs',
     license='BSD',
     author='Jorge Bastida',

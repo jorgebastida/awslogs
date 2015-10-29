@@ -1,3 +1,7 @@
+0.1.1
+=====
+* Fix dependecies so installing awslogs from pypi works again.
+
 0.1.0
 =====
 * awslogs now use ``boto3`` instead of ``boto2``.
