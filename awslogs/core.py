@@ -1,5 +1,6 @@
 import re
 import sys
+import os
 import time
 from threading import Thread, Event
 from datetime import datetime, timedelta
@@ -163,9 +164,9 @@ class AWSLogs(object):
                 time.sleep(.1)
         except (KeyboardInterrupt, SystemExit):
             exit.set()
-            print('You pressed Ctrl+C!\n')
-            g.join()
-            c.join()
+            print('Closing...\n')
+            os._exit(0)
+            
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
