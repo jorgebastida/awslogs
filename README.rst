@@ -69,6 +69,8 @@ If you are on OSX El Capitan, use the following::
 
   $ pip install awslogs --ignore-installed six
 
+Why? Check Donald Stufft's comment `here <pip/issues/3165#issuecomment-145856429>'_
+
 Options
 -------
 
