@@ -1,3 +1,8 @@
+0.1.2
+=====
+* Add some documentation about installing awslogs in "El Capitan"
+* Fix #21 - Problems to stop awslogs when pressing Ctrl+C.
+
 0.1.1
 =====
 * Fix dependecies so installing awslogs from pypi works again.
