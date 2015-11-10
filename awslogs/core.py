@@ -166,7 +166,7 @@ class AWSLogs(object):
             exit.set()
             print('Closing...\n')
             os._exit(0)
-            
+
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
@@ -189,7 +189,7 @@ class AWSLogs(object):
         """Returns available CloudWatch logs streams in ``log_group_name``."""
         kwargs = {'logGroupName': log_group_name or self.log_group_name}
         window_start = self.start or 0
-        window_end = self.end or sys.maxsize
+        window_end = self.end or sys.float_info.max
 
         paginator = self.client.get_paginator('describe_log_streams')
         for page in paginator.paginate(**kwargs):
