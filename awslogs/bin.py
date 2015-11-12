@@ -91,6 +91,11 @@ def main(argv=None):
                             dest='output_stream_enabled',
                             help="Add stream to the output")
 
+    get_parser.add_argument("--no-time",
+                            action='store_false',
+                            dest='output_time_enabled',
+                            help="Add time to the output")
+
     add_date_range_arguments(get_parser)
 
     get_parser.add_argument("--no-color",
