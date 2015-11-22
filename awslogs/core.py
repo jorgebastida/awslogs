@@ -41,6 +41,7 @@ class AWSLogs(object):
         self.aws_session_token = kwargs.get('aws_session_token')
         self.log_group_name = kwargs.get('log_group_name')
         self.log_stream_name = kwargs.get('log_stream_name')
+        self.filter_pattern = kwargs.get('filter_pattern')
         self.watch = kwargs.get('watch')
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
@@ -136,6 +137,9 @@ class AWSLogs(object):
             if self.end:
                 kwargs['endTime'] = self.end
 
+            if self.filter_pattern:
+                kwargs['filterPattern'] = self.filter_pattern
+
             while not exit.is_set():
                 response = self.client.filter_log_events(**kwargs)
 
@@ -166,7 +170,7 @@ class AWSLogs(object):
             exit.set()
             print('Closing...\n')
             os._exit(0)
-            
+
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
