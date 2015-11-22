@@ -122,6 +122,19 @@ While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`
 
 * All previous examples are applicable for  ``--end`` ``-e`` too.
 
+Filter options
+----------------
+
+You can use ``--filter-pattern`` if you want to only retrieve logs which match one CloudWatch Logs Filter pattern.
+This is helpful if you know precisely what you are looking for, and don't want to download the entire stream.
+
+For example, if you only want to download only the report events from a Lambda stream you can run::
+
+  $ awslogs get my_lambda_group --filter-pattern="[r=REPORT,...]"
+
+
+Full documentation of how to write patterns: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/FilterAndPatternSyntax.html
+
 
 Contribute
 -----------
