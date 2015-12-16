@@ -194,6 +194,12 @@ class AWSLogs(object):
         paginator = self.client.get_paginator('describe_log_streams')
         for page in paginator.paginate(**kwargs):
             for stream in page.get('logStreams', []):
+                if 'firstEventTimestamp' not in stream:
+                    # This is a specified log stream rather than
+                    # a filter on the whole log group, so there's
+                    #no firstEventTimestamp.
+                    yield stream['logStreamName']
+                    continue
                 if max(stream['firstEventTimestamp'], window_start) <= \
                    min(stream['lastEventTimestamp'], window_end):
                     yield stream['logStreamName']
