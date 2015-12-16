@@ -118,6 +118,9 @@ def main(argv=None):
 
     try:
         logs = AWSLogs(**vars(options))
+        if not hasattr(options, 'func'):
+            parser.print_help()
+            return 1
         getattr(logs, options.func)()
     except ClientError as exc:
         code = exc.response['Error']['Code']
