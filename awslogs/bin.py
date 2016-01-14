@@ -10,7 +10,7 @@ from . import exceptions
 from .core import AWSLogs
 
 
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 
 def main(argv=None):
@@ -75,6 +75,12 @@ def main(argv=None):
                             default="ALL",
                             nargs='?',
                             help="log stream name")
+
+    get_parser.add_argument("--filter-pattern",
+                            dest='filter_pattern',
+                            help=("A valid CloudWatch Logs filter pattern to "
+                                  "use for filtering the response. If not "
+                                  "provided, all the events are matched."))
 
     get_parser.add_argument("--watch",
                             action='store_true',
