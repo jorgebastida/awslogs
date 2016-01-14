@@ -157,7 +157,7 @@ Helpful Links
 How to provide AWS credentials to awslogs
 ------------------------------------------
 
-Although, the most straightforward thing to do might be use ``--aws-access-key-id`` and ``--aws-secret-access-key`` this will eventually become a pain in the ass.
+Although, the most straightforward thing to do might be use ``--aws-access-key-id`` and ``--aws-secret-access-key`` or ``--profile``, this will eventually become a pain in the ass.
 
 * If you only have one ``AWS`` account, my personal recommendation would be to configure `aws-cli <http://aws.amazon.com/cli/>`_. ``awslogs`` will use those credentials if available.
 * If you have multiple ``AWS`` accounts or you don't want to setup ``aws-cli``, I would recommend you to use `envdir <https://pypi.python.org/pypi/envdir>`_ in order to make ``AWS_ACCESS_KEY_ID`` and ``AWS_SECRET_ACCESS_KEY`` available to ``awslogs``.

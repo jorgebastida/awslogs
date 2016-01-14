@@ -38,6 +38,12 @@ def main(argv=None):
                             default=None,
                             help="aws session token")
 
+        parser.add_argument("--profile",
+                            dest="aws_profile",
+                            type=str,
+                            default=None,
+                            help="aws profile")
+
         parser.add_argument("--aws-region",
                             dest="aws_region",
                             type=str,
@@ -122,6 +128,12 @@ def main(argv=None):
     # Parse input
     options, args = parser.parse_known_args(argv)
 
+    # Workaround the fact that boto3 don't allow you to specify a profile
+    # when you instantiate the a client. We need --profile because that's
+    # the api people are use to with aws-cli.
+    if options.aws_profile:
+        os.environ['AWS_PROFILE'] = option.aws_profile
+
     try:
         logs = AWSLogs(**vars(options))
         getattr(logs, options.func)()
@@ -142,6 +154,7 @@ def main(argv=None):
         options['aws_access_key_id'] = 'SENSITIVE'
         options['aws_secret_access_key'] = 'SENSITIVE'
         options['aws_session_token'] = 'SENSITIVE'
+        options['aws_profile'] = 'SENSITIVE'
         sys.stderr.write("\n")
         sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
