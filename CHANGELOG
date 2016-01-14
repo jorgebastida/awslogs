@@ -1,9 +1,10 @@
 0.2.0
 =====
-* Add ``--filter-pattern`` option. @28
+* Add ``--filter-pattern`` option. #28
 * Fix issue with --end default value in  Windows 10 x64. #24
 * Added support for ``--profile`` #29
 * Fix argparse error in Python 3. #31
+* Fix some filtering stream issues #32
 
 0.1.2
 =====
