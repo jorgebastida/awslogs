@@ -5,6 +5,7 @@
 * Added support for ``--profile`` #29
 * Fix argparse error in Python 3. #31
 * Fix some filtering stream issues #32
+* Default value for ``--start`` is now 5 minutes instead of 24h.
 
 0.1.2
 =====

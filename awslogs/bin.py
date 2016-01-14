@@ -54,7 +54,7 @@ def main(argv=None):
         parser.add_argument("-s", "--start",
                                 type=str,
                                 dest='start',
-                                default='24h',
+                                default='5m',
                                 help="Start time")
 
         parser.add_argument("-e", "--end",
