@@ -201,11 +201,10 @@ class AWSLogs(object):
                 if 'firstEventTimestamp' not in stream:
                     # This is a specified log stream rather than
                     # a filter on the whole log group, so there's
-                    #no firstEventTimestamp.
+                    # no firstEventTimestamp.
                     yield stream['logStreamName']
-                    continue
-                if max(stream['firstEventTimestamp'], window_start) <= \
-                   min(stream['lastEventTimestamp'], window_end):
+                elif max(stream['firstEventTimestamp'], window_start) <= \
+                     min(stream['lastEventTimestamp'], window_end):
                     yield stream['logStreamName']
 
     def color(self, text, color):
