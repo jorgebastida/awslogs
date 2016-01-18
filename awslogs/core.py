@@ -46,6 +46,7 @@ class AWSLogs(object):
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
+        self.output_time_enabled = kwargs.get('output_time_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
@@ -92,6 +93,16 @@ class AWSLogs(object):
                     break
 
                 output = [event['message']]
+                if self.output_time_enabled:
+                    ts = event['timestamp']
+                    t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(ts / 1000))
+                    output.insert(
+                        0,
+                        self.color(
+                            '%s.%03d' % (t, ts % 1000),
+                            'magenta'
+                        )
+                    )
                 if self.output_stream_enabled:
                     output.insert(
                         0,
