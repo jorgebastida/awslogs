@@ -25,7 +25,8 @@ __version__ = '0.1.0'
 
 
 def milis2iso(milis):
-    return datetime.utcfromtimestamp(milis/1000.0).isoformat()[:23] + 'Z'
+    res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
+    return (res + ".000")[:23] + 'Z'
 
 
 class AWSLogs(object):
