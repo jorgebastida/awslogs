@@ -1,18 +1,13 @@
 language: python
-python:
-  - "3.4"
-  - "3.3"
-  - "2.7"
-  - "2.6"
-
+python: 2.7
+env:
+ - TOX_ENV=py34
+ - TOX_ENV=py33
+ - TOX_ENV=py27
+ - TOX_ENV=py26
 install:
-  - pip install coveralls
-
+ - pip install tox
 script:
-  - coverage run --source=awslogs setup.py test
-  - python setup.py install
-  - which awslogs
-  - awslogs --help
-
+ - tox -e $TOX_ENV -- --cov-report html --cov=awslogs --no-cov-on-fail
 after_success:
   coveralls
