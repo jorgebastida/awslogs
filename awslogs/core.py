@@ -12,9 +12,6 @@ except ImportError:
 
 import boto3
 from botocore.compat import total_seconds
-from botocore.client import ClientError
-from botocore.auth import NoCredentialsError
-from botocore.retryhandler import EndpointConnectionError
 
 from termcolor import colored
 from dateutil.parser import parse

@@ -7,15 +7,13 @@ except ImportError:
     from io import StringIO
 
 from botocore.compat import total_seconds
-from botocore.client import ClientError
-from botocore.auth import NoCredentialsError
 
 from termcolor import colored
 
 try:
-    from mock import patch, Mock, call
+    from mock import patch, Mock
 except ImportError:
-    from unittest.mock import patch, Mock, call
+    from unittest.mock import patch, Mock
 
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
@@ -197,7 +195,7 @@ class TestAWSLogs(unittest.TestCase):
     def test_main_get(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client
-        awslogs = AWSLogs()
+        AWSLogs()
 
         logs = [
             {'events': [{'eventId': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
@@ -249,7 +247,7 @@ class TestAWSLogs(unittest.TestCase):
     def test_main_get_deduplication(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client
-        awslogs = AWSLogs()
+        AWSLogs()
 
         logs = [
             {'events': [{'eventId': 1, 'message': 'Hello 1', 'logStreamName': 'DDD'},
@@ -298,7 +296,7 @@ class TestAWSLogs(unittest.TestCase):
     def test_main_groups(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client
-        awslogs = AWSLogs()
+        AWSLogs()
 
         groups = [
             {'logGroups': [{'logGroupName': 'AAA'},
@@ -321,7 +319,7 @@ class TestAWSLogs(unittest.TestCase):
     def test_main_streams(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client
-        awslogs = AWSLogs()
+        AWSLogs()
 
         groups = [
             {'logGroups': [{'logGroupName': 'AAA'},

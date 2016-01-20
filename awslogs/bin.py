@@ -132,7 +132,7 @@ def main(argv=None):
     # when you instantiate the a client. We need --profile because that's
     # the api people are use to with aws-cli.
     if options.aws_profile:
-        os.environ['AWS_PROFILE'] = option.aws_profile
+        os.environ['AWS_PROFILE'] = options.aws_profile
 
     try:
         logs = AWSLogs(**vars(options))
