@@ -6,13 +6,15 @@ python:
   - "2.6"
 
 install:
-  - pip install coveralls
+  - pip install coveralls frosted
 
 script:
   - coverage run --source=awslogs setup.py test
   - python setup.py install
   - which awslogs
   - awslogs --help
+  - frosted -r awslogs
+
 
 after_success:
   coveralls
