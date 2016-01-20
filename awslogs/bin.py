@@ -91,24 +91,24 @@ def main(argv=None):
     get_parser.add_argument("--watch",
                             action='store_true',
                             dest='watch',
-                            help="Pool for new log lines constantly")
+                            help="Query for new log lines constantly")
 
     get_parser.add_argument("--no-group",
                             action='store_false',
                             dest='output_group_enabled',
-                            help="Add group to the output")
+                            help="Do not display group")
 
     get_parser.add_argument("--no-stream",
                             action='store_false',
                             dest='output_stream_enabled',
-                            help="Add stream to the output")
+                            help="Do not display stream name")
 
     add_date_range_arguments(get_parser)
 
     get_parser.add_argument("--no-color",
                             action='store_false',
                             dest='color_enabled',
-                            help="Color output")
+                            help="Do not color output")
 
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
