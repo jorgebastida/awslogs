@@ -142,9 +142,11 @@ Contribute
 * Fork the repository on GitHub.
 * Write a test which shows that the bug was fixed or that the feature works as expected.
 
-  - Use ``python setup.py test``
+  - Use ``tox`` command to run all the tests in all locally available python version.
 
-* Send a pull request and bug the maintainer until it gets merged and published. :) Make sure to add yourself to AUTHORS.
+* Send a pull request and bug the maintainer until it gets merged and published. :).
+
+For more instructions see `TESTING.rst`.
 
 
 Helpful Links
