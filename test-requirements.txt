@@ -1,2 +1,3 @@
+coverage
 mock>=1.0.0; python_version<='3.3'
 pytest
