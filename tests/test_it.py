@@ -229,6 +229,31 @@ class TestAWSLogs(unittest.TestCase):
     def test_main_get(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get AAA DDD --no-color".split())
+        output = mock_stdout.getvalue()
+        expected = ("AAA DDD Hello 1\n"
+                    "AAA EEE Hello 2\n"
+                    "AAA DDD Hello 3\n"
+                    "AAA EEE Hello 4\n"
+                    "AAA DDD Hello 5\n"
+                    "AAA EEE Hello 6\n"
+                    )
+        assert output == expected
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_get_with_color(self, mock_stdout, botoclient):
+        self.set_ABCDE_logs(botoclient)
+        main("awslogs get AAA DDD".split())
+        output = mock_stdout.getvalue()
+        expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 1\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 2\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 3\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 4\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 5\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 6\n"
+                    )
+
+        assert output == expected
 
     @patch('boto3.client')
     @patch('sys.stdout', new_callable=StringIO)
@@ -403,3 +428,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_help(self, mock_stderr):
+        self.assertRaises(SystemExit, main, "awslogs --help".split())
