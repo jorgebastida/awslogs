@@ -21,8 +21,6 @@ from dateutil.parser import parse
 
 from . import exceptions
 
-__version__ = '0.1.0'
-
 
 class AWSLogs(object):
 

@@ -432,3 +432,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stderr', new_callable=StringIO)
     def test_help(self, mock_stderr):
         self.assertRaises(SystemExit, main, "awslogs --help".split())
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_version(self, mock_stderr):
+        self.assertRaises(SystemExit, main, "awslogs --version".split())
