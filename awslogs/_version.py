@@ -1,8 +1,3 @@
-from pkg_resources import get_distribution, DistributionNotFound
+from pkg_resources import get_distribution
 
-__version__ = None  # required for initial installation
-
-try:
-    __version__ = get_distribution("awslogs").version
-except DistributionNotFound:
-    __version__ == '(notfound)'
+__version__ = get_distribution("awslogs").version
