@@ -5,6 +5,7 @@ class BaseAWSLogsException(Exception):
     def hint(self):
         return "Unknown Error."
 
+
 class UnknownDateError(BaseAWSLogsException):
 
     code = 3

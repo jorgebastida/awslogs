@@ -52,15 +52,15 @@ def main(argv=None):
 
     def add_date_range_arguments(parser):
         parser.add_argument("-s", "--start",
-                                type=str,
-                                dest='start',
-                                default='5m',
-                                help="Start time")
+                            type=str,
+                            dest='start',
+                            default='5m',
+                            help="Start time")
 
         parser.add_argument("-e", "--end",
-                                type=str,
-                                dest='end',
-                                help="End time")
+                            type=str,
+                            dest='end',
+                            help="End time")
 
     subparsers = parser.add_subparsers()
 
@@ -68,7 +68,6 @@ def main(argv=None):
     get_parser = subparsers.add_parser('get', description='Get logs')
     get_parser.set_defaults(func="list_logs")
     add_common_arguments(get_parser)
-
 
     get_parser.add_argument("log_group_name",
                             type=str,
@@ -142,7 +141,7 @@ def main(argv=None):
     # when you instantiate the a client. We need --profile because that's
     # the api people are use to with aws-cli.
     if options.aws_profile:
-        os.environ['AWS_PROFILE'] = option.aws_profile
+        os.environ['AWS_PROFILE'] = options.aws_profile
 
     try:
         logs = AWSLogs(**vars(options))

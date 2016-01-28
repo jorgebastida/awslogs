@@ -6,13 +6,14 @@ python:
   - "2.6"
 
 install:
-  - pip install coveralls
+  - pip install coveralls flake8
 
 script:
   - coverage run --source=awslogs setup.py test
   - python setup.py install
   - which awslogs
   - awslogs --help
+  - flake8 awslogs
 
 after_success:
   coveralls

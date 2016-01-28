@@ -12,9 +12,6 @@ except ImportError:
 
 import boto3
 from botocore.compat import total_seconds
-from botocore.client import ClientError
-from botocore.auth import NoCredentialsError
-from botocore.retryhandler import EndpointConnectionError
 
 from termcolor import colored
 from dateutil.parser import parse
@@ -57,7 +54,8 @@ class AWSLogs(object):
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
-        self.client = boto3.client('logs',
+        self.client = boto3.client(
+            'logs',
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
             aws_session_token=self.aws_session_token,
@@ -171,7 +169,7 @@ class AWSLogs(object):
                         queue.put(event)
 
                 if 'nextToken' in response:
-                    kwargs['nextToken']= response['nextToken']
+                    kwargs['nextToken'] = response['nextToken']
                 else:
                     if self.watch:
                         time.sleep(1)
@@ -192,7 +190,6 @@ class AWSLogs(object):
             exit.set()
             print('Closing...\n')
             os._exit(0)
-
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
@@ -226,7 +223,7 @@ class AWSLogs(object):
                     # no firstEventTimestamp.
                     yield stream['logStreamName']
                 elif max(stream['firstEventTimestamp'], window_start) <= \
-                     min(stream['lastEventTimestamp'], window_end):
+                        min(stream['lastEventTimestamp'], window_end):
                     yield stream['logStreamName']
 
     def color(self, text, color):
@@ -241,7 +238,9 @@ class AWSLogs(object):
         if not datetime_text:
             return None
 
-        ago_match = re.match(r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?', datetime_text)
+        ago_regexp = r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
+        ago_match = re.match(ago_regexp, datetime_text)
+
         if ago_match:
             amount, unit = ago_match.groups()
             amount = int(amount)

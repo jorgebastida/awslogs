@@ -2,6 +2,7 @@
 =====
 * Add ``--timestamp`` and ``--ingestion-time`` Thanks vlcinsky #36
 * Fix help texts. Thanks Daniel Hahler #46
+* Add flake8 to travis
 
 0.2.0
 =====
