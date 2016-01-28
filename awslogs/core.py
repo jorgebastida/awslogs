@@ -24,6 +24,11 @@ from . import exceptions
 __version__ = '0.1.0'
 
 
+def milis2iso(milis):
+    res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
+    return (res + ".000")[:23] + 'Z'
+
+
 class AWSLogs(object):
 
     ACTIVE = 1
@@ -46,6 +51,9 @@ class AWSLogs(object):
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
+        self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
+        self.output_ingestion_time_enabled = kwargs.get(
+            'output_ingestion_time_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
@@ -91,23 +99,37 @@ class AWSLogs(object):
                     exit.set()
                     break
 
-                output = [event['message']]
-                if self.output_stream_enabled:
-                    output.insert(
-                        0,
-                        self.color(
-                            event['logStreamName'].ljust(max_stream_length, ' '),
-                            'cyan'
-                        )
-                    )
+                output = []
                 if self.output_group_enabled:
-                    output.insert(
-                        0,
+                    output.append(
                         self.color(
-                             self.log_group_name.ljust(group_length, ' '),
+                            self.log_group_name.ljust(group_length, ' '),
                             'green'
                         )
                     )
+                if self.output_stream_enabled:
+                    output.append(
+                        self.color(
+                            event['logStreamName'].ljust(max_stream_length,
+                                                         ' '),
+                            'cyan'
+                        )
+                    )
+                if self.output_timestamp_enabled:
+                    output.append(
+                        self.color(
+                            milis2iso(event['timestamp']),
+                            'yellow'
+                        )
+                    )
+                if self.output_ingestion_time_enabled:
+                    output.append(
+                        self.color(
+                            milis2iso(event['ingestionTime']),
+                            'blue'
+                        )
+                    )
+                output.append(event['message'])
                 print(' '.join(output))
 
         def generator():
