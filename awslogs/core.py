@@ -21,7 +21,7 @@ from dateutil.parser import parse
 
 from . import exceptions
 
-__version__ = '0.1.0'
+__version__ = '0.3.0'
 
 
 def milis2iso(milis):

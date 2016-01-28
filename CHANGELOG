@@ -1,3 +1,7 @@
+0.3.0
+=====
+* Add ``--timestamp`` and ``--ingestion-time`` Thanks vlcinsky #36
+
 0.2.0
 =====
 * Add ``--filter-pattern`` option. #28
