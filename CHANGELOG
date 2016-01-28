@@ -1,6 +1,7 @@
 0.3.0
 =====
 * Add ``--timestamp`` and ``--ingestion-time`` Thanks vlcinsky #36
+* Fix help texts. Thanks Daniel Hahler #46
 
 0.2.0
 =====
