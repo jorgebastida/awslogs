@@ -52,8 +52,8 @@ Features
 
 * Retrieve event metadata:
 
-    - ``--timestamp`` Prints the creation timestamp of each event.
-    - ``--ingestion-time`` Prints the ingestion time of each event.
+  - ``--timestamp`` Prints the creation timestamp of each event.
+  - ``--ingestion-time`` Prints the ingestion time of each event.
 
 
 Example
