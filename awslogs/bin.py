@@ -96,7 +96,7 @@ def main(argv=None):
     get_parser.add_argument("--no-group",
                             action='store_false',
                             dest='output_group_enabled',
-                            help="Do not display group")
+                            help="Do not display group name")
 
     get_parser.add_argument("--no-stream",
                             action='store_false',
@@ -106,12 +106,12 @@ def main(argv=None):
     get_parser.add_argument("--timestamp",
                             action='store_true',
                             dest='output_timestamp_enabled',
-                            help=("Add creation timestamp to the output"))
+                            help="Add creation timestamp to the output")
 
     get_parser.add_argument("--ingestion-time",
                             action='store_true',
                             dest='output_ingestion_time_enabled',
-                            help=("Add ingestion time to the output"))
+                            help="Add ingestion time to the output")
 
     add_date_range_arguments(get_parser)
 
