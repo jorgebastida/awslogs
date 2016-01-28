@@ -8,7 +8,7 @@ install_requires = [
     'python-dateutil>=2.4.0'
 ]
 
-tests_require = ['flake8']
+tests_require = []
 
 # as of Python >= 2.7 argparse module is maintained within Python.
 if sys.version_info < (2, 7):
