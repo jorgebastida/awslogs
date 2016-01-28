@@ -119,14 +119,14 @@ class AWSLogs(object):
                     output.append(
                         self.color(
                             milis2iso(event['timestamp']),
-                            'red'
+                            'yellow'
                         )
                     )
                 if self.output_ingestion_time_enabled:
                     output.append(
                         self.color(
                             milis2iso(event['ingestionTime']),
-                            'yellow'
+                            'blue'
                         )
                     )
                 output.append(event['message'])
