@@ -50,6 +50,12 @@ Features
   - ``--start='2w ago'``
   - ``--start='2d ago' --end='1h ago'``
 
+* Retrieve event metadata:
+
+    - ``--timestamp`` Prints the creation timestamp of each event.
+    - ``--ingestion-time`` Prints the ingestion time of each event.
+
+
 Example
 -------
 
