@@ -13,6 +13,7 @@ script:
   - python setup.py install
   - which awslogs
   - awslogs --help
+  - falke8 awslogs
 
 after_success:
   coveralls
