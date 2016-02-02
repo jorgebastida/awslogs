@@ -128,7 +128,11 @@ class AWSLogs(object):
                         )
                     )
                 output.append(event['message'])
-                print(' '.join(output))
+                joined_output = ' '.join(output)
+                try:
+                    print(joined_output)
+                except UnicodeEncodeError:
+                    print(joined_output.encode('utf-8'))
 
         def generator():
             """Push events into queue trying to deduplicate them using a lru queue.
