@@ -148,8 +148,7 @@ class AWSLogs(object):
             kwargs = {'logGroupName': self.log_group_name,
                       'interleaved': True}
 
-            if streams:
-                kwargs['logStreamNames'] = streams
+            kwargs['logStreamNames'] = streams
 
             if self.start:
                 kwargs['startTime'] = self.start

@@ -1,6 +1,6 @@
 import sys
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 try:
     from StringIO import StringIO
 except ImportError:
@@ -457,3 +457,44 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
+
+    @patch('awslogs.core.datetime')
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_streams_not_found(self, mock_stdout, botoclient, datetime_mock):
+        """
+        Do not fallback on all available streams if none are found
+        when performing pattern matching.
+        """
+        awslogs = AWSLogs()
+        datetime_mock.utcnow.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
+        datetime_mock.return_value = datetime(1970, 1, 1)
+
+        client = Mock()
+        botoclient.return_value = client
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'}]},
+        ]
+
+        streams = [
+            {'logStreams': []}
+        ]
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+        filter_log_events = Mock(side_effect=[{'events': []}])
+        client.filter_log_events = filter_log_events
+        main("awslogs get AAA XXX --no-color".split())
+        filter_log_events.assert_called_once_with(
+            startTime=1420080900000,
+            logStreamNames=[],
+            logGroupName='AAA',
+            interleaved=True,
+        )
