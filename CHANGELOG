@@ -1,3 +1,7 @@
+0.4.0
+=====
+* Fix utf-8 issues
+
 0.3.0
 =====
 * Add ``--timestamp`` and ``--ingestion-time`` Thanks vlcinsky #36
