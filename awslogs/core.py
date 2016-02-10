@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import time
+import codecs
 from threading import Thread, Event
 from datetime import datetime, timedelta
 from collections import deque
@@ -37,6 +38,8 @@ class AWSLogs(object):
     ALL_WILDCARD = 'ALL'
 
     def __init__(self, **kwargs):
+        UTF8Writer = codecs.getwriter('utf8')
+        sys.stdout = UTF8Writer(sys.stdout)
         self.aws_region = kwargs.get('aws_region')
         self.aws_access_key_id = kwargs.get('aws_access_key_id')
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
