@@ -38,8 +38,16 @@ class AWSLogs(object):
     ALL_WILDCARD = 'ALL'
 
     def __init__(self, **kwargs):
-        UTF8Writer = codecs.getwriter('utf8')
-        sys.stdout = UTF8Writer(sys.stdout)
+        if sys.version_info > (3, 0):
+            if sys.stdout.encoding != 'UTF-8':
+                sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+            if sys.stderr.encoding != 'UTF-8':
+                sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+        else:
+            if sys.stdout.encoding != 'UTF-8':
+                sys.stdout = codecs.getwriter('utf-8')(sys.stdout, 'strict')
+            if sys.stderr.encoding != 'UTF-8':
+                sys.stderr = codecs.getwriter('utf-8')(sys.stderr, 'strict')
         self.aws_region = kwargs.get('aws_region')
         self.aws_access_key_id = kwargs.get('aws_access_key_id')
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
