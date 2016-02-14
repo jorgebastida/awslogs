@@ -305,6 +305,60 @@ class TestAWSLogs(unittest.TestCase):
 
     @patch('boto3.client')
     @patch('sys.stdout', new_callable=StringIO)
+    def test_get_timestamp(self, mock_stdout, botoclient):
+        self.set_ABCDE_logs(botoclient)
+        main("awslogs get "
+             "--timestamp --no-group --no-stream "
+             "AAA DDD --no-color".split())
+
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("1970-01-01T00:00:00.000Z Hello 1\n"
+             "1970-01-01T00:00:00.000Z Hello 2\n"
+             "1970-01-01T00:00:00.000Z Hello 3\n"
+             "1970-01-01T00:00:00.000Z Hello 4\n"
+             "1970-01-01T00:00:00.000Z Hello 5\n"
+             "1970-01-01T00:00:00.000Z Hello 6\n")
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_get_ingestion_time(self, mock_stdout, botoclient):
+        self.set_ABCDE_logs(botoclient)
+        main("awslogs get "
+             "--ingestion-time --no-group --no-stream "
+             "AAA DDD --no-color".split())
+
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("1970-01-01T00:00:05.000Z Hello 1\n"
+             "1970-01-01T00:00:05.000Z Hello 2\n"
+             "1970-01-01T00:00:05.006Z Hello 3\n"
+             "1970-01-01T00:00:05.000Z Hello 4\n"
+             "1970-01-01T00:00:05.000Z Hello 5\n"
+             "1970-01-01T00:00:05.009Z Hello 6\n")
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_get_timestamp_and_ingestion_time(self, mock_stdout, botoclient):
+        self.set_ABCDE_logs(botoclient)
+        main("awslogs get "
+             "--timestamp --ingestion-time --no-group --no-stream "
+             "AAA DDD --no-color".split())
+
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.000Z Hello 1\n"
+             "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.000Z Hello 2\n"
+             "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.006Z Hello 3\n"
+             "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.000Z Hello 4\n"
+             "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.000Z Hello 5\n"
+             "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.009Z Hello 6\n")
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_deduplication(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client

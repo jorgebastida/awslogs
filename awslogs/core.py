@@ -12,14 +12,16 @@ except ImportError:
 
 import boto3
 from botocore.compat import total_seconds
-from botocore.client import ClientError
-from botocore.auth import NoCredentialsError
-from botocore.retryhandler import EndpointConnectionError
 
 from termcolor import colored
 from dateutil.parser import parse
 
 from . import exceptions
+
+
+def milis2iso(milis):
+    res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
+    return (res + ".000")[:23] + 'Z'
 
 
 class AWSLogs(object):
@@ -44,10 +46,14 @@ class AWSLogs(object):
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
+        self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
+        self.output_ingestion_time_enabled = kwargs.get(
+            'output_ingestion_time_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
 
-        self.client = boto3.client('logs',
+        self.client = boto3.client(
+            'logs',
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
             aws_session_token=self.aws_session_token,
@@ -89,23 +95,37 @@ class AWSLogs(object):
                     exit.set()
                     break
 
-                output = [event['message']]
-                if self.output_stream_enabled:
-                    output.insert(
-                        0,
-                        self.color(
-                            event['logStreamName'].ljust(max_stream_length, ' '),
-                            'cyan'
-                        )
-                    )
+                output = []
                 if self.output_group_enabled:
-                    output.insert(
-                        0,
+                    output.append(
                         self.color(
-                             self.log_group_name.ljust(group_length, ' '),
+                            self.log_group_name.ljust(group_length, ' '),
                             'green'
                         )
                     )
+                if self.output_stream_enabled:
+                    output.append(
+                        self.color(
+                            event['logStreamName'].ljust(max_stream_length,
+                                                         ' '),
+                            'cyan'
+                        )
+                    )
+                if self.output_timestamp_enabled:
+                    output.append(
+                        self.color(
+                            milis2iso(event['timestamp']),
+                            'yellow'
+                        )
+                    )
+                if self.output_ingestion_time_enabled:
+                    output.append(
+                        self.color(
+                            milis2iso(event['ingestionTime']),
+                            'blue'
+                        )
+                    )
+                output.append(event['message'])
                 print(' '.join(output))
 
         def generator():
@@ -147,7 +167,7 @@ class AWSLogs(object):
                         queue.put(event)
 
                 if 'nextToken' in response:
-                    kwargs['nextToken']= response['nextToken']
+                    kwargs['nextToken'] = response['nextToken']
                 else:
                     if self.watch:
                         time.sleep(1)
@@ -168,7 +188,6 @@ class AWSLogs(object):
             exit.set()
             print('Closing...\n')
             os._exit(0)
-
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
@@ -202,7 +221,7 @@ class AWSLogs(object):
                     # no firstEventTimestamp.
                     yield stream['logStreamName']
                 elif max(stream['firstEventTimestamp'], window_start) <= \
-                     min(stream['lastEventTimestamp'], window_end):
+                        min(stream['lastEventTimestamp'], window_end):
                     yield stream['logStreamName']
 
     def color(self, text, color):
@@ -217,7 +236,9 @@ class AWSLogs(object):
         if not datetime_text:
             return None
 
-        ago_match = re.match(r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?', datetime_text)
+        ago_regexp = r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
+        ago_match = re.match(ago_regexp, datetime_text)
+
         if ago_match:
             amount, unit = ago_match.groups()
             amount = int(amount)

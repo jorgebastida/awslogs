@@ -1,5 +1,7 @@
 import os
 import sys
+import locale
+import codecs
 import argparse
 
 import boto3
@@ -12,6 +14,7 @@ from ._version import __version__
 
 
 def main(argv=None):
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
     argv = (argv or sys.argv)[1:]
 
@@ -52,15 +55,15 @@ def main(argv=None):
 
     def add_date_range_arguments(parser):
         parser.add_argument("-s", "--start",
-                                type=str,
-                                dest='start',
-                                default='5m',
-                                help="Start time")
+                            type=str,
+                            dest='start',
+                            default='5m',
+                            help="Start time")
 
         parser.add_argument("-e", "--end",
-                                type=str,
-                                dest='end',
-                                help="End time")
+                            type=str,
+                            dest='end',
+                            help="End time")
 
     subparsers = parser.add_subparsers()
 
@@ -68,7 +71,6 @@ def main(argv=None):
     get_parser = subparsers.add_parser('get', description='Get logs')
     get_parser.set_defaults(func="list_logs")
     add_common_arguments(get_parser)
-
 
     get_parser.add_argument("log_group_name",
                             type=str,
@@ -91,24 +93,34 @@ def main(argv=None):
     get_parser.add_argument("--watch",
                             action='store_true',
                             dest='watch',
-                            help="Pool for new log lines constantly")
+                            help="Query for new log lines constantly")
 
     get_parser.add_argument("--no-group",
                             action='store_false',
                             dest='output_group_enabled',
-                            help="Add group to the output")
+                            help="Do not display group name")
 
     get_parser.add_argument("--no-stream",
                             action='store_false',
                             dest='output_stream_enabled',
-                            help="Add stream to the output")
+                            help="Do not display stream name")
+
+    get_parser.add_argument("--timestamp",
+                            action='store_true',
+                            dest='output_timestamp_enabled',
+                            help="Add creation timestamp to the output")
+
+    get_parser.add_argument("--ingestion-time",
+                            action='store_true',
+                            dest='output_ingestion_time_enabled',
+                            help="Add ingestion time to the output")
 
     add_date_range_arguments(get_parser)
 
     get_parser.add_argument("--no-color",
                             action='store_false',
                             dest='color_enabled',
-                            help="Color output")
+                            help="Do not color output")
 
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
@@ -132,7 +144,7 @@ def main(argv=None):
     # when you instantiate the a client. We need --profile because that's
     # the api people are use to with aws-cli.
     if options.aws_profile:
-        os.environ['AWS_PROFILE'] = option.aws_profile
+        os.environ['AWS_PROFILE'] = options.aws_profile
 
     try:
         logs = AWSLogs(**vars(options))

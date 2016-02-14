@@ -1,2 +1,2 @@
-from ._version import __version__
-from .core import AWSLogs
+from ._version import __version__  # noqa
+from .core import AWSLogs  # noqa

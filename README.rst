@@ -50,6 +50,12 @@ Features
   - ``--start='2w ago'``
   - ``--start='2d ago' --end='1h ago'``
 
+* Retrieve event metadata:
+
+  - ``--timestamp`` Prints the creation timestamp of each event.
+  - ``--ingestion-time`` Prints the ingestion time of each event.
+
+
 Example
 -------
 
@@ -76,7 +82,7 @@ Options
 
 * ``awslogs groups``: List existing groups
 * ``awslogs streams GROUP``: List existing streams withing ``GROUP``
-* ``awslogs get [GROUP [STREAM_EXPRESSION]]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
+* ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
 
