@@ -71,7 +71,7 @@ You can easily install ``awslogs`` using ``pip``::
 
   $ pip install awslogs
 
-If you are on OSX El Capitan, use the following (Why? Check Donald Stufft's comment `here <pip/issues/3165#issuecomment-145856429>`_) ::
+If you are on OSX El Capitan, use the following (Why? Check Donald Stufft's comment `here <https://github.com/pypa/pip/issues/3165#issuecomment-145856429>`_) ::
 
   $ pip install awslogs --ignore-installed six
 
