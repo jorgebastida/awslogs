@@ -1,12 +1,11 @@
 import sys
 import unittest
-from datetime import datetime
+
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 
-from botocore.compat import total_seconds
 from termcolor import colored
 
 try:
@@ -15,7 +14,6 @@ except ImportError:
     from unittest.mock import patch, Mock
 
 from awslogs import AWSLogs
-from awslogs.exceptions import UnknownDateError
 from awslogs.bin import main
 
 
@@ -27,61 +25,6 @@ def mapkeys(keys, rec_lst):
     [{"a": 1, "b": 2, "c": 3}, {"a": 4, "b": 5, "c": 6}]
     """
     return [dict(zip(keys, vals)) for vals in rec_lst]
-
-
-class TestAWSLogsDatetimeParse(unittest.TestCase):
-    @patch('boto3.client')
-    @patch('awslogs.core.datetime')
-    def test_parse_datetime(self, datetime_mock, botoclient):
-
-        awslogs = AWSLogs()
-        datetime_mock.utcnow.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
-        datetime_mock.return_value = datetime(1970, 1, 1)
-
-        def iso2epoch(iso_str):
-            dt = datetime.strptime(iso_str, "%Y-%m-%d %H:%M:%S")
-            return int(total_seconds(dt - datetime(1970, 1, 1)) * 1000)
-
-        self.assertEqual(awslogs.parse_datetime(''), None)
-        self.assertEqual(awslogs.parse_datetime(None), None)
-        plan = (('2015-01-01 02:59:00', '1m'),
-                ('2015-01-01 02:59:00', '1m ago'),
-                ('2015-01-01 02:59:00', '1minute'),
-                ('2015-01-01 02:59:00', '1minute ago'),
-                ('2015-01-01 02:59:00', '1minutes'),
-                ('2015-01-01 02:59:00', '1minutes ago'),
-
-                ('2015-01-01 02:00:00', '1h'),
-                ('2015-01-01 02:00:00', '1h ago'),
-                ('2015-01-01 02:00:00', '1hour'),
-                ('2015-01-01 02:00:00', '1hour ago'),
-                ('2015-01-01 02:00:00', '1hours'),
-                ('2015-01-01 02:00:00', '1hours ago'),
-
-                ('2014-12-31 03:00:00', '1d'),
-                ('2014-12-31 03:00:00', '1d ago'),
-                ('2014-12-31 03:00:00', '1day'),
-                ('2014-12-31 03:00:00', '1day ago'),
-                ('2014-12-31 03:00:00', '1days'),
-                ('2014-12-31 03:00:00', '1days ago'),
-
-                ('2014-12-25 03:00:00', '1w'),
-                ('2014-12-25 03:00:00', '1w ago'),
-                ('2014-12-25 03:00:00', '1week'),
-                ('2014-12-25 03:00:00', '1week ago'),
-                ('2014-12-25 03:00:00', '1weeks'),
-                ('2014-12-25 03:00:00', '1weeks ago'),
-
-                ('2013-01-01 00:00:00', '1/1/2013'),
-                ('2012-01-01 12:34:00', '1/1/2012 12:34'),
-                ('2011-01-01 12:34:56', '1/1/2011 12:34:56')
-                )
-
-        for expected_iso, dateutil_time in plan:
-            self.assertEqual(awslogs.parse_datetime(dateutil_time),
-                             iso2epoch(expected_iso))
-
-        self.assertRaises(UnknownDateError, awslogs.parse_datetime, '???')
 
 
 class TestAWSLogs(unittest.TestCase):
