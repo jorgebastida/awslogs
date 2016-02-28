@@ -143,7 +143,7 @@ def main(argv=None):
     # Workaround the fact that boto3 don't allow you to specify a profile
     # when you instantiate the a client. We need --profile because that's
     # the api people are use to with aws-cli.
-    if options.aws_profile:
+    if getattr(options, 'aws_profile', None):
         os.environ['AWS_PROFILE'] = options.aws_profile
 
     try:
