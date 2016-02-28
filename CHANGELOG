@@ -1,9 +1,7 @@
-* Add ``-S`` as shorthand for ``--no-stream`` and ``-G`` as shorthand for
-  ``--no-group``.
-
 0.4.0
 =====
 * Fix utf-8 issues
+* Add ``-S`` as shorthand for ``--no-stream`` and ``-G`` as shorthand for ``--no-group``. Thanks Adam Chainz
 
 0.3.0
 =====
