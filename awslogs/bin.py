@@ -97,12 +97,14 @@ def main(argv=None):
                             dest='watch',
                             help="Query for new log lines constantly")
 
-    get_parser.add_argument("--no-group",
+    get_parser.add_argument("-G",
+                            "--no-group",
                             action='store_false',
                             dest='output_group_enabled',
                             help="Do not display group name")
 
-    get_parser.add_argument("--no-stream",
+    get_parser.add_argument("-S",
+                            "--no-stream",
                             action='store_false',
                             dest='output_stream_enabled',
                             help="Do not display stream name")

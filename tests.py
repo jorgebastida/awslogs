@@ -280,6 +280,22 @@ class TestAWSLogs(unittest.TestCase):
 
     @patch('boto3.client')
     @patch('sys.stdout', new_callable=StringIO)
+    def test_get_nogroup_nostream_short_forms(self, mock_stdout, botoclient):
+        self.set_ABCDE_logs(botoclient)
+        main("awslogs get -GS AAA DDD --no-color".split())
+
+        self.assertEqual(
+            mock_stdout.getvalue(),
+            ("Hello 1\n"
+             "Hello 2\n"
+             "Hello 3\n"
+             "Hello 4\n"
+             "Hello 5\n"
+             "Hello 6\n")
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
