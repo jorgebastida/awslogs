@@ -129,6 +129,7 @@ class AWSLogs(object):
                     )
                 output.append(event['message'])
                 print(' '.join(output))
+                sys.stdout.flush();
 
         def generator():
             """Push events into queue trying to deduplicate them using a lru queue.
