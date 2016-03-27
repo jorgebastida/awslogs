@@ -1,6 +1,7 @@
 0.5.0
 =====
 - Start using tox (Thanks Jan Vlčinský)
+- If streams are filtered, and none are found, awslogs will complain #52 (Thanks Nathan Leiby)
 
 0.4.0
 =====
