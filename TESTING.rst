@@ -241,7 +241,7 @@ To show coverage report on console::
     awslogs/exceptions.py      12      2    83%
     -------------------------------------------
     TOTAL                     242     23    90%
-    
+
 You may also generate nice HTML report, showing your source code highlighting
 lines, which were ignored by your tests.
 
@@ -259,8 +259,6 @@ Release a new version
 
 This task is relevant to package maintainer only.
 
-This packages uses pbr_ package for building resulting package.
-
 When is all ready for release:
 
 1. Commit all changes to git
@@ -276,5 +274,3 @@ Running `tox` creates the package in `.tox/dist` directory.
 Or you may activate relevant virtualenv and run::
 
     $ python setup.py <buld_command_you_prefer>
-
-.. _pbr: http://docs.openstack.org/developer/pbr/
