@@ -18,8 +18,6 @@ from dateutil.parser import parse
 
 from . import exceptions
 
-__version__ = '0.3.0'
-
 
 def milis2iso(milis):
     res = datetime.utcfromtimestamp(milis/1000.0).isoformat()

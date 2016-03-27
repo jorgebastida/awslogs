@@ -10,9 +10,7 @@ from termcolor import colored
 
 from . import exceptions
 from .core import AWSLogs
-
-
-__version__ = "0.4.0"
+from ._version import __version__
 
 
 def main(argv=None):
@@ -23,6 +21,8 @@ def main(argv=None):
     argv = (argv or sys.argv)[1:]
 
     parser = argparse.ArgumentParser(usage=("%(prog)s [ get | groups | streams ]"))
+    parser.add_argument("--version", action="version",
+                        version="%(prog)s " + __version__)
 
     def add_common_arguments(parser):
         parser.add_argument("--aws-access-key-id",
