@@ -78,6 +78,8 @@ class AWSLogs(object):
                      len(streams),
                      self.FILTER_LOG_EVENTS_STREAMS_LIMIT
                 )
+            if len(streams) == 0:
+                raise exceptions.NoStreamsFilteredError(self.log_stream_name)
 
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)

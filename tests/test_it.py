@@ -426,6 +426,38 @@ class TestAWSLogs(unittest.TestCase):
         )
 
     @patch('boto3.client')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_main_get_no_matching_streams(self, mock_stderr, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'}]},
+        ]
+
+        # None of these match the pattern below: "foo.*"
+        streams = [
+            {'logStreams': [self._stream('DDD'),
+                            self._stream('EEE')]}
+        ]
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+
+        code = main("awslogs get AAA foo.*".split())
+        self.assertEqual(code, 7)
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("No streams match your pattern 'foo.*'.\n",
+                                 "red"))
+
+    @patch('boto3.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_groups(self, mock_stdout, botoclient):
         client = Mock()
