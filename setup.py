@@ -25,6 +25,8 @@ setup(
     packages=find_packages(),
     platforms='any',
     install_requires=install_requires,
+    setup_requires=['pytest-runner'],
+    tests_require=['pytest', 'pytest-mock'],
     test_suite='tests',
     classifiers=[
         'Programming Language :: Python :: 3',
