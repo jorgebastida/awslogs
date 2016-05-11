@@ -86,13 +86,15 @@ def main(argv=None):
                             nargs='?',
                             help="log stream name")
 
-    get_parser.add_argument("--filter-pattern",
+    get_parser.add_argument("-f",
+                            "--filter-pattern",
                             dest='filter_pattern',
                             help=("A valid CloudWatch Logs filter pattern to "
                                   "use for filtering the response. If not "
                                   "provided, all the events are matched."))
 
-    get_parser.add_argument("--watch",
+    get_parser.add_argument("-w",
+                            "--watch",
                             action='store_true',
                             dest='watch',
                             help="Query for new log lines constantly")
