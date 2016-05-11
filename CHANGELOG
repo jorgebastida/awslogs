@@ -2,6 +2,8 @@
 =====
 - Start using tox (Thanks Jan Vlčinský)
 - If streams are filtered, and none are found, awslogs will complain #52 (Thanks Nathan Leiby)
+- Add shortcuts to --filter-pattern and --watch
+- Add python 3.5 support
 
 0.4.0
 =====
