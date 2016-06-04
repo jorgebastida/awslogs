@@ -81,7 +81,7 @@ For that reason, there is no reason to install virtualenv separately.
 
 .. _tox: https://testrun.org/tox/latest/
 
-.. _virtualenvwrapper: http://virtualenvwrapper.readthedocs.org/en/latest/
+.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/en/latest/
 
 .. _venv: https://docs.python.org/3/library/venv.html
 
@@ -108,7 +108,7 @@ not executed. There are often the lines, where bugs are present.
 
 This project is using coverage_ tool.
 
-.. _coverage: http://coverage.readthedocs.org/en/
+.. _coverage: https://coverage.readthedocs.io/
 
 Recipes
 =======

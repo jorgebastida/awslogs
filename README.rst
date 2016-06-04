@@ -124,7 +124,7 @@ While querying for logs you can filter events by ``--start`` ``-s`` and ``--end`
   - ``--start='1/1/2015'`` Events generated after midnight on the 1st of January 2015.
   - ``--start='Sat Oct 11 17:13:46 UTC 2003'`` You can use detailed dates too.
 
-  Note, for time parsing awslogs uses `dateutil <https://dateutil.readthedocs.org/en/latest/>`_.
+  Note, for time parsing awslogs uses `dateutil <https://dateutil.readthedocs.io/en/latest/>`_.
 
 * All previous examples are applicable for  ``--end`` ``-e`` too.
 
@@ -159,7 +159,7 @@ Helpful Links
 -------------
 
 * http://aws.amazon.com/cloudwatch/
-* http://boto.readthedocs.org/en/latest/ref/logs.html
+* https://boto.readthedocs.io/en/latest/ref/logs.html
 * http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_limits.html
 
 How to provide AWS credentials to awslogs
