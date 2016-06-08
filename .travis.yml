@@ -7,9 +7,8 @@ python:
     - 3.4
     - 3.5
 install:
-    - pip install tox-travis
-    - pip install coveralls
+    - pip install tox-travis coveralls
 script:
- - tox
+    - tox -- -sv
 after_success:
-  - coveralls
+    - coveralls
