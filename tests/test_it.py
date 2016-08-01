@@ -459,6 +459,68 @@ class TestAWSLogs(unittest.TestCase):
 
     @patch('boto3.client')
     @patch('sys.stdout', new_callable=StringIO)
+    @patch('awslogs.core.AWSLogs.FILTER_LOG_EVENTS_STREAMS_LIMIT', 3)
+    def test_main_get_multiple_generators(self, mock_stdout, botoclient):
+        """Test getting logs with more streams specified than supported in a single filter_log_events call."""
+        client = Mock()
+        botoclient.return_value = client
+
+        event_keys = ["eventId", "timestamp", "ingestionTime",
+                      "message", "logStreamName"]
+        logs = [
+            {'events': mapkeys(event_keys,
+                               [[1, 0, 0, 'Hello 1', 'S1'],
+                                [2, 0, 0, 'Hello 2', 'S2'],
+                                [3, 0, 0, 'Hello 3', 'S3']]),
+             'nextToken': 'token'},
+            {'events': mapkeys(event_keys,
+                               [[4, 0, 0, 'Hello 4', 'S4'],
+                                [5, 0, 0, 'Hello 5', 'S5'],
+                                [6, 0, 0, 'Hello 6', 'S6']]),
+             'nextToken': 'token'},
+            {'events': []},
+            {'events': []}
+        ]
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'}]}
+        ]
+
+        streams = [
+            {'logStreams': [
+                self._stream('S1'),
+                self._stream('S2'),
+                self._stream('S3'),
+                self._stream('S4'),
+                self._stream('S5'),
+                self._stream('S6'),
+            ]}
+        ]
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+        client.filter_log_events.side_effect = logs
+        main("awslogs get AAA S --no-color".split())
+
+        self.assertEqual(
+            sorted(mock_stdout.getvalue().split('\n')),
+            ("\nAAA S1 Hello 1\n"
+             "AAA S2 Hello 2\n"
+             "AAA S3 Hello 3\n"
+             "AAA S4 Hello 4\n"
+             "AAA S5 Hello 5\n"
+             "AAA S6 Hello 6").split('\n')
+        )
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
     def test_main_groups(self, mock_stdout, botoclient):
         client = Mock()
         botoclient.return_value = client

@@ -24,6 +24,12 @@ def milis2iso(milis):
     return (res + ".000")[:23] + 'Z'
 
 
+try:
+    xrange
+except NameError:
+    xrange = range  # Python 3
+
+
 class AWSLogs(object):
 
     ACTIVE = 1
@@ -72,17 +78,14 @@ class AWSLogs(object):
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
-            if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
-                raise exceptions.TooManyStreamsFilteredError(
-                     self.log_stream_name,
-                     len(streams),
-                     self.FILTER_LOG_EVENTS_STREAMS_LIMIT
-                )
             if len(streams) == 0:
                 raise exceptions.NoStreamsFilteredError(self.log_stream_name)
 
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)
+        streams_per_generator = [
+            streams[i:i + self.FILTER_LOG_EVENTS_STREAMS_LIMIT]
+            for i in xrange(0, len(streams), self.FILTER_LOG_EVENTS_STREAMS_LIMIT)]
 
         queue, exit = Queue(), Event()
 
@@ -90,12 +93,17 @@ class AWSLogs(object):
         # ! Error during pagination: The same next token was received twice
 
         def consumer():
+            generators_left = len(streams_per_generator)
             while not exit.is_set():
                 event = queue.get()
 
                 if event is None:
-                    exit.set()
-                    break
+                    # A generator has finished.
+                    generators_left -= 1
+                    if generators_left == 0:
+                        exit.set()
+                        break
+                    continue
 
                 output = []
                 if self.output_group_enabled:
@@ -131,7 +139,7 @@ class AWSLogs(object):
                 print(' '.join(output))
                 sys.stdout.flush()
 
-        def generator():
+        def generator(streams):
             """Push events into queue trying to deduplicate them using a lru queue.
             AWS API stands for the interleaved parameter that:
                 interleaved (boolean) -- If provided, the API will make a best
@@ -178,8 +186,14 @@ class AWSLogs(object):
                         queue.put(None)
                         break
 
-        g = Thread(target=generator)
-        g.start()
+        if streams_per_generator:
+            for stream_batch in streams_per_generator:
+                # For each batch of up to 100 log streams, run a thread getting and enqueueing events.
+                g = Thread(target=generator, args=(stream_batch,))
+                g.start()
+        else:
+            g = Thread(target=generator, args=(streams,))
+            g.start()
 
         c = Thread(target=consumer)
         c.start()
