@@ -2,6 +2,7 @@
 =====
 - Add wheels support (Thanks Thomas Grainger)
 - Improve core removing threading (Thanks Thomas Grainger)
+- Fix output when several newlines are present at the end onf the log line #73 (Thanks Charlie Chrisman)
 
 0.5.0
 =====
