@@ -1,3 +1,7 @@
+0.6.0
+=====
+- Add wheels support (Thanks Thomas Grainger)
+
 0.5.0
 =====
 - Start using tox (Thanks Jan Vlčinský)
