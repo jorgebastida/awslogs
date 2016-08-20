@@ -1,6 +1,7 @@
 0.6.0
 =====
 - Add wheels support (Thanks Thomas Grainger)
+- Improve core removing threading (Thanks Thomas Grainger)
 
 0.5.0
 =====
