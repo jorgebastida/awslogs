@@ -166,7 +166,7 @@ class AWSLogs(object):
                             'blue'
                         )
                     )
-                output.append(event['message'])
+                output.append(event['message'].rstrip())
                 print(' '.join(output))
                 sys.stdout.flush()
         try:
