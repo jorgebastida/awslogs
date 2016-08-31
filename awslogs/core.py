@@ -10,6 +10,7 @@ from botocore.compat import total_seconds
 
 from termcolor import colored
 from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 from . import exceptions
 
@@ -235,5 +236,10 @@ class AWSLogs(object):
                 date = parse(datetime_text)
             except ValueError:
                 raise exceptions.UnknownDateError(datetime_text)
+
+        if date.tzinfo:
+            if date.utcoffset != 0:
+                date = date.astimezone(tzutc())
+            date = date.replace(tzinfo=None)
 
         return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
