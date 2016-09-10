@@ -2,6 +2,7 @@
 =====
 - Improve documentation (Thanks Pietro Di Bello)
 - Make it possible to use timezoned timestamps as input for ``-start`` and ``-end`` (Thanks Samuel Cochran)
+- New: ``--query`` will now accept a JMESPath query which will filter the response data (Thanks Samuel Cochran)
 
 0.6.0
 =====
