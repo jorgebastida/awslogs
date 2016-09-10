@@ -128,6 +128,12 @@ def main(argv=None):
                             dest='color_enabled',
                             help="Do not color output")
 
+    get_parser.add_argument("-q",
+                            "--query",
+                            action="store",
+                            dest="query",
+                            help="JMESPath query to use in filtering the response data")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
