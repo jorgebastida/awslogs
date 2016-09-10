@@ -137,6 +137,43 @@ class TestAWSLogs(unittest.TestCase):
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
 
+    def set_json_logs(self, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+
+        event_keys = ["eventId", "timestamp", "ingestionTime",
+                      "message", "logStreamName"]
+        logs = [
+            {'events': mapkeys(event_keys,
+                               [[1, 0, 5000, '{"foo": "bar"}', "DDD"],
+                                [2, 0, 5000, '{"foo": {"bar": "baz"}}', "EEE"],
+                                [3, 0, 5006, "Hello 3", "DDD"]]),
+             'nextToken': 'token'},
+            {'events': []}
+        ]
+
+        groups = [
+            {'logGroups': [{'logGroupName': 'AAA'},
+                           {'logGroupName': 'BBB'},
+                           {'logGroupName': 'CCC'}]},
+        ]
+
+        streams = [
+            {'logStreams': [self._stream('DDD'),
+                            self._stream('EEE')]}
+        ]
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': groups,
+                'describe_log_streams': streams
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+        client.filter_log_events.side_effect = logs
+
     @patch('boto3.client')
     def test_get_groups(self, botoclient):
         client = Mock()
@@ -254,6 +291,19 @@ class TestAWSLogs(unittest.TestCase):
                     "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 4\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 5\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 6\n"
+                    )
+
+        assert output == expected
+
+    @patch('boto3.client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_main_get_query(self, mock_stdout, botoclient):
+        self.set_json_logs(botoclient)
+        main("awslogs get AAA DDD --query foo".split())
+        output = mock_stdout.getvalue()
+        expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m bar\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m {\"bar\": \"baz\"}\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 3\n"
                     )
 
         assert output == expected

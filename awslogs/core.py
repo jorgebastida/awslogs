@@ -6,7 +6,9 @@ from datetime import datetime, timedelta
 from collections import deque
 
 import boto3
-from botocore.compat import total_seconds
+from botocore.compat import json, six, total_seconds
+
+import jmespath
 
 from termcolor import colored
 from dateutil.parser import parse
@@ -47,6 +49,9 @@ class AWSLogs(object):
             'output_ingestion_time_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
+        self.query = kwargs.get('query')
+        if self.query is not None:
+            self.query_expression = jmespath.compile(self.query)
 
         self.client = boto3.client(
             'logs',
@@ -167,7 +172,15 @@ class AWSLogs(object):
                             'blue'
                         )
                     )
-                output.append(event['message'].rstrip())
+
+                message = event['message']
+                if self.query is not None and message[0] == '{':
+                    parsed = json.loads(event['message'])
+                    message = self.query_expression.search(parsed)
+                    if not isinstance(message, six.string_types):
+                        message = json.dumps(message)
+                output.append(message)
+
                 print(' '.join(output))
                 sys.stdout.flush()
         try:
