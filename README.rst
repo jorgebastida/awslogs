@@ -138,6 +138,16 @@ For example, if you only want to download only the report events from a Lambda s
 
 Full documentation of how to write patterns: http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/FilterAndPatternSyntax.html
 
+JSON logs
+------------
+
+In a similar way than the `aws-cli <http://docs.aws.amazon.com/cli/latest/userguide/controlling-output.html#controlling-output-filter>`_ command, you can use  ``--query`` to
+filter each of your json log lines and extract certain fields::
+
+  $ awslogs get my_lambda_group --query=message
+
+This will only display the ``message`` field for each of the json log lines.
+
 
 Contribute
 -----------
