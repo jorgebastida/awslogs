@@ -1,3 +1,8 @@
+0.7.0
+=====
+- Improve documentation (Thanks Pietro Di Bello)
+- Make it possible to use timezoned timestamps as input for ``-start`` and ``-end`` (Thanks Samuel Cochran)
+
 0.6.0
 =====
 - Add wheels support (Thanks Thomas Grainger)
