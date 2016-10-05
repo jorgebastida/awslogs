@@ -140,10 +140,10 @@ def main(argv=None):
     add_common_arguments(groups_parser)
 
     groups_parser.add_argument("-p",
-                            "--log-group-prefix",
-                            action="store",
-                            dest="log_group_prefix",
-                            help="List only groups matching the prefix")
+                               "--log-group-prefix",
+                               action="store",
+                               dest="log_group_prefix",
+                               help="List only groups matching the prefix")
 
     # streams
     streams_parser = subparsers.add_parser('streams', description='List streams')
