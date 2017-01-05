@@ -179,7 +179,7 @@ class AWSLogs(object):
                     message = self.query_expression.search(parsed)
                     if not isinstance(message, six.string_types):
                         message = json.dumps(message)
-                output.append(message)
+                output.append(message.rstrip())
 
                 print(' '.join(output))
                 sys.stdout.flush()
