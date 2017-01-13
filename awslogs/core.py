@@ -52,7 +52,7 @@ class AWSLogs(object):
         self.query = kwargs.get('query')
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
-
+        self.log_group_prefix = kwargs.get('log_group_prefix')
         self.client = boto3.client(
             'logs',
             aws_access_key_id=self.aws_access_key_id,
@@ -201,8 +201,11 @@ class AWSLogs(object):
 
     def get_groups(self):
         """Returns available CloudWatch logs groups"""
+        kwargs = {}
+        if self.log_group_prefix is not None:
+            kwargs = {'logGroupNamePrefix': self.log_group_prefix}
         paginator = self.client.get_paginator('describe_log_groups')
-        for page in paginator.paginate():
+        for page in paginator.paginate(**kwargs):
             for group in page.get('logGroups', []):
                 yield group['logGroupName']
 

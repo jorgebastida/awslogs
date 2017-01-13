@@ -195,6 +195,18 @@ class TestAWSLogs(unittest.TestCase):
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
     @patch('boto3.client')
+    def test_get_groups_with_log_group_prefix(self, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+        client.get_paginator.return_value.paginate.return_value = [
+            {'logGroups': [{'logGroupName': 'A'}]}
+        ]
+
+        awslogs = AWSLogs(log_group_prefix='log_group_prefix')
+        self.assertEqual([g for g in awslogs.get_groups()],
+                         ['A'])
+
+    @patch('boto3.client')
     def test_get_streams(self, botoclient):
         client = Mock()
         botoclient.return_value = client
