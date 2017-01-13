@@ -1,3 +1,8 @@
+0.8.0
+=====
+- New: ``--log-group-prefix``, ``-p`` option to filter groups.
+- Fix: Remove extra newline after each line.
+
 0.7.0
 =====
 - Improve documentation (Thanks Pietro Di Bello)
