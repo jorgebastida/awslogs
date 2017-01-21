@@ -2,12 +2,14 @@ import datetime
 import json
 import os
 
+
 def json_encoder(obj):
     """JSON encoder that formats datetimes as ISO8601 format."""
     if isinstance(obj, datetime.datetime):
         return obj.isoformat()
     else:
         return obj
+
 
 class JSONFileCache(object):
     """JSON file cache.
