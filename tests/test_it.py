@@ -65,13 +65,14 @@ class TestAWSLogsSessionCache(fake_filesystem_unittest.TestCase):
         key = 'some-random-key'
         with self.assertRaises(KeyError) as context:
             cache[key]
-        self.assertTrue(key in context.exception)
+        self.assertTrue(key in str(context.exception))
     
     def test_cache_non_serializable(self):
         cache = JSONFileCache()
         key = 'some-bad-key'
         with self.assertRaises(ValueError) as context:
             cache[key] = set()
+        self.assertTrue('Value cannot be cached, must be JSON serializable' in str(context.exception))
         
 
 class TestAWSLogsDatetimeParse(unittest.TestCase):
