@@ -7,6 +7,7 @@ from collections import deque
 
 import boto3
 from botocore.compat import json, six, total_seconds
+from .utils import JSONFileCache
 
 import jmespath
 
@@ -53,7 +54,11 @@ class AWSLogs(object):
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
         self.log_group_prefix = kwargs.get('log_group_prefix')
-        self.client = boto3.client(
+        session = boto3.session.Session()
+        cred_chain = session._session.get_component('credential_provider')
+        provider = cred_chain.get_provider('assume-role')
+        provider.cache = JSONFileCache()
+        self.client = session.client(
             'logs',
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
