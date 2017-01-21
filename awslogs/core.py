@@ -59,7 +59,7 @@ class AWSLogs(object):
         cred_chain = session.get_component('credential_provider')
         provider = cred_chain.get_provider('assume-role')
         provider.cache = JSONFileCache()
-        self.client = boto3.session.Session(botocore_session=session).client(
+        self.client = boto3.Session(botocore_session=session).client(
             'logs',
             aws_access_key_id=self.aws_access_key_id,
             aws_secret_access_key=self.aws_secret_access_key,
