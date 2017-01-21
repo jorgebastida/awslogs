@@ -1,5 +1,10 @@
+import os
 import sys
 import unittest
+import json
+from pyfakefs import fake_filesystem
+from pyfakefs import fake_filesystem_unittest
+
 from datetime import datetime
 try:
     from StringIO import StringIO
@@ -17,6 +22,7 @@ except ImportError:
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
 from awslogs.bin import main
+from awslogs.utils import JSONFileCache
 
 
 def mapkeys(keys, rec_lst):
@@ -28,6 +34,45 @@ def mapkeys(keys, rec_lst):
     """
     return [dict(zip(keys, vals)) for vals in rec_lst]
 
+
+class TestAWSLogsSessionCache(fake_filesystem_unittest.TestCase):
+    def setUp(self):
+        self.setUpPyfakefs()
+        self.cache_path = os.path.expanduser(os.path.join('~', '.aws', 'cli', 'cache'))
+
+    def tearDown(self):
+        pass
+
+    def test_cache_lookup(self):
+        cache = JSONFileCache()
+        key = 'my-profile--arn_aws_iam__111111111111_role-admin'
+        data = {'test': 'test'}
+        os.makedirs(self.cache_path)
+        with open(self.cache_path + '/' + key + '.json', 'w') as f:
+            json.dump(data, f)
+        self.assertEqual(cache[key], data)
+
+    def test_cache_write(self):
+        cache = JSONFileCache()
+        key = 'my-profile--arn_aws_iam__222222222222_role-admin'
+        data = {'test': 'test'}
+        cache[key] = data
+        with open(self.cache_path + '/' + key + '.json') as d:
+            self.assertEqual(json.load(d), data)
+
+    def test_cache_miss(self):
+        cache = JSONFileCache()
+        key = 'some-random-key'
+        with self.assertRaises(KeyError) as context:
+            cache[key]
+        self.assertTrue(key in context.exception)
+    
+    def test_cache_non_serializable(self):
+        cache = JSONFileCache()
+        key = 'some-bad-key'
+        with self.assertRaises(ValueError) as context:
+            cache[key] = set()
+        
 
 class TestAWSLogsDatetimeParse(unittest.TestCase):
     @patch('boto3.Session.client')
