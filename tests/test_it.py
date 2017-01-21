@@ -2,7 +2,6 @@ import os
 import sys
 import unittest
 import json
-from pyfakefs import fake_filesystem
 from pyfakefs import fake_filesystem_unittest
 
 from datetime import datetime
