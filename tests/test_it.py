@@ -39,39 +39,37 @@ class TestAWSLogsSessionCache(fake_filesystem_unittest.TestCase):
     def setUp(self):
         self.setUpPyfakefs()
         self.cache_path = os.path.expanduser(os.path.join('~', '.aws', 'cli', 'cache'))
+        self.cache = JSONFileCache()
 
     def tearDown(self):
         pass
 
     def test_cache_lookup(self):
-        cache = JSONFileCache()
         key = 'my-profile--arn_aws_iam__111111111111_role-admin'
         data = {'test': 'test'}
         os.makedirs(self.cache_path)
         with open(self.cache_path + '/' + key + '.json', 'w') as f:
             json.dump(data, f)
-        self.assertEqual(cache[key], data)
+        self.assertEqual(self.cache[key], data)
+        self.assertTrue(key in self.cache)
 
     def test_cache_write(self):
-        cache = JSONFileCache()
         key = 'my-profile--arn_aws_iam__222222222222_role-admin'
-        data = {'test': 'test'}
-        cache[key] = data
+        data = {'test': 'test','date':datetime(2016, 3, 8, 11, 37, 24)}
+        self.cache[key] = data
         with open(self.cache_path + '/' + key + '.json') as d:
-            self.assertEqual(json.load(d), data)
+            self.assertEqual(json.load(d), {'test':'test','date':'2016-03-08T11:37:24'})
 
     def test_cache_miss(self):
-        cache = JSONFileCache()
         key = 'some-random-key'
         with self.assertRaises(KeyError) as context:
-            cache[key]
+            self.cache[key]
         self.assertTrue(key in str(context.exception))
     
     def test_cache_non_serializable(self):
-        cache = JSONFileCache()
         key = 'some-bad-key'
         with self.assertRaises(ValueError) as context:
-            cache[key] = set()
+            self.cache[key] = set()
         self.assertTrue('Value cannot be cached, must be JSON serializable' in str(context.exception))
         
 
