@@ -95,6 +95,7 @@ def main(argv=None):
 
     get_parser.add_argument("-w",
                             "--watch",
+                            "--follow",
                             action='store_true',
                             dest='watch',
                             help="Query for new log lines constantly")
