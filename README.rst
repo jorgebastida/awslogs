@@ -21,7 +21,7 @@ One of the most powerful features is to query events from several streams and co
 Features
 --------
 
-* Aggregate logs from accross streams.
+* Aggregate logs from across streams.
 
   - Aggregate all streams in a group.
   - Aggregate streams matching a regular expression.
