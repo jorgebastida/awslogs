@@ -2,6 +2,7 @@ import re
 import sys
 import os
 import time
+import errno
 from datetime import datetime, timedelta
 from collections import deque
 
@@ -182,7 +183,15 @@ class AWSLogs(object):
                 output.append(message.rstrip())
 
                 print(' '.join(output))
-                sys.stdout.flush()
+                try:
+                    sys.stdout.flush()
+                except IOError as e:
+                    if e.errno == errno.EPIPE:
+                        # SIGPIPE received, so exit
+                        os._exit(0)
+                    else:
+                        # We don't want to handle any other errors from this
+                        raise
         try:
             consumer()
         except KeyboardInterrupt:
