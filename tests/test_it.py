@@ -519,7 +519,8 @@ class TestAWSLogs(unittest.TestCase):
         code = main("awslogs get AAA foo.*".split())
         self.assertEqual(code, 7)
         self.assertEqual(mock_stderr.getvalue(),
-                         colored("No streams match your pattern 'foo.*'.\n",
+                         colored("No streams match your pattern 'foo.*' "
+                                 "for the given time period.\n",
                                  "red"))
 
     @patch('boto3.client')
