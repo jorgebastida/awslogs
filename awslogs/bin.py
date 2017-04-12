@@ -55,12 +55,12 @@ def main(argv=None):
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
 
-    def add_date_range_arguments(parser):
+    def add_date_range_arguments(parser, default_start='5m'):
         parser.add_argument("-s", "--start",
                             type=str,
                             dest='start',
-                            default='5m',
-                            help="Start time")
+                            default=default_start,
+                            help="Start time (default %(default)s)")
 
         parser.add_argument("-e", "--end",
                             type=str,
@@ -149,7 +149,7 @@ def main(argv=None):
     streams_parser = subparsers.add_parser('streams', description='List streams')
     streams_parser.set_defaults(func="list_streams")
     add_common_arguments(streams_parser)
-    add_date_range_arguments(streams_parser)
+    add_date_range_arguments(streams_parser, default_start='1h')
 
     streams_parser.add_argument("log_group_name",
                                 type=str,
