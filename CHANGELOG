@@ -1,3 +1,7 @@
+0.9.0
+=====
+- New default start time for "streams"
+
 0.8.0
 =====
 - New: ``--log-group-prefix``, ``-p`` option to filter groups.
