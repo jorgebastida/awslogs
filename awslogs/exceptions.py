@@ -30,4 +30,4 @@ class NoStreamsFilteredError(BaseAWSLogsException):
     code = 7
 
     def hint(self):
-        return ("No streams match your pattern '{0}'.").format(*self.args)
+        return ("No streams match your pattern '{0}' for the given time period.").format(*self.args)
