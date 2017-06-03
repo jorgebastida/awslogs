@@ -1,5 +1,9 @@
+import os
 import sys
 import unittest
+import json
+from pyfakefs import fake_filesystem_unittest
+
 from datetime import datetime
 try:
     from StringIO import StringIO
@@ -17,6 +21,7 @@ except ImportError:
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
 from awslogs.bin import main
+from awslogs.utils import JSONFileCache
 
 
 def mapkeys(keys, rec_lst):
@@ -29,8 +34,46 @@ def mapkeys(keys, rec_lst):
     return [dict(zip(keys, vals)) for vals in rec_lst]
 
 
+class TestAWSLogsSessionCache(fake_filesystem_unittest.TestCase):
+    def setUp(self):
+        self.setUpPyfakefs()
+        self.cache_path = os.path.expanduser(os.path.join('~', '.aws', 'cli', 'cache'))
+        self.cache = JSONFileCache()
+
+    def tearDown(self):
+        pass
+
+    def test_cache_lookup(self):
+        key = 'my-profile--arn_aws_iam__111111111111_role-admin'
+        data = {'test': 'test'}
+        os.makedirs(self.cache_path)
+        with open(self.cache_path + '/' + key + '.json', 'w') as f:
+            json.dump(data, f)
+        self.assertEqual(self.cache[key], data)
+        self.assertTrue(key in self.cache)
+
+    def test_cache_write(self):
+        key = 'my-profile--arn_aws_iam__222222222222_role-admin'
+        data = {'test': 'test','date':datetime(2016, 3, 8, 11, 37, 24)}
+        self.cache[key] = data
+        with open(self.cache_path + '/' + key + '.json') as d:
+            self.assertEqual(json.load(d), {'test':'test','date':'2016-03-08T11:37:24'})
+
+    def test_cache_miss(self):
+        key = 'some-random-key'
+        with self.assertRaises(KeyError) as context:
+            self.cache[key]
+        self.assertTrue(key in str(context.exception))
+    
+    def test_cache_non_serializable(self):
+        key = 'some-bad-key'
+        with self.assertRaises(ValueError) as context:
+            self.cache[key] = set()
+        self.assertTrue('Value cannot be cached, must be JSON serializable' in str(context.exception))
+        
+
 class TestAWSLogsDatetimeParse(unittest.TestCase):
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('awslogs.core.datetime')
     def test_parse_datetime(self, datetime_mock, botoclient):
 
@@ -174,7 +217,7 @@ class TestAWSLogs(unittest.TestCase):
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     def test_get_groups(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -194,7 +237,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_groups()],
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     def test_get_groups_with_log_group_prefix(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -206,7 +249,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_groups()],
                          ['A'])
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     def test_get_streams(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -226,7 +269,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_streams()],
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('awslogs.core.AWSLogs.parse_datetime')
     def test_get_streams_filtered_by_date(self, parse_datetime, botoclient):
         client = Mock()
@@ -242,7 +285,7 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs(log_group_name='group', start='5', end='7')
         self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C'])
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     def test_get_streams_from_pattern(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -276,7 +319,7 @@ class TestAWSLogs(unittest.TestCase):
         actual = [s for s in awslogs._get_streams_from_pattern('X', 'A[AC]A')]
         self.assertEqual(actual, expected)
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -291,7 +334,7 @@ class TestAWSLogs(unittest.TestCase):
                     )
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_with_color(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -307,7 +350,7 @@ class TestAWSLogs(unittest.TestCase):
 
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_query(self, mock_stdout, botoclient):
         self.set_json_logs(botoclient)
@@ -320,7 +363,7 @@ class TestAWSLogs(unittest.TestCase):
 
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -336,7 +379,7 @@ class TestAWSLogs(unittest.TestCase):
              "EEE Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -352,7 +395,7 @@ class TestAWSLogs(unittest.TestCase):
              "AAA Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -368,7 +411,7 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream_short_forms(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -384,7 +427,7 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -402,7 +445,7 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -420,7 +463,7 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:05.009Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp_and_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -438,7 +481,7 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.009Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_deduplication(self, mock_stdout, botoclient):
         client = Mock()
@@ -490,7 +533,7 @@ class TestAWSLogs(unittest.TestCase):
              "AAA DDD Hello 3\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stderr', new_callable=StringIO)
     def test_main_get_no_matching_streams(self, mock_stderr, botoclient):
         client = Mock()
@@ -523,7 +566,7 @@ class TestAWSLogs(unittest.TestCase):
                                  "for the given time period.\n",
                                  "red"))
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_groups(self, mock_stdout, botoclient):
         client = Mock()
@@ -545,7 +588,7 @@ class TestAWSLogs(unittest.TestCase):
              "CCC\n")
         )
 
-    @patch('boto3.client')
+    @patch('boto3.Session.client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_streams(self, mock_stdout, botoclient):
         client = Mock()
