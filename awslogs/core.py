@@ -131,6 +131,8 @@ class AWSLogs(object):
                 if 'nextToken' in response:
                     kwargs['nextToken'] = response['nextToken']
                 else:
+                    # No more results for this token, don't try to use it again
+                    kwargs.pop('nextToken', None)
                     yield do_wait
 
         def consumer():
