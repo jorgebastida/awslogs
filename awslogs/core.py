@@ -38,6 +38,7 @@ class AWSLogs(object):
         self.aws_access_key_id = kwargs.get('aws_access_key_id')
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
         self.aws_session_token = kwargs.get('aws_session_token')
+        self.aws_profile = kwargs.get('aws_profile')
         self.log_group_name = kwargs.get('log_group_name')
         self.log_stream_name = kwargs.get('log_stream_name')
         self.filter_pattern = kwargs.get('filter_pattern')
@@ -54,13 +55,22 @@ class AWSLogs(object):
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
         self.log_group_prefix = kwargs.get('log_group_prefix')
-        self.client = boto3.client(
-            'logs',
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            aws_session_token=self.aws_session_token,
-            region_name=self.aws_region
-        )
+
+        # if providing a profile name, you need to use boto3 session
+        if self.aws_profile:
+            session = boto3.Session(profile_name=self.aws_profile)
+            self.client = session.client(
+                'logs',
+                region_name=self.aws_region
+            )
+        else:
+            self.client = boto3.client(
+                'logs',
+                aws_access_key_id=self.aws_access_key_id,
+                aws_secret_access_key=self.aws_secret_access_key,
+                aws_session_token=self.aws_session_token,
+                region_name=self.aws_region
+            )
 
     def _get_streams_from_pattern(self, group, pattern):
         """Returns streams in ``group`` matching ``pattern``."""
