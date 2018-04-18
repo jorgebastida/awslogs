@@ -1,6 +1,6 @@
 import sys
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 try:
     from StringIO import StringIO
 except ImportError:
@@ -227,20 +227,29 @@ class TestAWSLogs(unittest.TestCase):
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
     @patch('boto3.client')
-    @patch('awslogs.core.AWSLogs.parse_datetime')
-    def test_get_streams_filtered_by_date(self, parse_datetime, botoclient):
+    @patch('awslogs.core.datetime')
+    def test_get_streams_filtered_by_date(self, datetime_mock, botoclient):
+        def timestamp(date):
+            return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
+
+        now = datetime(2017, 4, 18)
+        datetime_mock.utcnow.return_value = now
+        datetime_mock.side_effect = lambda *args, **kw: datetime(*args, **kw)
+
         client = Mock()
         botoclient.return_value = client
+
         client.get_paginator.return_value.paginate.return_value = [
-            {'logStreams': [self._stream('A', 0, 1),
-                            self._stream('B', 0, 6),
-                            self._stream('C'),
-                            self._stream('D', sys.maxsize - 1, sys.maxsize)],
+            {'logStreams': [self._stream('A', 0, timestamp(now - timedelta(minutes=61))),
+                            self._stream('B', 0, timestamp(now - timedelta(minutes=60))),
+                            self._stream('C', 0, timestamp(now - timedelta(minutes=5))),
+                            self._stream('D'),
+                            self._stream('E', sys.maxsize - 1, sys.maxsize)],
              }
         ]
-        parse_datetime.side_effect = [5, 7]
-        awslogs = AWSLogs(log_group_name='group', start='5', end='7')
-        self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C'])
+        awslogs = AWSLogs(log_group_name='group', start='10m', end='1m')
+        self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C', 'D'])
+
 
     @patch('boto3.client')
     def test_get_streams_from_pattern(self, botoclient):

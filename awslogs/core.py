@@ -219,9 +219,14 @@ class AWSLogs(object):
                 yield group['logGroupName']
 
     def get_streams(self, log_group_name=None):
-        """Returns available CloudWatch logs streams in ``log_group_name``."""
+        """Returns possibly available CloudWatch logs streams in ``log_group_name``."""
         kwargs = {'logGroupName': log_group_name or self.log_group_name}
         window_start = self.start or 0
+        # lastEventTime updates on an eventual consistency basis. It typically
+        # updates in less than an hour from ingestion, but may take longer in
+        # some rare situations. Relaxing window_start helps to avoid false
+        # negatives.
+        window_start = min(window_start, self.parse_datetime("1h ago"))
         window_end = self.end or sys.float_info.max
 
         paginator = self.client.get_paginator('describe_log_streams')
