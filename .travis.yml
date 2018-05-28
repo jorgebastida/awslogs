@@ -8,9 +8,13 @@ env:
   - TOX_ENV=py35
   - TOX_ENV=lint
 python: 3.5
+matrix:
+  include:
+    - python: 3.6
+      env: TOX_ENV=py36
 install:
     - pip install tox
-    - pip install coveralls
 script: tox -e $TOX_ENV
 after_success:
+  - pip install coveralls
   - coveralls
