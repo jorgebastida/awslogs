@@ -233,7 +233,7 @@ class AWSLogs(object):
                     # no firstEventTimestamp.
                     yield stream['logStreamName']
                 elif max(stream['firstEventTimestamp'], window_start) <= \
-                        min(stream['lastEventTimestamp'], window_end):
+                        min(stream['lastIngestionTime'], window_end):
                     yield stream['logStreamName']
 
     def color(self, text, color):
