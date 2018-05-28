@@ -115,7 +115,6 @@ class AWSLogs(object):
 
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
-        do_wait = object()
 
         def generator():
             """Yield events into trying to deduplicate them using a lru queue.
@@ -157,20 +156,17 @@ class AWSLogs(object):
 
                 if 'nextToken' in response:
                     kwargs['nextToken'] = response['nextToken']
-                else:
+                    continue
+
+                if self.watch:
+                    time.sleep(self.watch_interval)
                     if 'nextToken' in kwargs:
                         del kwargs['nextToken']
-                    yield do_wait
+                else:
+                    raise StopIteration
 
         def consumer():
             for event in generator():
-
-                if event is do_wait:
-                    if self.watch:
-                        time.sleep(self.watch_interval)
-                        continue
-                    else:
-                        return
 
                 output = []
                 if self.output_group_enabled:
