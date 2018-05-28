@@ -148,8 +148,9 @@ class AWSLogs(object):
 
             while True:
                 response = self.client.filter_log_events(**kwargs)
+                events = response.get('events', [])
 
-                for event in response.get('events', []):
+                for event in events:
                     if event['eventId'] not in interleaving_sanity:
                         interleaving_sanity.append(event['eventId'])
                         yield event
@@ -162,6 +163,13 @@ class AWSLogs(object):
                     time.sleep(self.watch_interval)
                     if 'nextToken' in kwargs:
                         del kwargs['nextToken']
+
+                    if events:
+                        kwargs['startTime'] = max(
+                            event['timestamp'] for event in events
+                        )
+                        assert kwargs['startTime'] == events[-1]['timestamp']
+
                 else:
                     raise StopIteration
 
