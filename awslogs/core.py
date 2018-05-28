@@ -158,6 +158,8 @@ class AWSLogs(object):
                 if 'nextToken' in response:
                     kwargs['nextToken'] = response['nextToken']
                 else:
+                    if 'nextToken' in kwargs:
+                        del kwargs['nextToken']
                     yield do_wait
 
         def consumer():
