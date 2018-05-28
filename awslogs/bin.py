@@ -189,11 +189,10 @@ def main(argv=None):
         options['aws_session_token'] = 'SENSITIVE'
         options['aws_profile'] = 'SENSITIVE'
         sys.stderr.write("\n")
-        sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
         sys.stderr.write("https://github.com/jorgebastida/awslogs/issues/new\n")
-        sys.stderr.write("-" * 80)
         sys.stderr.write("\n")
+        sys.stderr.write("```")
         sys.stderr.write("Version: {0}\n".format(__version__))
         sys.stderr.write("Python: {0}\n".format(sys.version))
         sys.stderr.write("boto3 version: {0}\n".format(boto3.__version__))
@@ -201,8 +200,8 @@ def main(argv=None):
         sys.stderr.write("Config: {0}\n".format(options))
         sys.stderr.write("Args: {0}\n\n".format(sys.argv))
         sys.stderr.write(traceback.format_exc())
-        sys.stderr.write("=" * 80)
         sys.stderr.write("\n")
+        sys.stderr.write("```")
         return 1
 
     return 0
