@@ -97,7 +97,7 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
-    def list_logs(self):
+    def list_logs(self):  # noqa: C901
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
