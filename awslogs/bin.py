@@ -134,6 +134,13 @@ def main(argv=None):
                             dest="query",
                             help="JMESPath query to use in filtering the response data")
 
+    get_parser.add_argument("-qi",
+                            "--query-indent",
+                            type=int,
+                            action="store",
+                            dest="query_indent",
+                            help="Indentation for JMESPath query result")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")

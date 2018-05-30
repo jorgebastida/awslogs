@@ -53,6 +53,7 @@ class AWSLogs(object):
         self.query = kwargs.get('query')
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
+            self.query_indent = kwargs.get('query_indent')
         self.log_group_prefix = kwargs.get('log_group_prefix')
         self.client = boto3.client(
             'logs',
@@ -179,7 +180,7 @@ class AWSLogs(object):
                     parsed = json.loads(event['message'])
                     message = self.query_expression.search(parsed)
                     if not isinstance(message, six.string_types):
-                        message = json.dumps(message)
+                        message = json.dumps(message, indent=self.query_indent)
                 output.append(message.rstrip())
 
                 print(' '.join(output))
