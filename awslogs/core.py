@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from collections import deque
 
 import boto3
+import botocore
 from botocore.compat import json, six, total_seconds
 
 import jmespath
@@ -21,6 +22,18 @@ from . import exceptions
 def milis2iso(milis):
     res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
     return (res + ".000")[:23] + 'Z'
+
+
+def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region):
+    core_session = botocore.session.get_session()
+    core_session.set_config_variable('profile', aws_profile)
+    session = boto3.session.Session(botocore_session=core_session)
+    return session.client(
+        'logs',
+        aws_access_key_id=aws_access_key_id,
+        aws_secret_access_key=aws_secret_access_key,
+        aws_session_token=aws_session_token,
+        region_name=aws_region)
 
 
 class AWSLogs(object):
@@ -54,12 +67,12 @@ class AWSLogs(object):
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
         self.log_group_prefix = kwargs.get('log_group_prefix')
-        self.client = boto3.client(
-            'logs',
-            aws_access_key_id=self.aws_access_key_id,
-            aws_secret_access_key=self.aws_secret_access_key,
-            aws_session_token=self.aws_session_token,
-            region_name=self.aws_region
+        self.client = boto3_client(
+            kwargs.get('aws_profile'),
+            self.aws_access_key_id,
+            self.aws_secret_access_key,
+            self.aws_session_token,
+            self.aws_region
         )
 
     def _get_streams_from_pattern(self, group, pattern):
