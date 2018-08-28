@@ -175,8 +175,9 @@ class AWSLogs(object):
                     )
 
                 message = event['message']
-                if self.query is not None and message[0] == '{':
-                    parsed = json.loads(event['message'])
+                json_start = message.find('{')
+                if self.query is not None and json_start != -1:
+                    parsed = json.loads(message[json_start:])
                     message = self.query_expression.search(parsed)
                     if not isinstance(message, six.string_types):
                         message = json.dumps(message)
