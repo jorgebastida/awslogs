@@ -604,3 +604,13 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stderr', new_callable=StringIO)
     def test_version(self, mock_stderr):
         self.assertRaises(SystemExit, main, "awslogs --version".split())
+
+    @patch('botocore.session.get_session')
+    def test_boto3_client_creation(self, mock_core_session):
+        client = Mock()
+        boto_session = Mock()
+        mock_core_session.return_value = boto_session
+        boto_session.create_client.return_value = client
+
+        awslogs = AWSLogs()
+        self.assertEqual(client, awslogs.client)
