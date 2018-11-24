@@ -104,7 +104,7 @@ def main(argv=None):
                             dest='interval',
                             type=int,
                             default=1,
-                            help="Interval at which to query for new log lines")
+                            help="Interval in seconds at which to query for new log lines")
 
     get_parser.add_argument("-G",
                             "--no-group",
