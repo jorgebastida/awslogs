@@ -280,7 +280,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get AAA DDD --no-color".split())
+        main("awslogs get AAA DDD --color=never".split())
         output = mock_stdout.getvalue()
         expected = ("AAA DDD Hello 1\n"
                     "AAA EEE Hello 2\n"
@@ -324,7 +324,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group AAA DDD --no-color".split())
+        main("awslogs get --no-group AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -340,7 +340,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-stream AAA DDD --no-color".split())
+        main("awslogs get --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -356,7 +356,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group --no-stream AAA DDD --no-color".split())
+        main("awslogs get --no-group --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -372,7 +372,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream_short_forms(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get -GS AAA DDD --no-color".split())
+        main("awslogs get -GS AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -390,7 +390,7 @@ class TestAWSLogs(unittest.TestCase):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--timestamp --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -408,7 +408,7 @@ class TestAWSLogs(unittest.TestCase):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--ingestion-time --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -426,7 +426,7 @@ class TestAWSLogs(unittest.TestCase):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--timestamp --ingestion-time --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -481,7 +481,7 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
-        main("awslogs get AAA DDD --no-color".split())
+        main("awslogs get AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
