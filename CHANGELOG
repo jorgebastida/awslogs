@@ -1,3 +1,7 @@
+0.11.0
+======
+- Add finer-grained control over color output (Thanks Alex Pinkney)
+
 0.10.0
 =======
 - Gracefully exit on SIGPIPE (Thanks rwolfson) #122 #93 #101
