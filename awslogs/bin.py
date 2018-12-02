@@ -100,8 +100,8 @@ def main(argv=None):
                             help="Query for new log lines constantly")
 
     get_parser.add_argument("-i",
-                            "--interval",
-                            dest='interval',
+                            "--watch-interval",
+                            dest='watch_interval',
                             type=int,
                             default=1,
                             help="Interval in seconds at which to query for new log lines")

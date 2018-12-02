@@ -42,7 +42,7 @@ class AWSLogs(object):
         self.log_stream_name = kwargs.get('log_stream_name')
         self.filter_pattern = kwargs.get('filter_pattern')
         self.watch = kwargs.get('watch')
-        self.interval = kwargs.get('interval')
+        self.watch_interval = kwargs.get('watch_interval')
         self.color_enabled = kwargs.get('color_enabled')
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
@@ -139,7 +139,7 @@ class AWSLogs(object):
 
                 if event is do_wait:
                     if self.watch:
-                        time.sleep(self.interval)
+                        time.sleep(self.watch_interval)
                         continue
                     else:
                         return
