@@ -99,6 +99,13 @@ def main(argv=None):
                             dest='watch',
                             help="Query for new log lines constantly")
 
+    get_parser.add_argument("-i",
+                            "--watch-interval",
+                            dest='watch_interval',
+                            type=int,
+                            default=1,
+                            help="Interval in seconds at which to query for new log lines")
+
     get_parser.add_argument("-G",
                             "--no-group",
                             action='store_false',
@@ -123,10 +130,15 @@ def main(argv=None):
 
     add_date_range_arguments(get_parser)
 
-    get_parser.add_argument("--no-color",
-                            action='store_false',
-                            dest='color_enabled',
-                            help="Do not color output")
+    get_parser.add_argument("--color",
+                            choices=['never', 'always', 'auto'],
+                            metavar='WHEN',
+                            default='auto',
+                            help=("When to color output. WHEN can be 'auto' "
+                                  "(default if ommitted), 'never', or "
+                                  "'always'. With --color=auto, output is "
+                                  "colored only when standard output is "
+                                  "connected to a terminal."))
 
     get_parser.add_argument("-q",
                             "--query",
@@ -157,12 +169,6 @@ def main(argv=None):
 
     # Parse input
     options, args = parser.parse_known_args(argv)
-
-    # Workaround the fact that boto3 don't allow you to specify a profile
-    # when you instantiate the a client. We need --profile because that's
-    # the api people are use to with aws-cli.
-    if getattr(options, 'aws_profile', None):
-        os.environ['AWS_PROFILE'] = options.aws_profile
 
     try:
         logs = AWSLogs(**vars(options))
