@@ -19,6 +19,13 @@ from dateutil.tz import tzutc
 from . import exceptions
 
 
+COLOR_ENABLED = {
+    'always': True,
+    'never': False,
+    'auto': sys.stdout.isatty(),
+}
+
+
 def milis2iso(milis):
     res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
     return (res + ".000")[:23] + 'Z'
@@ -61,7 +68,8 @@ class AWSLogs(object):
         self.log_stream_name = kwargs.get('log_stream_name')
         self.filter_pattern = kwargs.get('filter_pattern')
         self.watch = kwargs.get('watch')
-        self.color_enabled = kwargs.get('color_enabled')
+        self.watch_interval = kwargs.get('watch_interval')
+        self.color_enabled = COLOR_ENABLED.get(kwargs.get('color'), True)
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
         self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
@@ -157,7 +165,7 @@ class AWSLogs(object):
 
                 if event is do_wait:
                     if self.watch:
-                        time.sleep(1)
+                        time.sleep(self.watch_interval)
                         continue
                     else:
                         return
