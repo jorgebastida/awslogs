@@ -5,7 +5,7 @@
 - Reuse aws-cli MFA sessions cache if present (Thanks Juhani Hietikko)
 - Use lastIngestionTime instead of lastEventTimestamp in order to correctly filter streams (Thanks Daniel Hahler and Clément MATHIEU)
 0.10.0
-=======
+======
 - Gracefully exit on SIGPIPE (Thanks rwolfson) #122 #93 #101
 
 0.9.0
