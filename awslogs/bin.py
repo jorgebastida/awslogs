@@ -188,6 +188,8 @@ def main(argv=None):
         return exc.code
     except Exception:
         import platform
+        import pprint
+        import re
         import traceback
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
@@ -198,16 +200,30 @@ def main(argv=None):
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
         sys.stderr.write("https://github.com/jorgebastida/awslogs/issues/new\n")
         sys.stderr.write("\n")
-        sys.stderr.write("```")
-        sys.stderr.write("Version: {0}\n".format(__version__))
-        sys.stderr.write("Python: {0}\n".format(sys.version))
-        sys.stderr.write("boto3 version: {0}\n".format(boto3.__version__))
-        sys.stderr.write("Platform: {0}\n".format(platform.platform()))
-        sys.stderr.write("Config: {0}\n".format(options))
-        sys.stderr.write("Args: {0}\n\n".format(sys.argv))
-        sys.stderr.write(traceback.format_exc())
-        sys.stderr.write("\n")
-        sys.stderr.write("```")
+
+        issue_info = "\n".join((
+            "Version:       {0}".format(__version__),
+            "Python:        {0}".format(sys.version),
+            "boto3 version: {0}".format(boto3.__version__),
+            "Platform:      {0}".format(platform.platform()),
+            "Args:          {0}".format(sys.argv),
+            # use pformat for ordering and nice rendering
+            "Config: {0}".format(pprint.pformat(options)),
+            "",
+            traceback.format_exc(),
+        ))
+        # use enough backticks to properly escape the issue_info pre-formatted block
+        try:
+            backtick_count = 1 + max(
+                (len(match.group()) for match in re.finditer(r"`{3,}", issue_info)),
+            )
+        except ValueError:
+            # only needed for python 2 as later have a `default` parameter to the max function
+            backtick_count = 3
+        backticks = "`" * backtick_count + "\n"
+        sys.stderr.write(backticks)
+        sys.stderr.write(issue_info + "\n")
+        sys.stderr.write(backticks)
         return 1
 
     return 0
