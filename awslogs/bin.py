@@ -99,6 +99,13 @@ def main(argv=None):
                             dest='watch',
                             help="Query for new log lines constantly")
 
+    get_parser.add_argument("-i",
+                            "--watch-interval",
+                            dest='watch_interval',
+                            type=int,
+                            default=1,
+                            help="Interval in seconds at which to query for new log lines")
+
     get_parser.add_argument("-G",
                             "--no-group",
                             action='store_false',
