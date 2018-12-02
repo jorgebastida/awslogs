@@ -89,10 +89,13 @@ class TestAWSLogsDatetimeParse(unittest.TestCase):
 
 class TestAWSLogs(unittest.TestCase):
 
-    def _stream(self, name, start=0, end=sys.maxsize):
+    def _stream(self, name, start=0, ingestion=sys.maxsize, end=None):
+        if end is None:
+            end = ingestion - 1
         return {'logStreamName': name,
                 'firstEventTimestamp': start,
-                'lastEventTimestamp': end}
+                'lastEventTimestamp': end,
+                'lastIngestionTime': ingestion}
 
     def set_ABCDE_logs(self, botoclient):
         client = Mock()
@@ -235,12 +238,14 @@ class TestAWSLogs(unittest.TestCase):
             {'logStreams': [self._stream('A', 0, 1),
                             self._stream('B', 0, 6),
                             self._stream('C'),
-                            self._stream('D', sys.maxsize - 1, sys.maxsize)],
+                            self._stream('D', sys.maxsize - 1, sys.maxsize),
+                            self._stream('E', 0, 5, 4),
+                            ],
              }
         ]
         parse_datetime.side_effect = [5, 7]
         awslogs = AWSLogs(log_group_name='group', start='5', end='7')
-        self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C'])
+        self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C', 'E'])
 
     @patch('awslogs.core.boto3_client')
     def test_get_streams_from_pattern(self, botoclient):
