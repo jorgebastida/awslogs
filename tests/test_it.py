@@ -285,7 +285,7 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get AAA DDD --color=never".split())
+        exit_code = main("awslogs get AAA DDD --color=never".split())
         output = mock_stdout.getvalue()
         expected = ("AAA DDD Hello 1\n"
                     "AAA EEE Hello 2\n"
@@ -295,12 +295,13 @@ class TestAWSLogs(unittest.TestCase):
                     "AAA EEE Hello 6\n"
                     )
         assert output == expected
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_with_color(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get AAA DDD".split())
+        exit_code = main("awslogs get AAA DDD".split())
         output = mock_stdout.getvalue()
         expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 1\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 2\n"
@@ -309,27 +310,27 @@ class TestAWSLogs(unittest.TestCase):
                     "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 5\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m Hello 6\n"
                     )
-
         assert output == expected
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_query(self, mock_stdout, botoclient):
         self.set_json_logs(botoclient)
-        main("awslogs get AAA DDD --query foo".split())
+        exit_code = main("awslogs get AAA DDD --query foo".split())
         output = mock_stdout.getvalue()
         expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m bar\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m {\"bar\": \"baz\"}\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 3\n"
                     )
-
         assert output == expected
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group AAA DDD --color=never".split())
+        exit_code = main("awslogs get --no-group AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -340,12 +341,13 @@ class TestAWSLogs(unittest.TestCase):
              "DDD Hello 5\n"
              "EEE Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-stream AAA DDD --color=never".split())
+        exit_code = main("awslogs get --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -356,12 +358,13 @@ class TestAWSLogs(unittest.TestCase):
              "AAA Hello 5\n"
              "AAA Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group --no-stream AAA DDD --color=never".split())
+        exit_code = main("awslogs get --no-group --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -372,12 +375,13 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 5\n"
              "Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream_short_forms(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get -GS AAA DDD --color=never".split())
+        exit_code = main("awslogs get -GS AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -388,12 +392,13 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 5\n"
              "Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get "
+        exit_code = main("awslogs get "
              "--timestamp --no-group --no-stream "
              "AAA DDD --color=never".split())
 
@@ -406,12 +411,13 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z Hello 5\n"
              "1970-01-01T00:00:00.000Z Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get "
+        exit_code = main("awslogs get "
              "--ingestion-time --no-group --no-stream "
              "AAA DDD --color=never".split())
 
@@ -424,12 +430,13 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:05.000Z Hello 5\n"
              "1970-01-01T00:00:05.009Z Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp_and_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get "
+        exit_code = main("awslogs get "
              "--timestamp --ingestion-time --no-group --no-stream "
              "AAA DDD --color=never".split())
 
@@ -442,6 +449,7 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.000Z Hello 5\n"
              "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.009Z Hello 6\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
@@ -486,7 +494,7 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
-        main("awslogs get AAA DDD --color=never".split())
+        exit_code = main("awslogs get AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -494,6 +502,7 @@ class TestAWSLogs(unittest.TestCase):
              "AAA EEE Hello 2\n"
              "AAA DDD Hello 3\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stderr', new_callable=StringIO)
@@ -521,12 +530,12 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.side_effect = paginator
 
-        code = main("awslogs get AAA foo.*".split())
-        self.assertEqual(code, 7)
+        exit_code = main("awslogs get AAA foo.*".split())
         self.assertEqual(mock_stderr.getvalue(),
                          colored("No streams match your pattern 'foo.*' "
                                  "for the given time period.\n",
                                  "red"))
+        assert exit_code == 7
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
@@ -542,13 +551,14 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.return_value.paginate.return_value = groups
 
-        main("awslogs groups".split())
+        exit_code = main("awslogs groups".split())
         self.assertEqual(
             mock_stdout.getvalue(),
             ("AAA\n"
              "BBB\n"
              "CCC\n")
         )
+        assert exit_code == 0
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
@@ -577,30 +587,31 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.side_effect = paginator
 
-        main("awslogs streams AAA".split())
+        exit_code = main("awslogs streams AAA".split())
         self.assertEqual(
             mock_stdout.getvalue(),
             ("DDD\n"
              "EEE\n")
         )
+        assert exit_code == 0
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_unknown_date_error(self, mock_stderr):
-        code = main("awslogs get AAA BBB -sX".split())
-        self.assertEqual(code, 3)
+        exit_code = main("awslogs get AAA BBB -sX".split())
         self.assertEqual(mock_stderr.getvalue(),
                          colored("awslogs doesn't understand 'X' as a date.\n",
                                  "red"))
+        assert exit_code == 3
 
     @patch('awslogs.bin.AWSLogs')
     @patch('sys.stderr', new_callable=StringIO)
     def test_unknown_error(self, mock_stderr, mock_awslogs):
         mock_awslogs.side_effect = Exception("Error!")
-        code = main("awslogs get AAA BBB".split())
+        exit_code = main("awslogs get AAA BBB".split())
         output = mock_stderr.getvalue()
-        self.assertEqual(code, 1)
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
+        assert exit_code == 1
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_help(self, mock_stderr):
