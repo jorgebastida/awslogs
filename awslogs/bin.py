@@ -130,10 +130,15 @@ def main(argv=None):
 
     add_date_range_arguments(get_parser)
 
-    get_parser.add_argument("--no-color",
-                            action='store_false',
-                            dest='color_enabled',
-                            help="Do not color output")
+    get_parser.add_argument("--color",
+                            choices=['never', 'always', 'auto'],
+                            metavar='WHEN',
+                            default='auto',
+                            help=("When to color output. WHEN can be 'auto' "
+                                  "(default if ommitted), 'never', or "
+                                  "'always'. With --color=auto, output is "
+                                  "colored only when standard output is "
+                                  "connected to a terminal."))
 
     get_parser.add_argument("-q",
                             "--query",
