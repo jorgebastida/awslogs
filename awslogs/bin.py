@@ -170,12 +170,6 @@ def main(argv=None):
     # Parse input
     options, args = parser.parse_known_args(argv)
 
-    # Workaround the fact that boto3 don't allow you to specify a profile
-    # when you instantiate the a client. We need --profile because that's
-    # the api people are use to with aws-cli.
-    if getattr(options, 'aws_profile', None):
-        os.environ['AWS_PROFILE'] = options.aws_profile
-
     try:
         logs = AWSLogs(**vars(options))
         if not hasattr(options, 'func'):

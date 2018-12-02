@@ -2,6 +2,7 @@
 ======
 - Add finer-grained control over color output (Thanks Alex Pinkney)
 - Make watch interval configurable (Thanks Logan Hendricks)
+- Reuse aws-cli MFA sessions cache if present (Thanks Juhani Hietikko)
 
 0.10.0
 =======
