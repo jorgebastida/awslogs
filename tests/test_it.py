@@ -30,7 +30,7 @@ def mapkeys(keys, rec_lst):
 
 
 class TestAWSLogsDatetimeParse(unittest.TestCase):
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('awslogs.core.datetime')
     def test_parse_datetime(self, datetime_mock, botoclient):
 
@@ -177,7 +177,7 @@ class TestAWSLogs(unittest.TestCase):
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     def test_get_groups(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -197,7 +197,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_groups()],
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     def test_get_groups_with_log_group_prefix(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -209,7 +209,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_groups()],
                          ['A'])
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     def test_get_streams(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -229,7 +229,7 @@ class TestAWSLogs(unittest.TestCase):
         self.assertEqual([g for g in awslogs.get_streams()],
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('awslogs.core.AWSLogs.parse_datetime')
     def test_get_streams_filtered_by_date(self, parse_datetime, botoclient):
         client = Mock()
@@ -247,7 +247,7 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs(log_group_name='group', start='5', end='7')
         self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C', 'E'])
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     def test_get_streams_from_pattern(self, botoclient):
         client = Mock()
         botoclient.return_value = client
@@ -281,11 +281,11 @@ class TestAWSLogs(unittest.TestCase):
         actual = [s for s in awslogs._get_streams_from_pattern('X', 'A[AC]A')]
         self.assertEqual(actual, expected)
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get AAA DDD --no-color".split())
+        main("awslogs get AAA DDD --color=never".split())
         output = mock_stdout.getvalue()
         expected = ("AAA DDD Hello 1\n"
                     "AAA EEE Hello 2\n"
@@ -296,7 +296,7 @@ class TestAWSLogs(unittest.TestCase):
                     )
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_with_color(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
@@ -312,7 +312,7 @@ class TestAWSLogs(unittest.TestCase):
 
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_query(self, mock_stdout, botoclient):
         self.set_json_logs(botoclient)
@@ -325,11 +325,11 @@ class TestAWSLogs(unittest.TestCase):
 
         assert output == expected
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group AAA DDD --no-color".split())
+        main("awslogs get --no-group AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -341,11 +341,11 @@ class TestAWSLogs(unittest.TestCase):
              "EEE Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-stream AAA DDD --no-color".split())
+        main("awslogs get --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -357,11 +357,11 @@ class TestAWSLogs(unittest.TestCase):
              "AAA Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get --no-group --no-stream AAA DDD --no-color".split())
+        main("awslogs get --no-group --no-stream AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -373,11 +373,11 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup_nostream_short_forms(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
-        main("awslogs get -GS AAA DDD --no-color".split())
+        main("awslogs get -GS AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -389,13 +389,13 @@ class TestAWSLogs(unittest.TestCase):
              "Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--timestamp --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -407,13 +407,13 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--ingestion-time --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -425,13 +425,13 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:05.009Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_get_timestamp_and_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         main("awslogs get "
              "--timestamp --ingestion-time --no-group --no-stream "
-             "AAA DDD --no-color".split())
+             "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -443,7 +443,7 @@ class TestAWSLogs(unittest.TestCase):
              "1970-01-01T00:00:00.000Z 1970-01-01T00:00:05.009Z Hello 6\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_get_deduplication(self, mock_stdout, botoclient):
         client = Mock()
@@ -486,7 +486,7 @@ class TestAWSLogs(unittest.TestCase):
 
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
-        main("awslogs get AAA DDD --no-color".split())
+        main("awslogs get AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -495,7 +495,7 @@ class TestAWSLogs(unittest.TestCase):
              "AAA DDD Hello 3\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stderr', new_callable=StringIO)
     def test_main_get_no_matching_streams(self, mock_stderr, botoclient):
         client = Mock()
@@ -528,7 +528,7 @@ class TestAWSLogs(unittest.TestCase):
                                  "for the given time period.\n",
                                  "red"))
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_groups(self, mock_stdout, botoclient):
         client = Mock()
@@ -550,7 +550,7 @@ class TestAWSLogs(unittest.TestCase):
              "CCC\n")
         )
 
-    @patch('boto3.client')
+    @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
     def test_main_streams(self, mock_stdout, botoclient):
         client = Mock()
@@ -609,3 +609,13 @@ class TestAWSLogs(unittest.TestCase):
     @patch('sys.stderr', new_callable=StringIO)
     def test_version(self, mock_stderr):
         self.assertRaises(SystemExit, main, "awslogs --version".split())
+
+    @patch('botocore.session.get_session')
+    def test_boto3_client_creation(self, mock_core_session):
+        client = Mock()
+        boto_session = Mock()
+        mock_core_session.return_value = boto_session
+        boto_session.create_client.return_value = client
+
+        awslogs = AWSLogs()
+        self.assertEqual(client, awslogs.client)
