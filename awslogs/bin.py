@@ -99,6 +99,13 @@ def main(argv=None):
                             dest='watch',
                             help="Query for new log lines constantly")
 
+    get_parser.add_argument("-i",
+                            "--watch-interval",
+                            dest='watch_interval',
+                            type=int,
+                            default=1,
+                            help="Interval in seconds at which to query for new log lines")
+
     get_parser.add_argument("-G",
                             "--no-group",
                             action='store_false',
@@ -123,10 +130,15 @@ def main(argv=None):
 
     add_date_range_arguments(get_parser)
 
-    get_parser.add_argument("--no-color",
-                            action='store_false',
-                            dest='color_enabled',
-                            help="Do not color output")
+    get_parser.add_argument("--color",
+                            choices=['never', 'always', 'auto'],
+                            metavar='WHEN',
+                            default='auto',
+                            help=("When to color output. WHEN can be 'auto' "
+                                  "(default if ommitted), 'never', or "
+                                  "'always'. With --color=auto, output is "
+                                  "colored only when standard output is "
+                                  "connected to a terminal."))
 
     get_parser.add_argument("-q",
                             "--query",
@@ -158,12 +170,6 @@ def main(argv=None):
     # Parse input
     options, args = parser.parse_known_args(argv)
 
-    # Workaround the fact that boto3 don't allow you to specify a profile
-    # when you instantiate the a client. We need --profile because that's
-    # the api people are use to with aws-cli.
-    if getattr(options, 'aws_profile', None):
-        os.environ['AWS_PROFILE'] = options.aws_profile
-
     try:
         logs = AWSLogs(**vars(options))
         if not hasattr(options, 'func'):
@@ -189,11 +195,10 @@ def main(argv=None):
         options['aws_session_token'] = 'SENSITIVE'
         options['aws_profile'] = 'SENSITIVE'
         sys.stderr.write("\n")
-        sys.stderr.write("=" * 80)
         sys.stderr.write("\nYou've found a bug! Please, raise an issue attaching the following traceback\n")
         sys.stderr.write("https://github.com/jorgebastida/awslogs/issues/new\n")
-        sys.stderr.write("-" * 80)
         sys.stderr.write("\n")
+        sys.stderr.write("```")
         sys.stderr.write("Version: {0}\n".format(__version__))
         sys.stderr.write("Python: {0}\n".format(sys.version))
         sys.stderr.write("boto3 version: {0}\n".format(boto3.__version__))
@@ -201,8 +206,8 @@ def main(argv=None):
         sys.stderr.write("Config: {0}\n".format(options))
         sys.stderr.write("Args: {0}\n\n".format(sys.argv))
         sys.stderr.write(traceback.format_exc())
-        sys.stderr.write("=" * 80)
         sys.stderr.write("\n")
+        sys.stderr.write("```")
         return 1
 
     return 0
