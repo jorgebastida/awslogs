@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'boto3>=1.2.1',
+    'botocore>=1.8.14',
     'jmespath>=0.7.1,<1.0.0',
     'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
