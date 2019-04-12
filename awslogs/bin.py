@@ -46,7 +46,7 @@ def main(argv=None):
         parser.add_argument("--profile",
                             dest="aws_profile",
                             type=str,
-                            default=None,
+                            default=os.environ.get('AWS_PROFILE', None),
                             help="aws profile")
 
         parser.add_argument("--aws-region",
