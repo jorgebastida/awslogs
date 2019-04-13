@@ -2,6 +2,7 @@
 ======
 - Extra polish on issue markdown (Thanks Oliver Bristow)
 - Require at least boto3>=1.5.0 (Thanks Wahab Ali)
+- Handle AWS_PROFILE env variable (Thanks Galen Huntington)
 
 0.11.0
 ======
