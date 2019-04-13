@@ -1,6 +1,7 @@
 0.12.0
 ======
 - Extra polish on issue markdown (Thanks Oliver Bristow)
+- Require at least boto3>=1.5.0 (Thanks Wahab Ali)
 
 0.11.0
 ======
