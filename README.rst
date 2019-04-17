@@ -79,9 +79,9 @@ Options
 
 * ``awslogs groups``: List existing groups
 * ``awslogs streams GROUP``: List existing streams withing ``GROUP``
-* ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
+* ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs from streams with names matching ``STREAM_EXPRESSION`` in log group ``GROUP``.
 
-  - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
+  - STREAM_EXPRESSION is a python regular expression accepted by ``re.compile()`` `described here <https://docs.python.org/3/library/re.html#regular-expression-syntax>`_. Expression ``ALL`` is reserved and is same as ``'.*'``. Remember to quote/escape shell special characters to ensure they are not gobbled up by shell variable expansion. E.g. ``'2014-04.*'`` instead of ``2014-04.*``
 
 **Note:** You need to provide to all these options a valid AWS region using ``--aws-region`` or ``AWS_REGION`` env variable.
 

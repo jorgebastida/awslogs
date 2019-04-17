@@ -16,7 +16,14 @@ except ImportError:
 
 from awslogs import AWSLogs
 from awslogs.exceptions import UnknownDateError
-from awslogs.bin import main
+from awslogs.bin import main, seconds_since_epoch
+
+import logging
+logger = logging.getLogger('awslogs')
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT, filename="/tmp/awslogs.log")
+# setLevel to logging.DEBUG to enable logging.
+logger.setLevel(logging.CRITICAL)
 
 
 def mapkeys(keys, rec_lst):
@@ -30,9 +37,10 @@ def mapkeys(keys, rec_lst):
 
 
 class TestAWSLogsDatetimeParse(unittest.TestCase):
+
+    @patch('awslogs.bin.datetime')
     @patch('awslogs.core.boto3_client')
-    @patch('awslogs.core.datetime')
-    def test_parse_datetime(self, datetime_mock, botoclient):
+    def test_seconds_since_epoch(self, botoclient, datetime_mock):
 
         awslogs = AWSLogs()
         datetime_mock.utcnow.return_value = datetime(2015, 1, 1, 3, 0, 0, 0)
@@ -42,8 +50,8 @@ class TestAWSLogsDatetimeParse(unittest.TestCase):
             dt = datetime.strptime(iso_str, "%Y-%m-%d %H:%M:%S")
             return int(total_seconds(dt - datetime(1970, 1, 1)) * 1000)
 
-        self.assertEqual(awslogs.parse_datetime(''), None)
-        self.assertEqual(awslogs.parse_datetime(None), None)
+        self.assertEqual(seconds_since_epoch(''), None)
+        self.assertEqual(seconds_since_epoch(None), None)
         plan = (('2015-01-01 02:59:00', '1m'),
                 ('2015-01-01 02:59:00', '1m ago'),
                 ('2015-01-01 02:59:00', '1minute'),
@@ -81,10 +89,10 @@ class TestAWSLogsDatetimeParse(unittest.TestCase):
                 )
 
         for expected_iso, dateutil_time in plan:
-            self.assertEqual(awslogs.parse_datetime(dateutil_time),
+            self.assertEqual(seconds_since_epoch(dateutil_time),
                              iso2epoch(expected_iso))
 
-        self.assertRaises(UnknownDateError, awslogs.parse_datetime, '???')
+        self.assertRaises(UnknownDateError, seconds_since_epoch, '???')
 
 
 class TestAWSLogs(unittest.TestCase):
@@ -230,8 +238,8 @@ class TestAWSLogs(unittest.TestCase):
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
 
     @patch('awslogs.core.boto3_client')
-    @patch('awslogs.core.AWSLogs.parse_datetime')
-    def test_get_streams_filtered_by_date(self, parse_datetime, botoclient):
+    @patch('awslogs.bin.seconds_since_epoch')
+    def test_get_streams_filtered_by_date(self, seconds_since_epoch_mock, botoclient):
         client = Mock()
         botoclient.return_value = client
         client.get_paginator.return_value.paginate.return_value = [
@@ -243,8 +251,8 @@ class TestAWSLogs(unittest.TestCase):
                             ],
              }
         ]
-        parse_datetime.side_effect = [5, 7]
-        awslogs = AWSLogs(log_group_name='group', start='5', end='7')
+        seconds_since_epoch_mock.side_effect = [5, 7]
+        awslogs = AWSLogs(log_group_name='group', start=5, end=7)
         self.assertEqual([g for g in awslogs.get_streams()], ['B', 'C', 'E'])
 
     @patch('awslogs.core.boto3_client')
@@ -630,3 +638,27 @@ class TestAWSLogs(unittest.TestCase):
 
         awslogs = AWSLogs()
         self.assertEqual(client, awslogs.client)
+
+    @patch('awslogs.core.boto3_client')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_invalid_stream_regex(self, mock_stderr, botoclient):
+        self.maxDiff = None
+        botoclient.return_value = None
+        exit_code = main("awslogs get LG_NAME *".split())
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("Log stream name pattern '*' is not a valid Python regular expression.\n",
+                                 "red"))
+        assert exit_code == 8
+
+    @patch('awslogs.core.boto3_client')
+    @patch('sys.stdout', new_callable=StringIO)
+    def test_valid_stream_regex(self, mock_stdout, botoclient):
+        logger.debug('botoclient: %s', botoclient)
+        self.maxDiff = None
+        self.set_ABCDE_logs(botoclient)
+        exit_code = main("awslogs streams LG_NAME .*".split())
+        output = mock_stdout.getvalue()
+        expected = ("DDD\n"
+                    "EEE\n")
+        assert output == expected
+        assert exit_code == 0
