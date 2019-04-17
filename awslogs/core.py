@@ -273,4 +273,3 @@ class AWSLogs(object):
         if self.color_enabled:
             return colored(text, color)
         return text
-
