@@ -90,8 +90,7 @@ class TestAWSLogsDatetimeParse(unittest.TestCase):
 
         for expected_iso, dateutil_time in plan:
             self.assertEqual(seconds_since_epoch(dateutil_time),
-                             iso2epoch(expected_iso),
-                             msg='expected_iso: {}, dateutil_time: {}'.format(expected_iso, dateutil_time))
+                             iso2epoch(expected_iso))
 
         self.assertRaises(UnknownDateError, seconds_since_epoch, '???')
 
