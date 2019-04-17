@@ -1,16 +1,60 @@
 import os
+import re
 import sys
 import locale
 import codecs
 import argparse
+from datetime import datetime, timedelta
+from dateutil.parser import parse
+from dateutil.tz import tzutc
 
 import boto3
 from botocore.client import ClientError
+from botocore.compat import total_seconds
 from termcolor import colored
 
 from . import exceptions
 from .core import AWSLogs
 from ._version import __version__
+
+
+def regex_str(s):
+    """Verifies that the s is a valid python regex
+    if s is not a valid regex then an exception is raised"""
+    try:
+        re.compile(s)
+    except Exception as e:
+        raise exceptions.InvalidPythonRegularExpressionError('Log stream name pattern', s)
+
+    return s
+
+
+def seconds_since_epoch(datetime_text):
+    """Parse ``datetime_text`` into a seconds since epoch."""
+
+    if not datetime_text:
+        return None
+
+    ago_regexp = r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
+    ago_match = re.match(ago_regexp, datetime_text)
+
+    if ago_match:
+        amount, unit = ago_match.groups()
+        amount = int(amount)
+        unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
+        date = datetime.utcnow() + timedelta(seconds=unit * amount * -1)
+    else:
+        try:
+            date = parse(datetime_text)
+        except ValueError:
+            raise exceptions.UnknownDateError(datetime_text)
+
+    if date.tzinfo:
+        if date.utcoffset != 0:
+            date = date.astimezone(tzutc())
+        date = date.replace(tzinfo=None)
+
+    return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
 
 
 def main(argv=None):
@@ -57,13 +101,13 @@ def main(argv=None):
 
     def add_date_range_arguments(parser, default_start='5m'):
         parser.add_argument("-s", "--start",
-                            type=str,
+                            type=seconds_since_epoch,
                             dest='start',
                             default=default_start,
                             help="Start time (default %(default)s)")
 
         parser.add_argument("-e", "--end",
-                            type=str,
+                            type=seconds_since_epoch,
                             dest='end',
                             help="End time")
 
@@ -81,7 +125,7 @@ def main(argv=None):
                             help="log group name")
 
     get_parser.add_argument("log_stream_name",
-                            type=str,
+                            type=regex_str,
                             default="ALL",
                             nargs='?',
                             help="log stream name")
@@ -167,10 +211,9 @@ def main(argv=None):
                                 type=str,
                                 help="log group name")
 
-    # Parse input
-    options, args = parser.parse_known_args(argv)
-
     try:
+        # Parse input
+        options, args = parser.parse_known_args(argv)
         logs = AWSLogs(**vars(options))
         if not hasattr(options, 'func'):
             parser.print_help()

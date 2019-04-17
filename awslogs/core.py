@@ -3,20 +3,25 @@ import sys
 import os
 import time
 import errno
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime
 from collections import deque
 
 import boto3
 import botocore
-from botocore.compat import json, six, total_seconds
+from botocore.compat import json, six
 
 import jmespath
 
 from termcolor import colored
-from dateutil.parser import parse
-from dateutil.tz import tzutc
 
 from . import exceptions
+
+logger = logging.getLogger('awslogs')
+FORMAT = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=FORMAT, filename="/tmp/awslogs.log")
+# setLevel to logging.DEBUG to enable logging.
+logger.setLevel(logging.CRITICAL)
 
 
 COLOR_ENABLED = {
@@ -59,6 +64,7 @@ class AWSLogs(object):
     ALL_WILDCARD = 'ALL'
 
     def __init__(self, **kwargs):
+        logger.debug('AWSLogs(): kwargs: %s', kwargs)
         self.aws_region = kwargs.get('aws_region')
         self.aws_access_key_id = kwargs.get('aws_access_key_id')
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
@@ -75,8 +81,8 @@ class AWSLogs(object):
         self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
         self.output_ingestion_time_enabled = kwargs.get(
             'output_ingestion_time_enabled')
-        self.start = self.parse_datetime(kwargs.get('start'))
-        self.end = self.parse_datetime(kwargs.get('end'))
+        self.start = kwargs.get('start')
+        self.end = kwargs.get('end')
         self.query = kwargs.get('query')
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
@@ -92,7 +98,7 @@ class AWSLogs(object):
     def _get_streams_from_pattern(self, group, pattern):
         """Returns streams in ``group`` matching ``pattern``."""
         pattern = '.*' if pattern == self.ALL_WILDCARD else pattern
-        reg = re.compile('^{0}'.format(pattern))
+        reg = re.compile('{0}'.format(pattern))
         for stream in self.get_streams(group):
             if re.match(reg, stream):
                 yield stream
@@ -250,7 +256,6 @@ class AWSLogs(object):
         kwargs = {'logGroupName': log_group_name or self.log_group_name}
         window_start = self.start or 0
         window_end = self.end or sys.float_info.max
-
         paginator = self.client.get_paginator('describe_log_streams')
         for page in paginator.paginate(**kwargs):
             for stream in page.get('logStreams', []):
@@ -269,29 +274,3 @@ class AWSLogs(object):
             return colored(text, color)
         return text
 
-    def parse_datetime(self, datetime_text):
-        """Parse ``datetime_text`` into a ``datetime``."""
-
-        if not datetime_text:
-            return None
-
-        ago_regexp = r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
-        ago_match = re.match(ago_regexp, datetime_text)
-
-        if ago_match:
-            amount, unit = ago_match.groups()
-            amount = int(amount)
-            unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
-            date = datetime.utcnow() + timedelta(seconds=unit * amount * -1)
-        else:
-            try:
-                date = parse(datetime_text)
-            except ValueError:
-                raise exceptions.UnknownDateError(datetime_text)
-
-        if date.tzinfo:
-            if date.utcoffset != 0:
-                date = date.astimezone(tzutc())
-            date = date.replace(tzinfo=None)
-
-        return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
