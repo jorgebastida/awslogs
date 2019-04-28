@@ -25,9 +25,9 @@ class TooManyStreamsFilteredError(BaseAWSLogsException):
                 "pattern and filter the output of awslogs.").format(*self.args)
 
 
-class NoStreamsFilteredError(BaseAWSLogsException):
+class JsonFormattingOrDecodingError(BaseAWSLogsException):
 
-    code = 7
+    code = 8
 
     def hint(self):
-        return ("No streams match your pattern '{0}' for the given time period.").format(*self.args)
+        return ("Invalid JSON string or string could not be decoded")
