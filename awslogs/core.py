@@ -203,8 +203,11 @@ class AWSLogs(object):
 
                 message = event['message']
                 if self.query is not None and message[0] == '{':
-                    parsed = json.loads(event['message'])
-                    message = self.query_expression.search(parsed)
+                    try:
+                        parsed = json.loads(event['message'])
+                        message = self.query_expression.search(parsed)
+                    except ValueError:  # includes JSONDecodeError
+                        raise exceptions.JsonFormattingOrDecodingError()
                     if not isinstance(message, six.string_types):
                         message = json.dumps(message)
                 output.append(message.rstrip())

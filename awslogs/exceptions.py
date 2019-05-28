@@ -31,3 +31,11 @@ class NoStreamsFilteredError(BaseAWSLogsException):
 
     def hint(self):
         return ("No streams match your pattern '{0}' for the given time period.").format(*self.args)
+
+
+class JsonFormattingOrDecodingError(BaseAWSLogsException):
+
+    code = 8
+
+    def hint(self):
+        return ("Invalid JSON string or string could not be decoded")
