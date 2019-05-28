@@ -206,7 +206,7 @@ class AWSLogs(object):
                     try:
                         parsed = json.loads(event['message'])
                         message = self.query_expression.search(parsed)
-                    except ValueError: #includes JSONDecodeError
+                    except ValueError:  # includes JSONDecodeError
                         raise exceptions.JsonFormattingOrDecodingError()
                     if not isinstance(message, six.string_types):
                         message = json.dumps(message)
