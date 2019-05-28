@@ -39,4 +39,3 @@ class JsonFormattingOrDecodingError(BaseAWSLogsException):
 
     def hint(self):
         return ("Invalid JSON string or string could not be decoded")
-
