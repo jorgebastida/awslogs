@@ -33,7 +33,12 @@ def milis2iso(milis):
 
 def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region):
     if any(param is not None for param in [aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region]):
-        core_session = botocore.session.get_session()
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=aws_region
+        )
     elif aws_profile is not None:
         session = boto3.Session(profile_name=aws_profile)
     else:
