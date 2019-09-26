@@ -77,8 +77,8 @@ If you are on OSX El Capitan, use the following (Why? Check Donald Stufft's comm
 Options
 -------
 
-* ``awslogs groups``: List existing groups
-* ``awslogs streams GROUP``: List existing streams withing ``GROUP``
+* ``awslogs groups``: List existing groups.
+* ``awslogs streams GROUP``: List existing streams withing ``GROUP``.
 * ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
