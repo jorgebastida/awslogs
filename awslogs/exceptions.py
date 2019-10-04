@@ -31,3 +31,27 @@ class NoStreamsFilteredError(BaseAWSLogsException):
 
     def hint(self):
         return ("No streams match your pattern '{0}' for the given time period.").format(*self.args)
+
+
+class NoRegionSpecifiedError(BaseAWSLogsException):
+
+    code = 8
+
+    def hint(self):
+        return ("No AWS region specified")
+
+
+class InvalidCredentialsError(BaseAWSLogsException):
+
+    code = 9
+
+    def hint(self):
+        return ("Invalid or missing credentials")
+
+
+class NoSuchLogGroupError(BaseAWSLogsException):
+
+    code = 10
+
+    def hint(self):
+        return ("The specified log group '{0}' does not exist").format(*self.args)

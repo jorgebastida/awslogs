@@ -7,6 +7,7 @@ except ImportError:
     from io import StringIO
 
 from botocore.compat import total_seconds
+from botocore.exceptions import ClientError
 from termcolor import colored
 
 try:
@@ -15,7 +16,9 @@ except ImportError:
     from unittest.mock import patch, Mock
 
 from awslogs import AWSLogs
-from awslogs.exceptions import UnknownDateError
+from awslogs.exceptions import (
+    UnknownDateError, NoSuchLogGroupError, InvalidCredentialsError, NoRegionSpecifiedError
+)
 from awslogs.bin import main
 
 
@@ -177,6 +180,21 @@ class TestAWSLogs(unittest.TestCase):
         client.get_paginator.side_effect = paginator
         client.filter_log_events.side_effect = logs
 
+    def set_nonexisting_log_group(self, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+
+        def paginator(value):
+            mock = Mock()
+            mock.paginate.return_value = {
+                'describe_log_groups': [],
+                'describe_log_streams': []
+            }.get(value)
+            return mock
+
+        client.get_paginator.side_effect = paginator
+        client.filter_log_events.side_effect = ClientError({'Error': {'Code': 'ResourceNotFoundException'}}, "filter_log_events") 
+
     @patch('awslogs.core.boto3_client')
     def test_get_groups(self, botoclient):
         client = Mock()
@@ -196,6 +214,15 @@ class TestAWSLogs(unittest.TestCase):
         awslogs = AWSLogs()
         self.assertEqual([g for g in awslogs.get_groups()],
                          ['A', 'B', 'C', 'D', 'E', 'F', 'G'])
+
+    @patch('awslogs.core.boto3_client')
+    def test_get_nonexisting_log_group(self, botoclient):
+        client = Mock()
+        botoclient.return_value = client
+        client.filter_log_events.side_effect = NoSuchLogGroupError
+        client.get_paginator.return_value.paginate.return_value = []
+        awslogs = AWSLogs(log_group_name='foobar', log_stream_name='ALL')
+        self.assertRaises(NoSuchLogGroupError, awslogs.list_logs)
 
     @patch('awslogs.core.boto3_client')
     def test_get_groups_with_log_group_prefix(self, botoclient):
@@ -603,6 +630,16 @@ class TestAWSLogs(unittest.TestCase):
                                  "red"))
         assert exit_code == 3
 
+    @patch('awslogs.core.boto3_client')
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_no_such_log_group(self, mock_stderr, botoclient):
+        self.set_nonexisting_log_group(botoclient)
+        exit_code = main("awslogs get AAAA".split())
+        self.assertEqual(mock_stderr.getvalue(),
+                         colored("The specified log group 'AAAA' does not exist\n",
+                                 "red"))
+        assert exit_code == 10
+
     @patch('awslogs.bin.AWSLogs')
     @patch('sys.stderr', new_callable=StringIO)
     def test_unknown_error(self, mock_stderr, mock_awslogs):
@@ -612,6 +649,20 @@ class TestAWSLogs(unittest.TestCase):
         self.assertTrue("You've found a bug!" in output)
         self.assertTrue("Exception: Error!" in output)
         assert exit_code == 1
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_no_region_specified_error(self, mock_stderr):
+        exit_code = main("awslogs get".split())
+        output = mock_stderr.getvalue()
+        self.assertTrue("No AWS region specified" in output)
+        assert exit_code == 8
+
+    @patch('sys.stderr', new_callable=StringIO)
+    def test_missing_credentials_error(self, mock_stderr):
+        exit_code = main("awslogs get --aws-region=eu-north-1".split())
+        output = mock_stderr.getvalue()
+        self.assertTrue("Invalid or missing credentials" in output)
+        assert exit_code == 9
 
     @patch('sys.stderr', new_callable=StringIO)
     def test_help(self, mock_stderr):
