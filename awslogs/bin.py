@@ -6,6 +6,7 @@ import argparse
 
 import boto3
 from botocore.client import ClientError
+from botocore.exceptions import NoRegionError, NoCredentialsError
 from termcolor import colored
 
 from . import exceptions
@@ -183,6 +184,17 @@ def main(argv=None):
             sys.stderr.write(colored("{0}\n".format(hint), "yellow"))
             return 4
         raise
+    except NoCredentialsError:
+        exc = exceptions.InvalidCredentialsError()
+        sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
+        return exc.code
+    except NoRegionError:
+        exc = exceptions.NoRegionSpecifiedError()
+        sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
+        return exc.code
+    except exceptions.NoSuchLogGroupError as exc:
+        sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
+        return exc.code
     except exceptions.BaseAWSLogsException as exc:
         sys.stderr.write(colored("{0}\n".format(exc.hint()), "red"))
         return exc.code

@@ -9,6 +9,7 @@ from collections import deque
 import boto3
 import botocore
 from botocore.compat import json, six, total_seconds
+from botocore.exceptions import ClientError
 
 import jmespath
 
@@ -97,6 +98,15 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
+    def _get_filtered_events(self, **kwargs):
+        try:
+            return self.client.filter_log_events(**kwargs)
+        except ClientError as exc:
+            if exc.response.get('Error', {}).get('Code') == 'ResourceNotFoundException':
+                raise exceptions.NoSuchLogGroupError(self.log_group_name)
+            else:
+                raise exc
+
     def list_logs(self):
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
@@ -148,8 +158,7 @@ class AWSLogs(object):
                 kwargs['filterPattern'] = self.filter_pattern
 
             while True:
-                response = self.client.filter_log_events(**kwargs)
-
+                response = self._get_filtered_events(**kwargs)
                 for event in response.get('events', []):
                     if event['eventId'] not in interleaving_sanity:
                         interleaving_sanity.append(event['eventId'])
