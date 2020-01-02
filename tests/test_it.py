@@ -44,7 +44,16 @@ class TestAWSLogsDatetimeParse(unittest.TestCase):
 
         self.assertEqual(awslogs.parse_datetime(''), None)
         self.assertEqual(awslogs.parse_datetime(None), None)
-        plan = (('2015-01-01 02:59:00', '1m'),
+        plan = (('2015-01-01 02:59:59', '1s'),
+                ('2015-01-01 02:59:59', '1s ago'),
+                ('2015-01-01 02:59:59', '1sec'),
+                ('2015-01-01 02:59:59', '1sec ago'),
+                ('2015-01-01 02:59:59', '1second'),
+                ('2015-01-01 02:59:59', '1second ago'),
+                ('2015-01-01 02:59:59', '1seconds'),
+                ('2015-01-01 02:59:59', '1seconds ago'),
+
+                ('2015-01-01 02:59:00', '1m'),
                 ('2015-01-01 02:59:00', '1m ago'),
                 ('2015-01-01 02:59:00', '1minute'),
                 ('2015-01-01 02:59:00', '1minute ago'),
