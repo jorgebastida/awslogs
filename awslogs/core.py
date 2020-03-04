@@ -203,7 +203,7 @@ class AWSLogs(object):
                     )
 
                 message = event['message']
-                if (self.query is not None or self.pretty_print_enabled is not None) and message[0] == '{':
+                if (self.query is not None or self.pretty_print_enabled) and message[0] == '{':
                     parsed = json.loads(message)
                     
                     if self.query is not None:
