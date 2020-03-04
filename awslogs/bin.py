@@ -149,7 +149,7 @@ def main(argv=None):
     get_parser.add_argument("-pretty",
                             "--pretty-print",
                             action='store_true',
-                            dest="pretty_print",
+                            dest="pretty_print_enabled",
                             help="Pretty print the json logs, using a 4 spaces indentation")
 
     # groups
