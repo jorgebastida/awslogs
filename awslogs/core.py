@@ -211,7 +211,7 @@ class AWSLogs(object):
                     if not isinstance(parsed, six.string_types):
                         if self.pretty_print is not None:
                             message = json.dumps(parsed, indent = 4)
-                        else
+                        else:
                             message = json.dumps(parsed)
                             
                 output.append(message.rstrip())
