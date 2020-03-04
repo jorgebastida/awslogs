@@ -213,6 +213,8 @@ class AWSLogs(object):
                             message = json.dumps(parsed, indent = 4)
                         else:
                             message = json.dumps(parsed)
+                    else:
+                        message = parsed
                             
                 output.append(message.rstrip())
 
