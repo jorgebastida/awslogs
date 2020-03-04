@@ -333,7 +333,7 @@ class TestAWSLogs(unittest.TestCase):
         exit_code = main("awslogs get AAA DDD --pretty-print".split())
         output = mock_stdout.getvalue()
         expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m {\n    \"foo\": \"bar\"\n}\n"
-                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m {\n    \"foo\": {\n        \"bar": "baz"\n    }\n}\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m {\n    \"foo\": {\n        \"bar\": \"baz\"\n    }\n}\n"
                     "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 3\n"
                     )
         assert output == expected
