@@ -328,7 +328,7 @@ class TestAWSLogs(unittest.TestCase):
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
-    def test_main_pretty_print(self, mock_stdout, botoclient):
+    def test_main_get_pretty_print(self, mock_stdout, botoclient):
         self.set_json_logs(botoclient)
         exit_code = main("awslogs get AAA DDD --pretty-print".split())
         output = mock_stdout.getvalue()
