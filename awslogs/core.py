@@ -80,7 +80,7 @@ class AWSLogs(object):
         self.query = kwargs.get('query')
         if self.query is not None:
             self.query_expression = jmespath.compile(self.query)
-        self.pretty_print_enabled = kwargs.get('pretty_print_enabled')
+        self.pretty_print_enabled = kwargs.get('_print_enabled')
         self.log_group_prefix = kwargs.get('log_group_prefix')
         self.client = boto3_client(
             self.aws_profile,
@@ -203,7 +203,7 @@ class AWSLogs(object):
                     )
 
                 message = event['message']
-                if (self.query is not None or self.pretty_print is not None) and message[0] == '{':
+                if (self.query is not None or self.pretty_print_enabled is not None) and message[0] == '{':
                     parsed = json.loads(message)
                     
                     if self.query is not None:
