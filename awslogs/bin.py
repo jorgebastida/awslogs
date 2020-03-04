@@ -146,6 +146,12 @@ def main(argv=None):
                             dest="query",
                             help="JMESPath query to use in filtering the response data")
 
+    get_parser.add_argument("-pretty",
+                            "--pretty-print",
+                            action='store_true',
+                            dest="pretty_print_enabled",
+                            help="Pretty print the json logs, using a 4 spaces indentation")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
