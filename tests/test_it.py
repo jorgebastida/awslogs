@@ -328,6 +328,19 @@ class TestAWSLogs(unittest.TestCase):
 
     @patch('awslogs.core.boto3_client')
     @patch('sys.stdout', new_callable=StringIO)
+    def test_main_pretty_print(self, mock_stdout, botoclient):
+        self.set_json_logs(botoclient)
+        exit_code = main("awslogs get AAA DDD --pretty-print".split())
+        output = mock_stdout.getvalue()
+        expected = ("\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m {\n    \"foo\": \"bar\"\n}\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mEEE\x1b[0m {\n    \"foo\": {\n        \"bar": "baz"\n    }\n}\n"
+                    "\x1b[32mAAA\x1b[0m \x1b[36mDDD\x1b[0m Hello 3\n"
+                    )
+        assert output == expected
+        assert exit_code == 0
+
+    @patch('awslogs.core.boto3_client')
+    @patch('sys.stdout', new_callable=StringIO)
     def test_get_nogroup(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         exit_code = main("awslogs get --no-group AAA DDD --color=never".split())
