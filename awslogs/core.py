@@ -203,15 +203,8 @@ class AWSLogs(object):
                     )
 
                 message = event['message']
-                if self.query is not None and message[0] == '{':
-                    parsed = json.loads(event['message'])
-                    message = self.query_expression.search(parsed)
-                    if not isinstance(message, six.string_types):
-                        message = json.dumps(message)
-
-                if self.pretty_print_enabled and message[0] == '{':
-                    parsed = json.loads(message)
-                    message = json.dumps(parsed, indent=4)
+                if self.query is not None or self.pretty_print_enabled:
+                    message = self.process_json_message(message)
 
                 output.append(message.rstrip())
 
@@ -301,3 +294,21 @@ class AWSLogs(object):
             date = date.replace(tzinfo=None)
 
         return int(total_seconds(date - datetime(1970, 1, 1))) * 1000
+
+    def process_json_message(self, message):
+        if message[0] == '{':
+            parsed = json.loads(message)
+
+            if self.query is not None:
+                parsed = self.query_expression.search(parsed)
+                # parsed can be now a string, in this case stop json processing
+                # query="[q]", message="{"q":"a"}", parsed => "a"
+            if isinstance(parsed, six.string_types):
+                return parsed
+
+            if self.pretty_print_enabled:
+                return json.dumps(parsed, indent=4)
+            else:
+                return json.dumps(parsed)
+        else:
+            return message
