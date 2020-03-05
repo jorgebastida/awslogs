@@ -150,7 +150,7 @@ def main(argv=None):
                             "--pretty-print",
                             action='store_true',
                             dest="pretty_print_enabled",
-                            help="Pretty print the json logs, using a 4 spaces indentation")
+                            help="Pretty print the json logs, using 4 spaces indentation")
 
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
