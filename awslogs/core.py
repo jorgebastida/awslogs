@@ -300,7 +300,7 @@ class AWSLogs(object):
             parsed = json.loads(message)
         except ValueError:
             return message
-        
+
         if self.query is not None:
             parsed = self.query_expression.search(parsed)
             # parsed can be now a string, in this case stop json processing
