@@ -123,6 +123,12 @@ def main(argv=None):
                             dest='output_timestamp_enabled',
                             help="Add creation timestamp to the output")
 
+    get_parser.add_argument("-l",
+                            "--localtime",
+                            action='store_true',
+                            dest='output_localtime_enabled',
+                            help="Use local time zone and format instead of UTC time in timestamps")
+
     get_parser.add_argument("--ingestion-time",
                             action='store_true',
                             dest='output_ingestion_time_enabled',
