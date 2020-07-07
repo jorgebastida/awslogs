@@ -8,7 +8,7 @@ from collections import deque
 
 import boto3
 import botocore
-from botocore.compat import json, six, total_seconds
+from botocore.compat import json, total_seconds
 
 import jmespath
 
@@ -216,7 +216,7 @@ class AWSLogs(object):
                 if self.query is not None and message[0] == '{':
                     parsed = json.loads(event['message'])
                     message = self.query_expression.search(parsed)
-                    if not isinstance(message, six.string_types):
+                    if not isinstance(message, str):
                         message = json.dumps(message)
                 output.append(message.rstrip())
 

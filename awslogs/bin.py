@@ -15,9 +15,6 @@ from ._version import __version__
 
 def main(argv=None):
 
-    if sys.version_info < (3, 0):
-        sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-
     argv = (argv or sys.argv)[1:]
 
     parser = argparse.ArgumentParser(usage=("%(prog)s [ get | groups | streams ]"))
@@ -213,13 +210,9 @@ def main(argv=None):
             traceback.format_exc(),
         ))
         # use enough backticks to properly escape the issue_info pre-formatted block
-        try:
-            backtick_count = 1 + max(
-                (len(match.group()) for match in re.finditer(r"`{3,}", issue_info)),
-            )
-        except ValueError:
-            # only needed for python 2 as later have a `default` parameter to the max function
-            backtick_count = 3
+        backtick_count = 1 + max(
+            (len(match.group()) for match in re.finditer(r"`{3,}", issue_info)),
+        )
         backticks = "`" * backtick_count + "\n"
         sys.stderr.write(backticks)
         sys.stderr.write(issue_info + "\n")
