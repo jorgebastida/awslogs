@@ -40,12 +40,23 @@ def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_sess
     credential_provider.cache = botocore.credentials.JSONFileCache(cache_dir)
 
     session = boto3.session.Session(botocore_session=core_session)
-    return session.client(
-        'logs',
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        aws_session_token=aws_session_token,
-        region_name=aws_region)
+    if aws_region:
+        # If an empty region is passed, boto will ignore the one configured for the
+        # current profile, so only pass one if it's non-null.
+        return session.client(
+            'logs',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=aws_region,
+        )
+    else:
+        return session.client(
+            'logs',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
 
 
 class AWSLogs(object):
