@@ -130,7 +130,7 @@ def main(argv=None):
                             metavar='WHEN',
                             default='auto',
                             help=("When to color output. WHEN can be 'auto' "
-                                  "(default if ommitted), 'never', or "
+                                  "(default if omitted), 'never', or "
                                   "'always'. With --color=auto, output is "
                                   "colored only when standard output is "
                                   "connected to a terminal."))
