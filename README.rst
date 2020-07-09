@@ -148,6 +148,30 @@ filter each of your json log lines and extract certain fields::
 
 This will only display the ``message`` field for each of the json log lines.
 
+AWS IAM Permissions
+-------------------
+
+The required permissions to run ``awslogs`` are contained within the `CloudWatchLogsReadOnlyAccess <https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/iam-identity-based-access-control-cwl.html>`_ AWS managed permissions.
+As of 2020-01-13, these are the permissions::
+
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Action": [
+                    "logs:Describe*",
+                    "logs:Get*",
+                    "logs:List*",
+                    "logs:StartQuery",
+                    "logs:StopQuery",
+                    "logs:TestMetricFilter",
+                    "logs:FilterLogEvents"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+            }
+        ]
+    }
 
 Contribute
 -----------
