@@ -1,7 +1,5 @@
 import os
 import sys
-import locale
-import codecs
 import argparse
 
 import boto3
@@ -185,8 +183,6 @@ def main(argv=None):
         return exc.code
     except Exception:
         import platform
-        import pprint
-        import re
         import traceback
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
@@ -204,19 +200,11 @@ def main(argv=None):
             "boto3 version: {0}".format(boto3.__version__),
             "Platform:      {0}".format(platform.platform()),
             "Args:          {0}".format(sys.argv),
-            # use pformat for ordering and nice rendering
-            "Config: {0}".format(pprint.pformat(options)),
+            "Config: {0}".format(options),
             "",
             traceback.format_exc(),
         ))
-        # use enough backticks to properly escape the issue_info pre-formatted block
-        backtick_count = 1 + max(
-            (len(match.group()) for match in re.finditer(r"`{3,}", issue_info)),
-        )
-        backticks = "`" * backtick_count + "\n"
-        sys.stderr.write(backticks)
         sys.stderr.write(issue_info + "\n")
-        sys.stderr.write(backticks)
         return 1
 
     return 0
