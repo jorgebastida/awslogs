@@ -188,6 +188,9 @@ Contribute
 
 For more instructions see `TESTING.rst`.
 
+Using third-party endpoints 
+-------------
+* if you use tools like localstack, fakes3 or other, consider to change boto3 endpoint using ``--aws-endpoint-url``
 
 Helpful Links
 -------------
@@ -195,6 +198,8 @@ Helpful Links
 * http://aws.amazon.com/cloudwatch/
 * https://boto.readthedocs.io/en/latest/ref/logs.html
 * http://docs.aws.amazon.com/AmazonCloudWatch/latest/DeveloperGuide/cloudwatch_limits.html
+
+
 
 How to provide AWS credentials to awslogs
 ------------------------------------------
