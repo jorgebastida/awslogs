@@ -8,7 +8,7 @@ from collections import deque
 
 import boto3
 import botocore
-from botocore.compat import json, six, total_seconds
+from botocore.compat import json, total_seconds
 
 import jmespath
 
@@ -40,12 +40,23 @@ def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_sess
     credential_provider.cache = botocore.credentials.JSONFileCache(cache_dir)
 
     session = boto3.session.Session(botocore_session=core_session)
-    return session.client(
-        'logs',
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-        aws_session_token=aws_session_token,
-        region_name=aws_region)
+    if aws_region:
+        # If an empty region is passed, boto will ignore the one configured for the
+        # current profile, so only pass one if it's non-null.
+        return session.client(
+            'logs',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+            region_name=aws_region,
+        )
+    else:
+        return session.client(
+            'logs',
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            aws_session_token=aws_session_token,
+        )
 
 
 class AWSLogs(object):
@@ -205,7 +216,7 @@ class AWSLogs(object):
                 if self.query is not None and message[0] == '{':
                     parsed = json.loads(event['message'])
                     message = self.query_expression.search(parsed)
-                    if not isinstance(message, six.string_types):
+                    if not isinstance(message, str):
                         message = json.dumps(message)
                 output.append(message.rstrip())
 
