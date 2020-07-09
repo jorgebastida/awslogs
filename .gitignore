@@ -11,3 +11,4 @@ build
 dist
 htmlcov/
 __pychache__
+.vscode
