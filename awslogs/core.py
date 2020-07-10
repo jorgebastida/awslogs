@@ -31,15 +31,7 @@ def milis2iso(milis):
     return (res + ".000")[:23] + 'Z'
 
 
-def boto3_client(
-    aws_profile,
-    aws_access_key_id,
-    aws_secret_access_key,
-    aws_session_token,
-    aws_region,
-    aws_endpoint_url
-):
-
+def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region, aws_endpoint_url):
     core_session = botocore.session.get_session()
     core_session.set_config_variable('profile', aws_profile)
 
@@ -53,8 +45,8 @@ def boto3_client(
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         aws_session_token=aws_session_token,
-        endpoint_url=aws_endpoint_url,
-        region_name=aws_region or None
+        region_name=aws_region or None,
+        endpoint_url=aws_endpoint_url or None
     )
 
 
@@ -75,6 +67,7 @@ class AWSLogs(object):
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
         self.aws_session_token = kwargs.get('aws_session_token')
         self.aws_profile = kwargs.get('aws_profile')
+        self.aws_endpoint_url = kwargs.get('aws_endpoint_url')
         self.log_group_name = kwargs.get('log_group_name')
         self.log_stream_name = kwargs.get('log_stream_name')
         self.filter_pattern = kwargs.get('filter_pattern')
