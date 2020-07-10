@@ -34,6 +34,10 @@ def milis2iso(milis):
 def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token,
                  aws_region, aws_endpoint_url):
     core_session = botocore.session.get_session()
+    known_regions = core_session.get_available_regions('logs')
+    if aws_region is not None:
+        if aws_region not in known_regions:
+            print("WARNING: your selected region {REGION} is probably not valid".format(REGION=aws_region))
     core_session.set_config_variable('profile', aws_profile)
 
     credential_provider = core_session.get_component('credential_provider').get_provider('assume-role')
@@ -109,9 +113,9 @@ class AWSLogs(object):
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
-                     self.log_stream_name,
-                     len(streams),
-                     self.FILTER_LOG_EVENTS_STREAMS_LIMIT
+                    self.log_stream_name,
+                    len(streams),
+                    self.FILTER_LOG_EVENTS_STREAMS_LIMIT
                 )
             if len(streams) == 0:
                 raise exceptions.NoStreamsFilteredError(self.log_stream_name)

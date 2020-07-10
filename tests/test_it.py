@@ -399,8 +399,8 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_timestamp(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         exit_code = main("awslogs get "
-             "--timestamp --no-group --no-stream "
-             "AAA DDD --color=never".split())
+                         "--timestamp --no-group --no-stream "
+                         "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -418,8 +418,8 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         exit_code = main("awslogs get "
-             "--ingestion-time --no-group --no-stream "
-             "AAA DDD --color=never".split())
+                         "--ingestion-time --no-group --no-stream "
+                         "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -437,8 +437,8 @@ class TestAWSLogs(unittest.TestCase):
     def test_get_timestamp_and_ingestion_time(self, mock_stdout, botoclient):
         self.set_ABCDE_logs(botoclient)
         exit_code = main("awslogs get "
-             "--timestamp --ingestion-time --no-group --no-stream "
-             "AAA DDD --color=never".split())
+                         "--timestamp --ingestion-time --no-group --no-stream "
+                         "AAA DDD --color=never".split())
 
         self.assertEqual(
             mock_stdout.getvalue(),
@@ -627,6 +627,17 @@ class TestAWSLogs(unittest.TestCase):
         boto_session = Mock()
         mock_core_session.return_value = boto_session
         boto_session.create_client.return_value = client
+
+        awslogs = AWSLogs()
+        self.assertEqual(client, awslogs.client)
+
+    @patch('botocore.session.get_session')
+    def test_boto3_client_invalid_region(self, mock_core_session):
+        client = Mock()
+        boto_session = Mock()
+        mock_core_session.return_value = boto_session
+        boto_session.create_client.return_value = client
+        boto_session.aws_region.return_value = "Frankfurt"
 
         awslogs = AWSLogs()
         self.assertEqual(client, awslogs.client)
