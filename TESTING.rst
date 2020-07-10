@@ -141,42 +141,42 @@ Run all tests under one python version using `tox`
 First, check, what python versions is `tox` configured to run for::
 
     $ tox -l
-    py26
-    py27
-    py33
-    py34
+    py35
+    py36
+    py37
+    py38
 
-Assuming you want to run tests for python 2.7, run::
+Assuming you want to run tests for python 3.8, run::
 
-    $ tox -e py27
+    $ tox -e py38
 
 Creating and recreating virtualenvs by `tox`
 --------------------------------------------
 
 Running `tox`, one or more virtualenvs are always created::
 
-    $ tox -e py27
+    $ tox -e py38
 
 Virtualenvs are by default located in `.tox` directory::
 
     $ dir .tox
     dist
     log
-    py27
+    py38
 
-.. note:: Ignore the `dist` and `log` directories. There may be more directories like `py34`.
+.. note:: Ignore the `dist` and `log` directories. There may be more directories like `py37`.
 
 To activate virtualenv on Linux::
 
-    $ source .tox/py27/bin/activate
+    $ source .tox/py38/bin/activate
 
 On MS Windows::
 
-    $ source .tox/py27/Scripts/activate
+    $ source .tox/py38/Scripts/activate
 
 After you activate virtualenv, command prompt often stars showing name of the virtualenv, e.g.::
 
-    (py27) $
+    (py38) $
 
 This is shell specific behaviour.
 
@@ -191,7 +191,7 @@ To deactivate virtualenv::
 If you need to recreate the environment, you may either remove given directory,
 or ask `tox` to recreate it::
 
-    $ tox -e py27 -r
+    $ tox -e py38 -r
 
 Run all tests under one python version using `py.test`
 ------------------------------------------------------
