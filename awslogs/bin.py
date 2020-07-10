@@ -50,6 +50,12 @@ def main(argv=None):
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
 
+        parser.add_argument("--aws-endpoint-url",
+                            dest="aws_endpoint_url",
+                            type=str,
+                            default=None,
+                            help="aws endpoint url")
+
     def add_date_range_arguments(parser, default_start='5m'):
         parser.add_argument("-s", "--start",
                             type=str,
