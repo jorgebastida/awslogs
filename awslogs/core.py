@@ -31,7 +31,8 @@ def milis2iso(milis):
     return (res + ".000")[:23] + 'Z'
 
 
-def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region, aws_endpoint_url):
+def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token,
+                 aws_region, aws_endpoint_url):
     core_session = botocore.session.get_session()
     core_session.set_config_variable('profile', aws_profile)
 
