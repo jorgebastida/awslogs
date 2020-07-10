@@ -71,7 +71,7 @@ You can easily install ``awslogs`` using ``pip``::
 If you are on OSX El Capitan, use the following (Why? Check Donald Stufft's comment `here <https://github.com/pypa/pip/issues/3165#issuecomment-145856429>`_) ::
 
   $ pip install awslogs --ignore-installed six
-  
+
 You can also install it with `brew <https://brew.sh/>`_::
 
   $ brew install awslogs
@@ -151,6 +151,13 @@ filter each of your json log lines and extract certain fields::
 
 This will only display the ``message`` field for each of the json log lines.
 
+
+Using third-party endpoints
+-------------
+
+If you use tools like localstack, fakes3 or other, consider to change boto3 endpoint using ``--aws-endpoint-url`` or ``AWS_REGION`` env variable.
+
+
 AWS IAM Permissions
 -------------------
 
@@ -188,9 +195,6 @@ Contribute
 
 For more instructions see `TESTING.rst`.
 
-Using third-party endpoints 
--------------
-* if you use tools like localstack, fakes3 or other, consider to change boto3 endpoint using ``--aws-endpoint-url``
 
 Helpful Links
 -------------
