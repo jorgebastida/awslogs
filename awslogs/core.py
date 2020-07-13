@@ -103,7 +103,7 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
-    def list_logs(self):
+    def list_logs(self):  # noqa: C901
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
             streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
@@ -121,7 +121,6 @@ class AWSLogs(object):
 
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
-        do_wait = object()
 
         def generator():
             """Yield events into trying to deduplicate them using a lru queue.
@@ -155,26 +154,33 @@ class AWSLogs(object):
 
             while True:
                 response = self.client.filter_log_events(**kwargs)
+                events = response.get('events', [])
 
-                for event in response.get('events', []):
+                for event in events:
                     if event['eventId'] not in interleaving_sanity:
                         interleaving_sanity.append(event['eventId'])
                         yield event
 
                 if 'nextToken' in response:
                     kwargs['nextToken'] = response['nextToken']
+                    continue
+
+                if self.watch:
+                    time.sleep(self.watch_interval)
+                    if 'nextToken' in kwargs:
+                        del kwargs['nextToken']
+
+                    if events:
+                        kwargs['startTime'] = max(
+                            event['timestamp'] for event in events
+                        )
+                        assert kwargs['startTime'] == events[-1]['timestamp']
+
                 else:
-                    yield do_wait
+                    raise StopIteration
 
         def consumer():
             for event in generator():
-
-                if event is do_wait:
-                    if self.watch:
-                        time.sleep(self.watch_interval)
-                        continue
-                    else:
-                        return
 
                 output = []
                 if self.output_group_enabled:
