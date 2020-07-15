@@ -51,6 +51,7 @@ Features
 
   - ``--timestamp`` Prints the creation timestamp of each event.
   - ``--ingestion-time`` Prints the ingestion time of each event.
+  - ``--localtime`` (or ``-l``) Use local time instead of UTC time when printing timestamps.
 
 
 Example

@@ -4,6 +4,8 @@ import os
 import time
 import errno
 from datetime import datetime, timedelta
+import locale
+import pytz
 from collections import deque
 
 import boto3
@@ -14,7 +16,7 @@ import jmespath
 
 from termcolor import colored
 from dateutil.parser import parse
-from dateutil.tz import tzutc
+from dateutil.tz import tzutc, tzlocal
 
 from . import exceptions
 
@@ -26,7 +28,13 @@ COLOR_ENABLED = {
 }
 
 
-def milis2iso(milis):
+def milis2iso(milis, localtime):
+    if localtime:
+        return (
+            pytz.utc.localize(datetime.utcfromtimestamp(milis/1000.0))
+            .astimezone(tzlocal())
+            .strftime("%x %X:%f")[:-3]
+        )
     res = datetime.utcfromtimestamp(milis/1000.0).isoformat()
     return (res + ".000")[:23] + 'Z'
 
@@ -78,6 +86,9 @@ class AWSLogs(object):
         self.output_stream_enabled = kwargs.get('output_stream_enabled')
         self.output_group_enabled = kwargs.get('output_group_enabled')
         self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
+        self.output_localtime_enabled = kwargs.get('output_localtime_enabled')
+        if self.output_localtime_enabled:
+            locale.setlocale(locale.LC_TIME,'')
         self.output_ingestion_time_enabled = kwargs.get(
             'output_ingestion_time_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
@@ -195,14 +206,16 @@ class AWSLogs(object):
                 if self.output_timestamp_enabled:
                     output.append(
                         self.color(
-                            milis2iso(event['timestamp']),
+                            milis2iso(event['timestamp'],
+                                self.output_localtime_enabled),
                             'yellow'
                         )
                     )
                 if self.output_ingestion_time_enabled:
                     output.append(
                         self.color(
-                            milis2iso(event['ingestionTime']),
+                            milis2iso(event['ingestionTime'],
+                                self.output_localtime_enabled),
                             'blue'
                         )
                     )
