@@ -281,13 +281,13 @@ class AWSLogs(object):
         if not datetime_text:
             return None
 
-        ago_regexp = r'(\d+)\s?(m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
+        ago_regexp = r'(\d+)\s?(s|sec|second|m|minute|minutes|h|hour|hours|d|day|days|w|weeks|weeks)(?: ago)?'
         ago_match = re.match(ago_regexp, datetime_text)
 
         if ago_match:
             amount, unit = ago_match.groups()
             amount = int(amount)
-            unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
+            unit = {'s': 1, 'm': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
             date = datetime.utcnow() + timedelta(seconds=unit * amount * -1)
         else:
             try:
