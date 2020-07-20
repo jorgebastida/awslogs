@@ -80,11 +80,13 @@ You can also install it with `brew <https://brew.sh/>`_::
 Options
 -------
 
-* ``awslogs groups``: List existing groups
-* ``awslogs streams GROUP``: List existing streams withing ``GROUP``
+* ``awslogs groups``: List existing groups.
+* ``awslogs streams GROUP``: List existing streams withing ``GROUP``.
 * ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
+* ``awslogs -G``: Remove the ``GROUP`` name from the results.
+* ``awslogs -S``: Remove the ``STREAM`` name from the results.
 
 **Note:** You need to provide to all these options a valid AWS region using ``--aws-region`` or ``AWS_REGION`` env variable.
 
