@@ -230,6 +230,8 @@ class AWSLogs(object):
         except KeyboardInterrupt:
             print('Closing...\n')
             os._exit(0)
+        except BrokenPipeError:
+            pass
 
     def list_groups(self):
         """Lists available CloudWatch logs groups"""
