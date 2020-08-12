@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    'boto3>=1.5.0',
+    'boto3>=1.14.0',
     'jmespath>=0.7.1,<1.0.0',
     'termcolor>=1.1.0',
     'python-dateutil>=2.4.0'
@@ -11,7 +11,7 @@ install_requires = [
 
 setup(
     name='awslogs',
-    version='0.14.0',
+    version='0.14.1',
     url='https://github.com/jorgebastida/awslogs',
     license='BSD',
     author='Jorge Bastida',
