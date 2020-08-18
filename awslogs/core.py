@@ -311,7 +311,7 @@ class AWSLogs(object):
             parsed = self.query_expression.search(parsed)
             # parsed can be now a string, in this case stop json processing
             # query="[q]", message="{"q":"a"}", parsed => "a"
-        if isinstance(parsed, six.string_types):
+        if isinstance(parsed, str):
             return parsed
 
         if self.pretty_print_enabled:
