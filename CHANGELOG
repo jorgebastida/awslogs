@@ -1,3 +1,14 @@
+0.14.0
+======
+- New --aws-endpoint-url option to configure awslogs to use services such localstack, fakes3, etc...
+
+0.13.0
+======
+
+- Use the configured region when using ``--profile``.
+- Drop support for Python 2
+- Test against Python 3.7 and 3.8.
+
 0.12.0
 ======
 - Extra polish on issue markdown (Thanks Oliver Bristow)

@@ -1,7 +1,5 @@
 import os
 import sys
-import locale
-import codecs
 import argparse
 
 import boto3
@@ -14,9 +12,6 @@ from ._version import __version__
 
 
 def main(argv=None):
-
-    if sys.version_info < (3, 0):
-        sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
     argv = (argv or sys.argv)[1:]
 
@@ -54,6 +49,12 @@ def main(argv=None):
                             type=str,
                             default=os.environ.get('AWS_REGION', None),
                             help="aws region")
+
+        parser.add_argument("--aws-endpoint-url",
+                            dest="aws_endpoint_url",
+                            type=str,
+                            default=os.environ.get('AWS_ENDPOINT_URL', None),
+                            help="aws endpoint url to services such localstack, fakes3, others")
 
     def add_date_range_arguments(parser, default_start='5m'):
         parser.add_argument("-s", "--start",
@@ -135,7 +136,7 @@ def main(argv=None):
                             metavar='WHEN',
                             default='auto',
                             help=("When to color output. WHEN can be 'auto' "
-                                  "(default if ommitted), 'never', or "
+                                  "(default if omitted), 'never', or "
                                   "'always'. With --color=auto, output is "
                                   "colored only when standard output is "
                                   "connected to a terminal."))
@@ -194,8 +195,6 @@ def main(argv=None):
         return exc.code
     except Exception:
         import platform
-        import pprint
-        import re
         import traceback
         options = vars(options)
         options['aws_access_key_id'] = 'SENSITIVE'
@@ -213,23 +212,11 @@ def main(argv=None):
             "boto3 version: {0}".format(boto3.__version__),
             "Platform:      {0}".format(platform.platform()),
             "Args:          {0}".format(sys.argv),
-            # use pformat for ordering and nice rendering
-            "Config: {0}".format(pprint.pformat(options)),
+            "Config: {0}".format(options),
             "",
             traceback.format_exc(),
         ))
-        # use enough backticks to properly escape the issue_info pre-formatted block
-        try:
-            backtick_count = 1 + max(
-                (len(match.group()) for match in re.finditer(r"`{3,}", issue_info)),
-            )
-        except ValueError:
-            # only needed for python 2 as later have a `default` parameter to the max function
-            backtick_count = 3
-        backticks = "`" * backtick_count + "\n"
-        sys.stderr.write(backticks)
         sys.stderr.write(issue_info + "\n")
-        sys.stderr.write(backticks)
         return 1
 
     return 0

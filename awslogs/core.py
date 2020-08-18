@@ -8,7 +8,7 @@ from collections import deque
 
 import boto3
 import botocore
-from botocore.compat import json, six, total_seconds
+from botocore.compat import json, total_seconds
 
 import jmespath
 
@@ -31,7 +31,8 @@ def milis2iso(milis):
     return (res + ".000")[:23] + 'Z'
 
 
-def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token, aws_region):
+def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_session_token,
+                 aws_region, aws_endpoint_url):
     core_session = botocore.session.get_session()
     core_session.set_config_variable('profile', aws_profile)
 
@@ -45,7 +46,9 @@ def boto3_client(aws_profile, aws_access_key_id, aws_secret_access_key, aws_sess
         aws_access_key_id=aws_access_key_id,
         aws_secret_access_key=aws_secret_access_key,
         aws_session_token=aws_session_token,
-        region_name=aws_region)
+        region_name=aws_region or None,
+        endpoint_url=aws_endpoint_url or None
+    )
 
 
 class AWSLogs(object):
@@ -61,9 +64,11 @@ class AWSLogs(object):
     def __init__(self, **kwargs):
         self.aws_region = kwargs.get('aws_region')
         self.aws_access_key_id = kwargs.get('aws_access_key_id')
+        self.aws_endpoint_url = kwargs.get('aws_endpoint_url')
         self.aws_secret_access_key = kwargs.get('aws_secret_access_key')
         self.aws_session_token = kwargs.get('aws_session_token')
         self.aws_profile = kwargs.get('aws_profile')
+        self.aws_endpoint_url = kwargs.get('aws_endpoint_url')
         self.log_group_name = kwargs.get('log_group_name')
         self.log_stream_name = kwargs.get('log_stream_name')
         self.filter_pattern = kwargs.get('filter_pattern')
@@ -87,7 +92,8 @@ class AWSLogs(object):
             self.aws_access_key_id,
             self.aws_secret_access_key,
             self.aws_session_token,
-            self.aws_region
+            self.aws_region,
+            self.aws_endpoint_url
         )
 
     def _get_streams_from_pattern(self, group, pattern):
