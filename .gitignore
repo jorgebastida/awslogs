@@ -12,3 +12,6 @@ dist
 htmlcov/
 __pychache__
 .vscode
+venv/
+.idea/
+*.iml

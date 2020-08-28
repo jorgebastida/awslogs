@@ -207,12 +207,22 @@ class AWSLogs(object):
                         )
                     )
 
+                # Handle JSON payloads that might be prepended with logging info (level, timestamp, etc.)
                 message = event['message']
+                try:
+                    message = message[message.index('{'):]
+                except ValueError:  # Probably not JSON
+                    pass
+
                 if self.query is not None and message[0] == '{':
-                    parsed = json.loads(event['message'])
-                    message = self.query_expression.search(parsed)
-                    if not isinstance(message, str):
-                        message = json.dumps(message)
+                    try:
+                        parsed = json.loads(message)
+                    except json.decoder.JSONDecodeError:
+                        pass
+                    else:
+                        message = self.query_expression.search(parsed)
+                        if not isinstance(message, str):
+                            message = json.dumps(message)
                 output.append(message.rstrip())
 
                 print(' '.join(output))
