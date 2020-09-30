@@ -80,6 +80,7 @@ class AWSLogs(object):
         self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
         self.output_ingestion_time_enabled = kwargs.get(
             'output_ingestion_time_enabled')
+        self.exact_stream_enabled = kwargs.get('exact_stream_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
         self.query = kwargs.get('query')
@@ -103,10 +104,16 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
+    def _get_streams(self, group, pattern):
+        if self.exact_stream_enabled:
+            return list([pattern])
+        else:
+            return list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
+
     def list_logs(self):
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
-            streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
+            streams = self._get_streams(self.log_group_name, self.log_stream_name)
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
                      self.log_stream_name,
