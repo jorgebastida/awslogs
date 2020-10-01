@@ -147,6 +147,11 @@ def main(argv=None):
                             dest="query",
                             help="JMESPath query to use in filtering the response data")
 
+    get_parser.add_argument("--exact-stream",
+                            action='store_true',
+                            dest='exact_stream_enabled',
+                            help="Stream argument is exact match. Do not list all streams")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
