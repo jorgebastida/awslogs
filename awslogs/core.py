@@ -131,7 +131,7 @@ class AWSLogs(object):
                 log streams within the log group interleaved in a single
                 response. That makes some responses return some subsequent
                 response duplicate events. In a similar way when awslogs is
-                called with --watch option, we need to findout which events we
+                called with --watch option, we need to find out which events we
                 have alredy put in the queue in order to not do it several
                 times while waiting for new ones and reusing the same
                 next_token. The site of this queue is MAX_EVENTS_PER_CALL in
