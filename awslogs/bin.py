@@ -68,6 +68,11 @@ def main(argv=None):
                             dest='end',
                             help="End time")
 
+        parser.add_argument("-re", "--rend",
+                            type=str,
+                            dest='relative_end',
+                            help="Relative end time")
+
     subparsers = parser.add_subparsers()
 
     # get
