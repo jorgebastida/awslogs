@@ -316,7 +316,7 @@ class AWSLogs(object):
             amount, unit = ago_match.groups()
             amount = int(amount)
             unit = {'m': 60, 'h': 3600, 'd': 86400, 'w': 604800}[unit[0]]
-            date = datetime.fromtimestamp(self.start / 1000) + timedelta(seconds=unit * amount)
+            date = datetime.utcfromtimestamp(self.start / 1000) + timedelta(seconds=unit * amount)
         else:
            raise exceptions.UnknownDateError("Wrong relative date")
 
