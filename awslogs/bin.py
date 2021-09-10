@@ -147,6 +147,12 @@ def main(argv=None):
                             dest="query",
                             help="JMESPath query to use in filtering the response data")
 
+    get_parser.add_argument("-p",
+                            "--stream-prefix",
+                            action='store_true',
+                            dest="treat_stream_as_prefix",
+                            help="Treat log_stream_name as a prefix instead of as a regex")
+
     # groups
     groups_parser = subparsers.add_parser('groups', description='List groups')
     groups_parser.set_defaults(func="list_groups")
