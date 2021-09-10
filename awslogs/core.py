@@ -71,6 +71,7 @@ class AWSLogs(object):
         self.aws_endpoint_url = kwargs.get('aws_endpoint_url')
         self.log_group_name = kwargs.get('log_group_name')
         self.log_stream_name = kwargs.get('log_stream_name')
+        self.treat_stream_as_prefix = kwargs.get('treat_stream_as_prefix')
         self.filter_pattern = kwargs.get('filter_pattern')
         self.watch = kwargs.get('watch')
         self.watch_interval = kwargs.get('watch_interval')
@@ -103,10 +104,17 @@ class AWSLogs(object):
             if re.match(reg, stream):
                 yield stream
 
+    def _get_streams_from_prefix(self, group, prefix):
+        """Returns streams in ``group`` whose name begins with ``prefix``."""
+        yield from self.get_streams(group, prefix)
+
     def list_logs(self):
         streams = []
         if self.log_stream_name != self.ALL_WILDCARD:
-            streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
+            if self.treat_stream_as_prefix:
+                streams = list(self._get_streams_from_prefix(self.log_group_name, self.log_stream_name))
+            else:
+                streams = list(self._get_streams_from_pattern(self.log_group_name, self.log_stream_name))
             if len(streams) > self.FILTER_LOG_EVENTS_STREAMS_LIMIT:
                 raise exceptions.TooManyStreamsFilteredError(
                      self.log_stream_name,
@@ -251,9 +259,11 @@ class AWSLogs(object):
             for group in page.get('logGroups', []):
                 yield group['logGroupName']
 
-    def get_streams(self, log_group_name=None):
+    def get_streams(self, log_group_name=None, log_stream_prefix=None):
         """Returns available CloudWatch logs streams in ``log_group_name``."""
         kwargs = {'logGroupName': log_group_name or self.log_group_name}
+        if log_stream_prefix is not None:
+            kwargs['logStreamNamePrefix'] = log_stream_prefix
         window_start = self.start or 0
         window_end = self.end or sys.float_info.max
 
