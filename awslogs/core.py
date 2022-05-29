@@ -15,6 +15,7 @@ import jmespath
 from termcolor import colored
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from pygments import formatters, highlight, lexers
 
 from . import exceptions
 
@@ -80,6 +81,7 @@ class AWSLogs(object):
         self.output_timestamp_enabled = kwargs.get('output_timestamp_enabled')
         self.output_ingestion_time_enabled = kwargs.get(
             'output_ingestion_time_enabled')
+        self.output_json_enabled = kwargs.get('output_json_enabled')
         self.start = self.parse_datetime(kwargs.get('start'))
         self.end = self.parse_datetime(kwargs.get('end'))
         self.query = kwargs.get('query')
@@ -118,6 +120,12 @@ class AWSLogs(object):
 
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)
+
+        message_print_parameters = {}
+        if self.output_json_enabled:
+            message_print_parameters.update({
+                'indent': 4
+            })
 
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
@@ -208,12 +216,16 @@ class AWSLogs(object):
                     )
 
                 message = event['message']
-                if self.query is not None and message[0] == '{':
-                    parsed = json.loads(event['message'])
-                    message = self.query_expression.search(parsed)
+                if (self.query is not None or self.output_json_enabled) and message[0] == '{':
+                    message = json.loads(event['message'])
+                    if self.query is not None:
+                        message = self.query_expression.search(message)
                     if not isinstance(message, str):
-                        message = json.dumps(message)
-                output.append(message.rstrip())
+                        message = json.dumps(message, **message_print_parameters)
+                if self.output_json_enabled and self.color_enabled:
+                    output.append(highlight(message.rstrip(), lexers.JsonLexer(), formatters.TerminalFormatter()))
+                else:
+                    output.append(message.rstrip())
 
                 print(' '.join(output))
                 try:
