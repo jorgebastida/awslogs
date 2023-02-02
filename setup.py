@@ -2,9 +2,9 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    'boto3>=1.5.0',
+    'boto3>=1.26.10',
     'jmespath>=0.7.1,<1.0.0',
-    'termcolor>=1.1.0',
+    'termcolor>=2.1.0',
     'python-dateutil>=2.4.0'
 ]
 
@@ -21,7 +21,7 @@ setup(
     keywords="aws logs cloudwatch",
     packages=find_packages(),
     platforms='any',
-    python_requires=">=3.5.*",
+    python_requires=">=3.5",
     install_requires=install_requires,
     test_suite='tests',
     classifiers=[
