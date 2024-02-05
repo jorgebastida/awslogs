@@ -1,3 +1,3 @@
-from pkg_resources import get_distribution
+from importlib import metadata
 
-__version__ = get_distribution("awslogs").version
+__version__ = metadata.version("awslogs")
