@@ -1,0 +1,39 @@
+name: Test
+on:
+  push:
+
+jobs:
+
+  build:
+    name: Test
+    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.12"
+          - "3.11"
+          - "3.10"
+          - "3.9"
+          - "3.8"
+        os:
+          - ubuntu-latest
+          # - macos-latest
+          # - windows-latest
+          
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.py }}
+
+      - name: Install python dependencies
+        shell: bash
+        run: pip install --upgrade --upgrade-strategy eager -r requirements.txt
+
+      - name: Run tests
+        run: tox -e py

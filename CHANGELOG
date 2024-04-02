@@ -2,7 +2,11 @@
 ======
 - Improve utf-8 support (Thanks and Eduard and Tristan-Lynass) #99 #121 #147 #156 #157 #165 #215 #273 #255 #299 #300 #339 #348 #364 #366 #376
 - Support Python 3.12 (Thanks Branch Vincent)
+- Drop support for old versions of Python
 - Allow to execute module with python3 -m (Thanks tometzky)
+- Add VSCode configuration for dev-containers to make development easier
+- Deprecate Travis
+- Run tests on Github actions
 
 0.14.0
 ======

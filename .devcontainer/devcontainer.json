@@ -1,0 +1,27 @@
+{
+	"name": "awslogs docker-dev",
+	"dockerComposeFile": [
+		"../docker-compose.yml"
+	],
+	"service": "dev",
+	"workspaceFolder": "/usr/src",
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"remote.autoForwardPorts": false
+			},
+			"extensions": [
+				"ms-python.python",
+				"ms-python.pylint",
+				"buenon.scratchpads",
+				"TrungNgo.autoflake",
+				"bungcip.better-toml",
+				"ms-python.black-formatter",
+				"ms-python.isort"
+			]
+		}
+	},
+	"runServices": [
+		"dev"
+	],
+}
