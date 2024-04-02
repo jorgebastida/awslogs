@@ -2,6 +2,7 @@
 ======
 - Improve utf-8 support (Thanks and Eduard and Tristan-Lynass) #99 #121 #147 #156 #157 #165 #215 #273 #255 #299 #300 #339 #348 #364 #366 #376
 - Support Python 3.12 (Thanks Branch Vincent)
+- Allow to execute module with python3 -m (Thanks tometzky)
 
 0.14.0
 ======
