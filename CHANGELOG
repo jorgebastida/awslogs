@@ -6,7 +6,8 @@
 - Allow to execute module with python3 -m (Thanks tometzky)
 - Add VSCode configuration for dev-containers to make development easier
 - Deprecate Travis
-- Run tests on Github actions
+- Run tests on Github actions (Linux, Windows and Macos)
+- Bump termcolor to fix related issues (Thanks Trey Valenta)
 
 0.14.0
 ======
