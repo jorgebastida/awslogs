@@ -21,7 +21,6 @@ jobs:
           - windows-latest
           - macos-latest
           
-          
     steps:
       - name: Checkout master
         uses: actions/checkout@v4
