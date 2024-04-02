@@ -6,7 +6,6 @@ jobs:
 
   build:
     name: Test
-    runs-on: ubuntu-latest
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
