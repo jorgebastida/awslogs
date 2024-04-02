@@ -236,11 +236,11 @@ def main(argv=None):
 
         issue_info = "\n".join(
             (
-                "Version:       {__version__}",
-                "Python:        {sys.version}",
-                "boto3 version: {boto3.__version__}",
-                "Platform:      {platform.platform()}",
-                "Args:          {sys.argv}",
+                f"Version:       {__version__}",
+                f"Python:        {sys.version}",
+                f"boto3 version: {boto3.__version__}",
+                f"Platform:      {platform.platform()}",
+                f"Args:          {sys.argv}",
                 "Config: {options}",
                 "",
                 traceback.format_exc(),

@@ -69,7 +69,6 @@ class AWSLogs(object):
         self.aws_secret_access_key = kwargs.get("aws_secret_access_key")
         self.aws_session_token = kwargs.get("aws_session_token")
         self.aws_profile = kwargs.get("aws_profile")
-        self.aws_endpoint_url = kwargs.get("aws_endpoint_url")
         self.log_group_name = kwargs.get("log_group_name")
         self.log_stream_name = kwargs.get("log_stream_name")
         self.filter_pattern = kwargs.get("filter_pattern")
