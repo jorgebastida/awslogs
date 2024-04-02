@@ -1,0 +1,8 @@
+version: "3"
+services:
+    dev:
+        command: /bin/sh -c "while sleep 1000; do :; done"
+        build: .
+        working_dir: "/usr/src"
+        volumes:
+            - .:/usr/src:delegated

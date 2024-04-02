@@ -12,3 +12,4 @@ dist
 htmlcov/
 __pychache__
 .vscode
+**/.pytest_cache

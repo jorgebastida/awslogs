@@ -1,0 +1,8 @@
+# Development
+mock==5.0.1
+ipdb==0.13.9
+debugpy==1.6.6
+black==22.3.0
+pylint==2.16.2
+pytest==7.2.1
+tox==4.14.2
