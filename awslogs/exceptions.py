@@ -11,7 +11,7 @@ class UnknownDateError(BaseAWSLogsException):
     code = 3
 
     def hint(self):
-        return "awslogs doesn't understand '{0}' as a date.".format(self.args[0])
+        return f"awslogs doesn't understand '{self.args[0]}' as a date."
 
 
 class TooManyStreamsFilteredError(BaseAWSLogsException):
@@ -19,10 +19,12 @@ class TooManyStreamsFilteredError(BaseAWSLogsException):
     code = 6
 
     def hint(self):
-        return ("The number of streams that match your pattern '{0}' is '{1}'. "
-                "AWS API limits the number of streams you can filter by to {2}."
-                "It might be helpful to you to not filter streams by any "
-                "pattern and filter the output of awslogs.").format(*self.args)
+        return (
+            f"The number of streams that match your pattern '{self.args[0]}' is '{self.args[1]}'. "
+            f"AWS API limits the number of streams you can filter by to {self.args[2]}."
+            "It might be helpful to you to not filter streams by any "
+            "pattern and filter the output of awslogs."
+        )
 
 
 class NoStreamsFilteredError(BaseAWSLogsException):
@@ -30,4 +32,6 @@ class NoStreamsFilteredError(BaseAWSLogsException):
     code = 7
 
     def hint(self):
-        return ("No streams match your pattern '{0}' for the given time period.").format(*self.args)
+        return (
+            f"No streams match your pattern '{self.args[0]}' for the given time period."
+        )
