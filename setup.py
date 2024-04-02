@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 
 install_requires = [
-    "boto3>=1.5.0",
+    "boto3>=1.34.75",
     "jmespath>=0.7.1,<1.0.0",
     "termcolor>=2.4.0",
-    "python-dateutil>=2.4.0",
+    "python-dateutil>=2.9.0",
 ]
 
 
