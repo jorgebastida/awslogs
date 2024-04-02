@@ -215,12 +215,9 @@ class AWSLogs(object):
                         message = json.dumps(message)
                 output.append(message.rstrip())
                 
-                if isinstance(output, str):
-                    output = output.encode('utf-8')
-                if isinstance(output, list):
-                    output = [y.encode('utf-8') if isinstance(y, str) else y for y in output]
-                
+                output = [m.encode('utf-8') if isinstance(m, str) else m for m in output]
                 print(b' '.join(output))
+
                 try:
                     sys.stdout.flush()
                 except IOError as e:
