@@ -214,8 +214,10 @@ class AWSLogs(object):
                     if not isinstance(message, str):
                         message = json.dumps(message)
                 output.append(message.rstrip())
+                
+                output = [m.encode('utf-8') if isinstance(m, str) else m for m in output]
+                print(b' '.join(output))
 
-                print(' '.join(output))
                 try:
                     sys.stdout.flush()
                 except IOError as e:
