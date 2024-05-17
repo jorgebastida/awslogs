@@ -4,9 +4,6 @@ awslogs
 .. image:: https://badge.fury.io/py/awslogs.png
   :target: http://badge.fury.io/py/awslogs
 
-.. image:: https://travis-ci.org/jorgebastida/awslogs.png?branch=master
-    :target: https://travis-ci.org/jorgebastida/awslogs
-
 .. image:: https://coveralls.io/repos/jorgebastida/awslogs/badge.svg
   :target: https://coveralls.io/r/jorgebastida/awslogs
 
@@ -81,7 +78,7 @@ Options
 -------
 
 * ``awslogs groups``: List existing groups
-* ``awslogs streams GROUP``: List existing streams withing ``GROUP``
+* ``awslogs streams GROUP``: List existing streams within ``GROUP``
 * ``awslogs get GROUP [STREAM_EXPRESSION]``: Get logs matching ``STREAM_EXPRESSION`` in ``GROUP``.
 
   - Expressions can be regular expressions or the wildcard ``ALL`` if you want any and don't want to type ``.*``.
@@ -193,7 +190,7 @@ Contribute
 
 * Send a pull request and bug the maintainer until it gets merged and published. :).
 
-For more instructions see `TESTING.rst`.
+For more instructions see `TESTING.md`.
 
 
 Helpful Links

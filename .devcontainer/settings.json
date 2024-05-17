@@ -1,0 +1,28 @@
+{
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.cwd": "/usr/src",
+    "python.defaultInterpreterPath": "/usr/local/bin/python",
+    "python.languageServer": "Default",
+    "pylint.args": [
+        "--disable=line-too-long,missing-module-docstring,missing-class-docstring,missing-function-docstring,abstract-method,no-self-use,f-string-without-interpolation"
+    ],
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "python.analysis.extraPaths": [
+        "/usr/src"
+    ],
+    "editor.formatOnSave": true,
+    "search.useParentIgnoreFiles": true,
+    "search.exclude": {
+        "**/.git": true,
+        "**/.pytest_cache": true
+    },
+    "files.exclude": {
+        "**/.pytest_cache": true
+    }
+}

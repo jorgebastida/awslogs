@@ -1,3 +1,14 @@
+0.15.0
+======
+- Improve utf-8 support (Thanks and Eduard and Tristan-Lynass) #99 #121 #147 #156 #157 #165 #215 #273 #255 #299 #300 #339 #348 #364 #366 #376
+- Support Python 3.12 (Thanks Branch Vincent)
+- Drop support for old versions of Python
+- Allow to execute module with python3 -m (Thanks tometzky)
+- Add VSCode configuration for dev-containers to make development easier
+- Deprecate Travis
+- Run tests on Github actions (Linux, Windows and Macos)
+- Bump termcolor to fix related issues (Thanks Trey Valenta)
+
 0.14.0
 ======
 - New --aws-endpoint-url option to configure awslogs to use services such localstack, fakes3, etc...
