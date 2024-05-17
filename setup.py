@@ -5,6 +5,7 @@ install_requires = [
     "boto3>=1.34.75",
     "jmespath>=1.0.1",
     "termcolor>=2.4.0",
+    "pygments>=2.12.0",
     "python-dateutil>=2.9.0",
 ]
 

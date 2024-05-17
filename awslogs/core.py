@@ -15,6 +15,7 @@ import jmespath
 from termcolor import colored
 from dateutil.parser import parse
 from dateutil.tz import tzutc
+from pygments import formatters, highlight, lexers
 
 from . import exceptions
 
@@ -79,6 +80,7 @@ class AWSLogs(object):
         self.output_group_enabled = kwargs.get("output_group_enabled")
         self.output_timestamp_enabled = kwargs.get("output_timestamp_enabled")
         self.output_ingestion_time_enabled = kwargs.get("output_ingestion_time_enabled")
+        self.output_json_enabled = kwargs.get("output_json_enabled")
         self.start = self.parse_datetime(kwargs.get("start"))
         self.end = self.parse_datetime(kwargs.get("end"))
         self.query = kwargs.get("query")
@@ -121,6 +123,12 @@ class AWSLogs(object):
 
         max_stream_length = max([len(s) for s in streams]) if streams else 10
         group_length = len(self.log_group_name)
+
+        message_print_parameters = {}
+        if self.output_json_enabled:
+            message_print_parameters.update({
+                "indent": 4
+            })
 
         # Note: filter_log_events paginator is broken
         # ! Error during pagination: The same next token was received twice
@@ -201,7 +209,14 @@ class AWSLogs(object):
                     parsed = json.loads(event["message"])
                     message = self.query_expression.search(parsed)
                     if not isinstance(message, str):
-                        message = json.dumps(message)
+                        message = json.dumps(message, **message_print_parameters)
+                elif self.output_json_enabled:
+                    try:
+                        message = json.dumps(json.loads(message), **message_print_parameters)
+                    except json.JSONDecodeError:
+                        pass
+                if self.output_json_enabled:
+                    message = highlight(message.rstrip(), lexers.JsonLexer(), formatters.TerminalFormatter())
                 output.append(message.rstrip())
                 print(" ".join(output))
 
